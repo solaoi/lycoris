@@ -1,4 +1,6 @@
+import { useRecoilValue } from 'recoil'
 import dayjs from '../../lib/dayjs'
+import { memoFilterState } from '../../store/atoms/memoFilterState'
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
 
 type SpeechHistoryProps = {
@@ -7,10 +9,13 @@ type SpeechHistoryProps = {
 
 const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
     const { histories = [] } = props
+    const filterd = useRecoilValue(memoFilterState)
 
     return (
         <div>
-            {histories.map((h, i) => {
+            {histories.filter(
+                h => { if (filterd) { return h.speech_type === "memo" } else { return true } }
+            ).map((h, i) => {
                 if (h.speech_type === "memo") {
                     return (
                         <div className='flex pb-1' key={"memo_" + i}>
