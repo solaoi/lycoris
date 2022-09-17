@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { SpeechHistory } from '../molecules/SpeechHistory'
-import { useRecoilState } from 'recoil'
-import { speechHistoryState } from '../../atoms/speechHistoryState'
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { speechHistoryAtom } from '../../store/atoms/speechHistoryAtom'
 
 const Main = (): JSX.Element => {
     const [partialText, setPartialText] = useState<string | null>(null)
-    const [histories, setHistories] = useRecoilState(speechHistoryState)
+    const [histories, setHistories] = useRecoilState(speechHistoryAtom)
     const bottomRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [histories]);
-
     useEffect(() => {
         let unlistenPartialText: any;
         let unlistenFinalText: any;
@@ -21,17 +20,19 @@ const Main = (): JSX.Element => {
                 setPartialText(event.payload as string)
             });
 
-            unlistenFinalText = await listen('finalTextRecognized', event => {
+            unlistenFinalText = await listen('finalTextRecognized', async event => {
                 setPartialText(null)
+                const current = event.payload as string
                 setHistories(prev => {
-                    const current = event.payload as string
-                    if (prev.length > 0) {
-                        if (prev[prev.length - 1].content === current) {
-                            return prev
-                        }
-                        return [...prev, { type: "speech", date: new Date(), content: event.payload as string }]
+                    if (prev.length > 0 && (prev[prev.length - 1].content === current)) {
+                        return prev;
                     }
-                    return [{ type: "speech", date: new Date(), content: event.payload as string }]
+
+                    return [...prev, {
+                        speech_type: "speech",
+                        unix_time: new Date().getTime(),
+                        content: current
+                    }]
                 })
             });
         }
@@ -42,6 +43,7 @@ const Main = (): JSX.Element => {
             if (unlistenFinalText) unlistenFinalText();
         }
     }, [])
+
     return (
         <main>
             <div className="p-5">

@@ -5,6 +5,7 @@
 
 use tauri::Manager;
 use tauri::State;
+use tauri_plugin_sql::{Migration, MigrationKind, TauriSql};
 
 use std::sync::{
     mpsc::{sync_channel, SyncSender},
@@ -43,6 +44,15 @@ fn stop_command(state: State<'_, RecordState>) {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(TauriSql::default().add_migrations(
+            "sqlite:speeches.db",
+            vec![Migration {
+                version: 1,
+                description: "create speeches table",
+                sql: include_str!("../migrations/001.sql"),
+                kind: MigrationKind::Up,
+            }],
+        ))
         .manage(RecordState(Default::default()))
         .invoke_handler(tauri::generate_handler![
             list_devices_command,

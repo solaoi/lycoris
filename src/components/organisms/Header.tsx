@@ -1,5 +1,5 @@
 import { useRecoilValue } from "recoil"
-import { recordState } from "../../atoms/recordState"
+import { recordState } from "../../store/atoms/recordState"
 import { AudioDevices } from "../molecules/AudioDevice"
 import { RecordStartButton } from "../molecules/RecordStartButton"
 import { RecordStopButton } from "../molecules/RecordStopButton"

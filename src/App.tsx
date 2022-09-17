@@ -1,4 +1,3 @@
-import './App.css'
 import { Header } from './components/organisms/Header'
 import { RecoilRoot } from 'recoil'
 import { Footer } from './components/organisms/Footer'

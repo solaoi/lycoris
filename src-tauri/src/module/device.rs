@@ -37,7 +37,7 @@ pub fn list_devices() -> Result<Vec<Device>, portaudio_rs::PaError> {
         ret.push(Device {
             device_id: *k,
             label: v.name.to_string(),
-            latency: v.default_low_input_latency
+            latency: v.default_low_input_latency,
         })
     }
     Ok(ret)

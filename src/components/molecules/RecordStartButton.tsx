@@ -1,7 +1,7 @@
 import { useRecoilState, useRecoilValue } from 'recoil'
-import { audioDeviceState } from '../../atoms/audioDeviceState';
+import { audioDeviceState } from '../../store/atoms/audioDeviceState';
 import { invoke } from '@tauri-apps/api/tauri'
-import { recordState } from '../../atoms/recordState';
+import { recordState } from '../../store/atoms/recordState';
 
 const RecordStartButton = (): JSX.Element => {
     const deviceId = useRecoilValue(audioDeviceState)

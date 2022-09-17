@@ -1,7 +1,7 @@
 import { ChangeEvent } from "react";
 import { useAudioDevices } from "../../hooks/useAudioDevices"
 import { useRecoilState } from 'recoil';
-import { audioDeviceState } from "../../atoms/audioDeviceState";
+import { audioDeviceState } from "../../store/atoms/audioDeviceState";
 
 const AudioDevices = (): JSX.Element => {
     const audioDevices = useAudioDevices()
@@ -13,8 +13,8 @@ const AudioDevices = (): JSX.Element => {
     }
 
     return (
-        <select className="select select-bordered w-full max-w-xs focus:outline-none" name="audio-devices" onChange={change}>
-            <option disabled selected >マイクを選択してください</option>
+        <select className="select select-bordered w-full max-w-xs focus:outline-none" name="audio-devices" onChange={change} defaultValue="mic-selector">
+            <option disabled value="mic-selector">マイクを選択してください</option>
             {audioDevices?.map((device, i) => (
                 <option key={"audio-device" + i} value={device.device_id}>{device.label}</option>
             ))}

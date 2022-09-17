@@ -1,0 +1,50 @@
+import Database from 'tauri-plugin-sql-api'
+import { SpeechHistoryType } from '../type/SpeechHistory.type'
+
+export default class DB {
+  private db: Database
+
+  private constructor(db: Database) {
+    this.db = db
+  }
+
+  private static instance: DB
+
+  static async getInstance(): Promise<DB> {
+    if (!this.instance) {
+      this.instance = new this(await Database.load('sqlite:speeches.db'))
+    }
+
+    return this.instance
+  }
+
+  public async deleteSpeech(speech: SpeechHistoryType) {
+    await this.db.execute('DELETE FROM speeches WHERE id = $1', [speech.id])
+  }
+
+  public async deleteAllSpeeches() {
+    await this.db.execute('DELETE FROM speeches')
+  }
+
+  public async loadAllSpeeches(): Promise<SpeechHistoryType[]> {
+    return await this.db.select('SELECT * FROM speeches')
+  }
+
+  public async saveSpeech(speech: SpeechHistoryType): Promise<SpeechHistoryType> {
+    const { lastInsertId } = await this.db.execute(
+      'INSERT INTO speeches(speech_type, unix_time, content) VALUES($1, $2, $3)',
+      [speech.speech_type, speech.unix_time, speech.content]
+    )
+
+    speech.id = lastInsertId
+
+    return speech
+  }
+
+  public async updateSpeech(speech: SpeechHistoryType) {
+    await this.db.execute(
+      'UPDATE speeches SET speech_type = $1, unix_time = $2, content = $3 WHERE id = $4',
+      [speech.speech_type, speech.unix_time, speech.content, speech.id]
+    )
+  }
+}
