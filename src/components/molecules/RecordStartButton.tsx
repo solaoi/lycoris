@@ -7,6 +7,9 @@ const RecordStartButton = (): JSX.Element => {
     const deviceId = useRecoilValue(audioDeviceState)
     const [_, setRecording] = useRecoilState(recordState)
     const click = () => {
+        if (deviceId === null) {
+            return
+        }
         setRecording(true)
         invoke('start_command', { deviceId })
     }

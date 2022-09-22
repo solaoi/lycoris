@@ -18,13 +18,15 @@ const Header = (): JSX.Element => {
                     <AudioDevices />
                 </div>
             </div>
-            <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 bg-white shadow flex items-center">
+            <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 bg-white shadow flex items-center group relative overflow-x-hidden">
                 <h1 className="text-3xl tracking-tight font-bold text-gray-900 flex-1">
                     HackDayの議事録
                 </h1>
                 <div className="flex-none">
                     {isRecording ? <RecordStopButton /> : <RecordStartButton />}
                 </div>
+                {/* shine box */}
+                <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${isRecording && "animate-shine"}`} />
             </div>
             <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white shadow flex items-center">
                 <MemoFilterButton />

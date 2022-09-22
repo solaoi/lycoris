@@ -6,7 +6,7 @@ const sqliteEffect: AtomEffect<SpeechHistoryType[]> = ({setSelf, onSet, trigger}
   const loadPersisted = async () => {
     const db = (await DB.getInstance())
     const savedValue =  await db.loadAllSpeeches();
-    if (savedValue.length >0 ) {
+    if (savedValue.length > 0 ) {
       setSelf(savedValue);
     }
   };

@@ -39,7 +39,7 @@ impl Record {
             data: 42, // random
         };
         let mut last_partial = String::new();
-        let mut recognizer = recognizer::build();
+        let mut recognizer = recognizer::build(self.app_handle.clone());
         let stream = Stream::open(
             Some(input_par),                          // input channels
             None,                                     // output channels
@@ -80,7 +80,7 @@ impl Record {
         )
         .unwrap();
         stream.start().expect("failed to start the stream");
-        receiver.recv().expect("failed to receive the message")
+        receiver.recv().expect("failed to receive the message");
     }
 
     fn is_correct_words(words: &str) -> bool {

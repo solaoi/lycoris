@@ -10,7 +10,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.2",
+    "@tauri-apps/api": "^1.1.0",
     "dayjs": "^1.11.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -18,7 +18,7 @@
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.0.5",
+    "@tauri-apps/cli": "^1.1.1",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.1",

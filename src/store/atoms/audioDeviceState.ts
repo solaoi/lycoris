@@ -1,6 +1,6 @@
 import { atom } from 'recoil'
 
-export const audioDeviceState = atom({
+export const audioDeviceState = atom<number|null>({
   key: 'audioDeviceState',
-  default: 0
+  default: null
 })
