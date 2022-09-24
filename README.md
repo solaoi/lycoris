@@ -12,23 +12,9 @@
 
 ## セットアップ
 
-将来的には自動でやる予定ですが、一旦時短。
-
-### ライブラリDL
-
-- プロジェクトルート/libには、下記の解凍結果を配置   
-https://github.com/alphacep/vosk-api/releases/download/v0.3.42/vosk-osx-0.3.42.zip
-
-- 下記スクリプトでPCにインストール
-
 ```sh
 sh ./setup.sh
 ```
-
-### モデルDL
-
-- プロジェクトルート/src-tauri/resourcesには、下記の解凍結果をディレクトリごと配置   
-https://alphacephei.com/vosk/models/vosk-model-ja-0.22.zip
 
 ## 開発者モードで起動
 
