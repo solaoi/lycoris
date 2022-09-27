@@ -8,21 +8,39 @@
 
 ## 対応環境
 
-- MacOS（将来的には他プラットフォームもサポートします）
+- MacOS
 
-## セットアップ
+## インストール
+
+### 必要なライブラリを取得
 
 ```sh
 sh ./setup.sh
 ```
 
-## 開発者モードで起動
+### アプリケーションを取得
+
+Releaseから最新のものをインストールしてください。
+
+## 開発用設定
+
+### 必要なモデルのダウンロード
+
+```
+VOSK_MODEL_VERSION=0.22
+curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
+unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+rm vosk-model-ja-$VOSK_MODEL_VERSION.zip
+```
+
+### 開発者モードで起動
 
 ```
 yarn tauri dev
 ```
 
-## インストール
+### 開発者向けインストール
 
 ```
 yarn tauri build
