@@ -32,7 +32,7 @@ jobs:
         mkdir ./src-tauri/resources
         mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
         unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
-        rm vosk-model-ja-$VOSK_MODEL_VERSION.zip
+        rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
     - uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
