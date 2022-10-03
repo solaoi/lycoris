@@ -6,14 +6,15 @@
 //! Read the "Setup" section in the README to know how to link the vosk dynamic
 //! libaries to the examples
 
-use std::{sync::mpsc::Receiver, time::Duration};
+use std::sync::{mpsc::Receiver, Arc, Mutex};
 
-use portaudio_rs::stream::{Stream, StreamCallbackResult, StreamFlags, StreamParameters};
-use tauri::{AppHandle, Manager};
-use unicode_segmentation::UnicodeSegmentation;
-use vosk::DecodingState;
+use cpal::{
+    traits::{DeviceTrait, HostTrait, StreamTrait},
+    SampleFormat,
+};
+use tauri::AppHandle;
 
-use super::{device, recognizer};
+use super::recognizer::MyRecognizer;
 
 pub struct Record {
     app_handle: AppHandle,
@@ -24,74 +25,73 @@ impl Record {
         Self { app_handle }
     }
 
-    pub fn start(&self, device_id: u32, receiver: Receiver<()>) {
-        let mut suggested_latency = Duration::ZERO;
-        for device in device::list_devices().unwrap() {
-            if device.device_id == device_id {
-                suggested_latency = device.latency;
-                break;
-            }
-        }
-        let input_par = StreamParameters {
-            device: device_id,
-            channel_count: 1,
-            suggested_latency,
-            data: 42, // random
-        };
-        let mut last_partial = String::new();
-        let mut recognizer = recognizer::build(self.app_handle.clone());
-        let stream = Stream::open(
-            Some(input_par),                          // input channels
-            None,                                     // output channels
-            recognizer::default_sample_rate() as f64, // sample rate
-            portaudio_rs::stream::FRAMES_PER_BUFFER_UNSPECIFIED,
-            StreamFlags::empty(),
-            Some(Box::new(move |input, _out: &mut [i16], _time, _flags| {
-                let state = recognizer.accept_waveform(input);
-                match state {
-                    DecodingState::Running => {
-                        let result = recognizer.partial_result();
-                        if Self::is_correct_words(result.partial) && result.partial != last_partial
-                        {
-                            last_partial.clear();
-                            last_partial.insert_str(0, &result.partial);
-                            if !result.partial.is_empty() {
-                                self.app_handle
-                                    .emit_all("partialTextRecognized", result.partial)
-                                    .unwrap();
-                            }
-                        }
-                    }
-                    DecodingState::Finalized => {
-                        let result = recognizer.final_result().single();
-                        if result.is_some() {
-                            let text = result.unwrap().text;
-                            if Self::is_correct_words(text) {
-                                self.app_handle
-                                    .emit_all("finalTextRecognized", text.replace(" ", ""))
-                                    .unwrap();
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-                StreamCallbackResult::Continue
-            })),
-        )
-        .unwrap();
-        stream.start().expect("failed to start the stream");
-        receiver.recv().expect("failed to receive the message");
-    }
+    pub fn start(&self, device_label: String, receiver: Receiver<()>) {
+        let host = cpal::default_host();
+        let device = host
+            .input_devices()
+            .unwrap()
+            .find(|device| device.name().ok().unwrap() == device_label)
+            .unwrap();
+        let config = device
+            .default_input_config()
+            .expect("Failed to load default input config");
+        let channels = config.channels();
 
-    fn is_correct_words(words: &str) -> bool {
-        let g = words.graphemes(true).collect::<Vec<&str>>();
-        let count = g.len();
-        if count < 2 {
-            return false;
+        let err_fn = move |err| {
+            eprintln!("an error occurred on stream: {}", err);
+        };
+
+        let app_handle = self.app_handle.clone();
+        let recognizer = MyRecognizer::build(app_handle.clone(), config.sample_rate().0 as f32);
+        let recognizer = Arc::new(Mutex::new(recognizer));
+        let recognizer_clone = recognizer.clone();
+        let mut last_partial = String::new();
+
+        let stream = match config.sample_format() {
+            SampleFormat::F32 => device.build_input_stream(
+                &config.into(),
+                move |data: &[f32], _| {
+                    MyRecognizer::recognize(
+                        app_handle.clone(),
+                        &mut last_partial,
+                        &mut recognizer_clone.lock().unwrap(),
+                        data,
+                        channels,
+                    )
+                },
+                err_fn,
+            ),
+            SampleFormat::U16 => device.build_input_stream(
+                &config.into(),
+                move |data: &[u16], _| {
+                    MyRecognizer::recognize(
+                        app_handle.clone(),
+                        &mut last_partial,
+                        &mut recognizer_clone.lock().unwrap(),
+                        data,
+                        channels,
+                    )
+                },
+                err_fn,
+            ),
+            SampleFormat::I16 => device.build_input_stream(
+                &config.into(),
+                move |data: &[i16], _| {
+                    MyRecognizer::recognize(
+                        app_handle.clone(),
+                        &mut last_partial,
+                        &mut recognizer_clone.lock().unwrap(),
+                        data,
+                        channels,
+                    )
+                },
+                err_fn,
+            ),
         }
-        if count == 2 && g[1] == "ー" {
-            return false;
-        }
-        true
+        .expect("Could not build stream");
+
+        stream.play().expect("Could not play stream");
+        receiver.recv().expect("failed to receive the message");
+        drop(stream);
     }
 }

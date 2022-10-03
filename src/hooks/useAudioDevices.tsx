@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 
 type Device = {
-  device_id: number;
+  // device_id: number;
   label: string;
 }
 

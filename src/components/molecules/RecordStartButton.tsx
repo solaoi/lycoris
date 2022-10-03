@@ -4,14 +4,14 @@ import { invoke } from '@tauri-apps/api/tauri'
 import { recordState } from '../../store/atoms/recordState';
 
 const RecordStartButton = (): JSX.Element => {
-    const deviceId = useRecoilValue(audioDeviceState)
+    const deviceLabel = useRecoilValue(audioDeviceState)
     const [_, setRecording] = useRecoilState(recordState)
     const click = () => {
-        if (deviceId === null) {
+        if (deviceLabel === null) {
             return
         }
         setRecording(true)
-        invoke('start_command', { deviceId })
+        invoke('start_command', { deviceLabel })
     }
 
     return (
