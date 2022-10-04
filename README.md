@@ -29,6 +29,7 @@ Releaseから最新のものをインストールしてください。
 ```
 VOSK_MODEL_VERSION=0.22
 curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+mkdir ./src-tauri/resources
 mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
 unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
 rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip

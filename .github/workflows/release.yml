@@ -1,0 +1,50 @@
+name: release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 18
+
+    - name: install Rust stable
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: aarch64-apple-darwin
+
+    - uses: Swatinem/rust-cache@v1
+      with:
+        working-directory: ./src-tauri
+        target-dir: ./src-tauri/target
+
+    - name: download Vosk model
+      run: |
+        VOSK_MODEL_VERSION=0.22
+        curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+        mkdir ./src-tauri/resources
+        mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
+        unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+        rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+
+    - name: build Tauri
+      run: |
+        yarn install --frozen-lockfile
+        yarn tauri build --target universal-apple-darwin
+
+    - name: upload package to release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
