@@ -29,7 +29,7 @@ jobs:
         working-directory: ./src-tauri
         target-dir: ./src-tauri/target
 
-    - name: download Vosk model
+    - name: build Tauri
       run: |
         VOSK_MODEL_VERSION=0.22
         curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
@@ -37,9 +37,6 @@ jobs:
         mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
         unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
         rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
-
-    - name: build Tauri
-      run: |
         yarn install --frozen-lockfile
         yarn tauri build --target universal-apple-darwin
 
