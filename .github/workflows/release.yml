@@ -1,9 +1,9 @@
 name: release
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - release
 
 jobs:
   release:
@@ -29,19 +29,25 @@ jobs:
         working-directory: ./src-tauri
         target-dir: ./src-tauri/target
 
-    - name: build Tauri
+    - name: download Vosk model
       run: |
         VOSK_MODEL_VERSION=0.22
         curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
         mkdir ./src-tauri/resources
         mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
-        unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+        unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri/resources
         rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
-        yarn install --frozen-lockfile
-        yarn tauri build --target universal-apple-darwin
 
-    - name: upload package to release
-      uses: softprops/action-gh-release@v1
+    - name: install app dependencies and build it
+      run: yarn install --frozen-lockfile && yarn build
+
+    - uses: tauri-apps/tauri-action@v0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        files: |
-          ./src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+        tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+        releaseName: "App v__VERSION__"
+        releaseBody: "See the assets to download this version and install."
+        releaseDraft: true
+        prerelease: false
+        args: --target universal-apple-darwin
