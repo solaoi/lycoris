@@ -8,7 +8,7 @@ on:
 jobs:
   release:
     runs-on: macos-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
     - uses: actions/checkout@v2
@@ -38,8 +38,8 @@ jobs:
         unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri/resources
         rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
 
-    - name: install app dependencies and build it
-      run: yarn install --frozen-lockfile && yarn build
+    - name: install app dependencies
+      run: yarn install --frozen-lockfile
 
     - uses: tauri-apps/tauri-action@v0
       env:
