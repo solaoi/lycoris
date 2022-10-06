@@ -12,14 +12,6 @@
 
 ## インストール
 
-### 必要なライブラリを取得
-
-```sh
-sh ./setup.sh
-```
-
-### アプリケーションを取得
-
 Releaseから最新のものをインストールしてください。
 
 ## 開発用設定
@@ -33,6 +25,20 @@ mkdir ./src-tauri/resources
 mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
 unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri/resources
 rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+```
+
+### voskのライブラリ更新
+
+```
+VOSK_VERSION=0.3.42
+curl -LO https://github.com/alphacep/vosk-api/releases/download/v$VOSK_VERSION/vosk-osx-$VOSK_VERSION.zip
+mv vosk-osx-$VOSK_VERSION.zip ./src-tauri/lib
+unzip ./src-tauri/lib/vosk-osx-$VOSK_VERSION.zip -d ./src-tauri/lib
+rm ./src-tauri/lib/vosk-osx-$VOSK_VERSION.zip
+// ライブラリ自身のPathを確認
+otool -D ./src-tauri/lib/libvosk.dylib
+// ライブラリ自身のPathを変更
+install_name_tool -id @rpath/libvosk.dylib ./src-tauri/lib/libvosk.dylib
 ```
 
 ### 開発者モードで起動

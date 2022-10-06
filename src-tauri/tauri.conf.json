@@ -38,7 +38,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["resources"],
+      "resources": ["resources", "lib"],
       "shortDescription": "",
       "targets": "all",
       "windows": {
