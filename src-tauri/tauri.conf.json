@@ -32,7 +32,7 @@
       "identifier": "blog.aota.Lycoris",
       "longDescription": "",
       "macOS": {
-        "entitlements": "../entitlements.plist",
+        "entitlements": null,
         "exceptionDomain": "",
         "frameworks": [],
         "providerShortName": null,
