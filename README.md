@@ -39,6 +39,10 @@ rm ./src-tauri/lib/vosk-osx-$VOSK_VERSION.zip
 otool -D ./src-tauri/lib/libvosk.dylib
 // ライブラリ自身のPathを変更
 install_name_tool -id @rpath/libvosk.dylib ./src-tauri/lib/libvosk.dylib
+// 署名を確認
+codesign -dvvv ./src-tauri/lib/libvosk.dylib
+// 公証用に署名を追加
+codesign -fs 'キーチェーンアクセスの該当鍵（Developer ID Application: ...）' ./src-tauri/lib/libvosk.dylib
 ```
 
 ### 開発者モードで起動
