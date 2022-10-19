@@ -32,8 +32,8 @@ export default class DB {
 
   public async saveSpeech(speech: SpeechHistoryType): Promise<SpeechHistoryType> {
     const { lastInsertId } = await this.db.execute(
-      'INSERT INTO speeches(speech_type, unix_time, content) VALUES($1, $2, $3)',
-      [speech.speech_type, speech.unix_time, speech.content]
+      'INSERT INTO speeches(speech_type, unix_time, content, wav) VALUES($1, $2, $3, $4)',
+      [speech.speech_type, speech.unix_time, speech.content, speech.wav]
     )
 
     speech.id = lastInsertId
@@ -43,8 +43,8 @@ export default class DB {
 
   public async updateSpeech(speech: SpeechHistoryType) {
     await this.db.execute(
-      'UPDATE speeches SET speech_type = $1, unix_time = $2, content = $3 WHERE id = $4',
-      [speech.speech_type, speech.unix_time, speech.content, speech.id]
+      'UPDATE speeches SET speech_type = $1, unix_time = $2, content = $3, wav = $4 WHERE id = $5',
+      [speech.speech_type, speech.unix_time, speech.content, speech.wav, speech.id]
     )
   }
 }

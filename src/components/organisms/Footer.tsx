@@ -13,7 +13,8 @@ const Footer = (): JSX.Element => {
             [...prev, {
                 speech_type: "memo",
                 unix_time: new Date().getTime(),
-                content: inputEl.current?.value || ""
+                content: inputEl.current?.value || "",
+                wav: ""
             }]
         )
 

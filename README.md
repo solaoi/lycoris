@@ -12,7 +12,34 @@
 
 ## インストール
 
-Releaseから最新のものをインストールしてください。
+[Releases](https://github.com/solaoi/lycoris/releases)から最新のものをインストールしてください。
+
+## データ保存場所
+
+> $HOME/Library/Application\ Support/blog.aota.Lycoris
+
+## ユースケース
+
+### Zoomで議事録をとる
+
+#### 仮想オーディオデバイスと、仮想ミキサーのインストール
+
+1. [BlackHole](https://existential.audio/blackhole/)のインストール   
+メール登録が必要ですが、無料で利用できます。
+
+2. [LadioCast](https://apps.apple.com/jp/app/ladiocast/id411213048)のインストール
+
+#### 設定
+
+1. LadioCastで、下記画像のように設定   
+外部マイク及び外部ヘッドフォンは、イヤホンを利用している場合の設定です。   
+利用していない場合は、MacBook Pro（お使いのPCの種類）のマイク及びMacBook Proのスピーカーを指定ください。   
+<img width="625" alt="スクリーンショット 2022-09-18 0 24 28" src="https://user-images.githubusercontent.com/46414076/190865290-9593f28b-5c83-4b5f-b605-ff95b598bbb7.png">
+
+2. Zoomで、下記画像のように入出力をBlackHoleへと変更   
+<img width="801" alt="スクリーンショット 2022-09-18 0 15 38" src="https://user-images.githubusercontent.com/46414076/190865345-82dcbdb0-b800-4b79-9f89-8567075913b6.png">
+
+3. 本アプリ『Lycoris』のマイクを、BlackHoleへと変更
 
 ## 開発用設定
 
@@ -56,26 +83,3 @@ yarn tauri dev
 ```
 yarn tauri build
 ```
-
-## ユースケース
-
-### Zoomで議事録をとる
-
-#### 仮想オーディオデバイスと、仮想ミキサーのインストール
-
-1. [BlackHole](https://existential.audio/blackhole/)のインストール   
-メール登録が必要ですが、無料で利用できます。
-
-2. [LadioCast](https://apps.apple.com/jp/app/ladiocast/id411213048)のインストール
-
-#### 設定
-
-1. LadioCastで、下記画像のように設定   
-外部マイク及び外部ヘッドフォンは、イヤホンを利用している場合の設定です。   
-利用していない場合は、MacBook Pro（お使いのPCの種類）のマイク及びMacBook Proのスピーカーを指定ください。   
-<img width="625" alt="スクリーンショット 2022-09-18 0 24 28" src="https://user-images.githubusercontent.com/46414076/190865290-9593f28b-5c83-4b5f-b605-ff95b598bbb7.png">
-
-2. Zoomで、下記画像のように入出力をBlackHoleへと変更   
-<img width="801" alt="スクリーンショット 2022-09-18 0 15 38" src="https://user-images.githubusercontent.com/46414076/190865345-82dcbdb0-b800-4b79-9f89-8567075913b6.png">
-
-3. 本アプリ『Lycoris』のマイクを、BlackHoleへと変更
