@@ -8,6 +8,7 @@
 use crate::BUNDLE_IDENTIFIER;
 
 use std::{
+    fs::remove_file,
     path::PathBuf,
     sync::{
         mpsc::{sync_channel, Receiver},
@@ -21,12 +22,17 @@ use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     SampleFormat,
 };
-use tauri::{api::path::data_dir, AppHandle};
+use tauri::{api::path::data_dir, AppHandle, Manager};
 
 use super::{recognizer::MyRecognizer, writer::Writer};
 
 pub struct Record {
     app_handle: AppHandle,
+}
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    text: String,
+    wav: String,
 }
 
 impl Record {
@@ -120,24 +126,35 @@ impl Record {
 
         stream.play().expect("Could not play stream");
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
+        let app_handle = self.app_handle.clone();
         thread::spawn(move || loop {
-            if notify_decoding_state_is_finalized_rx.try_recv().is_ok() {
-                writer
-                    .lock()
-                    .unwrap()
-                    .take()
-                    .unwrap()
-                    .finalize()
-                    .expect("Error finalizing writer");
-                let audio_path = data_dir
-                    .join(BUNDLE_IDENTIFIER)
-                    .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
-                writer
-                    .lock()
-                    .unwrap()
-                    .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
+            match notify_decoding_state_is_finalized_rx.try_recv() {
+                Ok(text) => {
+                    let (w, path) = writer.lock().unwrap().take().unwrap();
+                    w.finalize().expect("Error finalizing writer");
+                    app_handle
+                        .emit_all(
+                            "finalTextRecognized",
+                            Payload {
+                                text: text.replace(" ", ""),
+                                wav: path,
+                            },
+                        )
+                        .unwrap();
+                    let audio_path = data_dir
+                        .join(BUNDLE_IDENTIFIER)
+                        .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
+                    writer.lock().unwrap().replace(Writer::build(
+                        &audio_path.to_str().expect("Error audio path"),
+                        spec,
+                    ));
+                }
+                _ => (),
             }
             if stop_writer_rx.try_recv().is_ok() {
+                let (w, path) = writer.lock().unwrap().take().unwrap();
+                drop(w);
+                remove_file(path).unwrap();
                 break;
             }
         });

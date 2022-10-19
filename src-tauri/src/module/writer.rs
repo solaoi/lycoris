@@ -8,15 +8,15 @@ use hound::{WavSpec, WavWriter};
 
 pub struct Writer {}
 
-type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
+type WavWriterHandle = Arc<Mutex<Option<(WavWriter<BufWriter<File>>, String)>>>;
 
 impl Writer {
-    pub fn build(path: &str, spec: WavSpec) -> WavWriter<BufWriter<File>> {
-        hound::WavWriter::create(path, spec).unwrap()
+    pub fn build(path: &str, spec: WavSpec) -> (WavWriter<BufWriter<File>>, String) {
+        (WavWriter::create(path, spec).unwrap(), path.to_string())
     }
 
-    pub fn wav_spec_from_config(config: &cpal::SupportedStreamConfig) -> hound::WavSpec {
-        hound::WavSpec {
+    pub fn wav_spec_from_config(config: &cpal::SupportedStreamConfig) -> WavSpec {
+        WavSpec {
             channels: 1,
             sample_rate: config.sample_rate().0 as _,
             bits_per_sample: (config.sample_format().sample_size() * 8) as _,
@@ -33,7 +33,7 @@ impl Writer {
             if let Some(writer) = guard.as_mut() {
                 for &sample in input.iter() {
                     let sample: U = cpal::Sample::from(&sample);
-                    writer.write_sample(sample).ok();
+                    writer.0.write_sample(sample).ok();
                 }
             }
         }

@@ -3,4 +3,5 @@ export type SpeechHistoryType = {
     speech_type: "speech" | "memo"
     unix_time: number
     content: string
+    wav: string 
 }

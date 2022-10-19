@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { SpeechHistory } from '../molecules/SpeechHistory'
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { speechHistoryAtom } from '../../store/atoms/speechHistoryAtom'
 
 const Main = (): JSX.Element => {
@@ -22,16 +22,17 @@ const Main = (): JSX.Element => {
 
             unlistenFinalText = await listen('finalTextRecognized', async event => {
                 setPartialText(null)
-                const current = event.payload as string
+                const current = event.payload as { text: string, wav: string }
                 setHistories(prev => {
-                    if (prev.length > 0 && (prev[prev.length - 1].content === current)) {
+                    if (prev.length > 0 && (prev[prev.length - 1].content === current.text)) {
                         return prev;
                     }
 
                     return [...prev, {
                         speech_type: "speech",
                         unix_time: new Date().getTime(),
-                        content: current
+                        content: current.text,
+                        wav: current.wav
                     }]
                 })
             });
