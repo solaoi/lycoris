@@ -5,16 +5,25 @@
 //!
 //! Read the "Setup" section in the README to know how to link the vosk dynamic
 //! libaries to the examples
+use crate::BUNDLE_IDENTIFIER;
 
-use std::sync::{mpsc::Receiver, Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{
+        mpsc::{sync_channel, Receiver},
+        Arc, Mutex,
+    },
+    thread,
+};
 
+use chrono::Local;
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     SampleFormat,
 };
-use tauri::AppHandle;
+use tauri::{api::path::data_dir, AppHandle};
 
-use super::recognizer::MyRecognizer;
+use super::{recognizer::MyRecognizer, writer::Writer};
 
 pub struct Record {
     app_handle: AppHandle,
@@ -25,7 +34,7 @@ impl Record {
         Self { app_handle }
     }
 
-    pub fn start(&self, device_label: String, receiver: Receiver<()>) {
+    pub fn start(&self, device_label: String, stop_record_rx: Receiver<()>) {
         let host = cpal::default_host();
         let device = host
             .input_devices()
@@ -47,6 +56,19 @@ impl Record {
         let recognizer_clone = recognizer.clone();
         let mut last_partial = String::new();
 
+        let spec = Writer::wav_spec_from_config(&config);
+        let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
+        let audio_path = data_dir
+            .join(BUNDLE_IDENTIFIER)
+            .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
+        let writer = Arc::new(Mutex::new(Some(Writer::build(
+            &audio_path.to_str().expect("error"),
+            spec,
+        ))));
+        let writer_clone = writer.clone();
+        let (notify_decoding_state_is_finalized_tx, notify_decoding_state_is_finalized_rx) =
+            sync_channel(1);
+
         let stream = match config.sample_format() {
             SampleFormat::F32 => device.build_input_stream(
                 &config.into(),
@@ -57,7 +79,9 @@ impl Record {
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
-                    )
+                        notify_decoding_state_is_finalized_tx.clone(),
+                    );
+                    Writer::write_input_data::<f32, f32>(&data, &writer_clone);
                 },
                 err_fn,
             ),
@@ -70,7 +94,9 @@ impl Record {
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
-                    )
+                        notify_decoding_state_is_finalized_tx.clone(),
+                    );
+                    Writer::write_input_data::<u16, i16>(&data, &writer_clone);
                 },
                 err_fn,
             ),
@@ -83,7 +109,9 @@ impl Record {
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
-                    )
+                        notify_decoding_state_is_finalized_tx.clone(),
+                    );
+                    Writer::write_input_data::<i16, i16>(&data, &writer_clone);
                 },
                 err_fn,
             ),
@@ -91,7 +119,32 @@ impl Record {
         .expect("Could not build stream");
 
         stream.play().expect("Could not play stream");
-        receiver.recv().expect("failed to receive the message");
+        let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
+        thread::spawn(move || loop {
+            if notify_decoding_state_is_finalized_rx.try_recv().is_ok() {
+                writer
+                    .lock()
+                    .unwrap()
+                    .take()
+                    .unwrap()
+                    .finalize()
+                    .expect("Error finalizing writer");
+                let audio_path = data_dir
+                    .join(BUNDLE_IDENTIFIER)
+                    .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
+                writer
+                    .lock()
+                    .unwrap()
+                    .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
+            }
+            if stop_writer_rx.try_recv().is_ok() {
+                break;
+            }
+        });
+        stop_record_rx
+            .recv()
+            .expect("failed to receive the message");
         drop(stream);
+        stop_writer_tx.send(()).unwrap();
     }
 }

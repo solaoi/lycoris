@@ -17,6 +17,8 @@ use module::device::Device;
 
 struct RecordState(Arc<Mutex<Option<SyncSender<()>>>>);
 
+const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
+
 #[tauri::command]
 fn list_devices_command() -> Vec<Device> {
     module::device::list_devices()
