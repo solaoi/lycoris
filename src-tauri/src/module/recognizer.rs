@@ -1,3 +1,5 @@
+use std::sync::mpsc::SyncSender;
+
 use cpal::ChannelCount;
 use dasp::{sample::ToSample, Sample};
 use tauri::{AppHandle, Manager};
@@ -25,6 +27,7 @@ impl MyRecognizer {
         recognizer: &mut Recognizer,
         data: &[T],
         channels: ChannelCount,
+        notify_decoding_state_is_finalized_tx: SyncSender<String>,
     ) {
         let data: Vec<i16> = data.iter().map(|v| v.to_sample()).collect();
         let data = if channels != 1 {
@@ -52,8 +55,8 @@ impl MyRecognizer {
                 if result.is_some() {
                     let text = result.unwrap().text;
                     if Self::is_correct_words(text) {
-                        app_handle
-                            .emit_all("finalTextRecognized", text.replace(" ", ""))
+                        notify_decoding_state_is_finalized_tx
+                            .send(text.to_string())
                             .unwrap();
                     }
                 }
