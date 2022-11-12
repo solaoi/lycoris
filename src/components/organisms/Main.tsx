@@ -3,6 +3,7 @@ import { listen } from '@tauri-apps/api/event'
 import { SpeechHistory } from '../molecules/SpeechHistory'
 import { useRecoilState } from 'recoil'
 import { speechHistoryAtom } from '../../store/atoms/speechHistoryAtom'
+import { SpeechHistoryType } from '../../type/SpeechHistory.type'
 
 const Main = (): JSX.Element => {
     const [partialText, setPartialText] = useState<string | null>(null)
@@ -14,6 +15,7 @@ const Main = (): JSX.Element => {
     useEffect(() => {
         let unlistenPartialText: any;
         let unlistenFinalText: any;
+        let unlistenFinalTextConverted: any;
 
         async function f() {
             unlistenPartialText = await listen('partialTextRecognized', event => {
@@ -22,18 +24,29 @@ const Main = (): JSX.Element => {
 
             unlistenFinalText = await listen('finalTextRecognized', async event => {
                 setPartialText(null)
-                const current = event.payload as { text: string, wav: string }
+                const current = event.payload as SpeechHistoryType
                 setHistories(prev => {
-                    if (prev.length > 0 && (prev[prev.length - 1].content === current.text)) {
+                    if (prev.length > 0 && (prev[prev.length - 1].content === current.content)) {
                         return prev;
                     }
 
-                    return [...prev, {
-                        speech_type: "speech",
-                        unix_time: new Date().getTime(),
-                        content: current.text,
-                        wav: current.wav
-                    }]
+                    return [...prev, current]
+                })
+            });
+
+            unlistenFinalTextConverted = await listen('finalTextConverted', async event => {
+                const { id, content } = event.payload as { id: number, content: string }
+                setHistories(prev => {
+                    return prev.map(p => {
+                        if (p.id === id) {
+                            return {
+                                ...p,
+                                content,
+                                model: "whisper-small"
+                            }
+                        }
+                        return p;
+                    })
                 })
             });
         }
@@ -42,6 +55,7 @@ const Main = (): JSX.Element => {
         return () => {
             if (unlistenPartialText) unlistenPartialText();
             if (unlistenFinalText) unlistenFinalText();
+            if (unlistenFinalTextConverted) unlistenFinalTextConverted();
         }
     }, [])
 
@@ -49,7 +63,7 @@ const Main = (): JSX.Element => {
         <main>
             <div className="p-5">
                 <SpeechHistory histories={histories} />
-                <div className="ml-16 pb-1 mb-[72px]" ref={bottomRef} >{partialText}</div>
+                <div className="ml-16 pb-1 mb-[72px] text-gray-400" ref={bottomRef} >{partialText}</div>
             </div>
         </main>
     )

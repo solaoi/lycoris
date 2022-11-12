@@ -15,12 +15,18 @@ const sqliteEffect: AtomEffect<SpeechHistoryType[]> = ({setSelf, onSet, trigger}
     loadPersisted();
   }
 
-  onSet(async(newValue, _:any, isReset:any) => {
+  onSet(async(newValue, oldValue, isReset:any) => {
     const db = await DB.getInstance()
     if (isReset) {
       await db.deleteAllSpeeches()
     } else {
-      db.saveSpeech(newValue[newValue.length - 1])
+      const old = oldValue as SpeechHistoryType[];
+      if (old.length !== newValue.length) {
+        const current = newValue[newValue.length - 1];
+        if (current.speech_type === "memo"){
+          db.saveSpeech(current);
+        }
+      }
     }
   });
 };
