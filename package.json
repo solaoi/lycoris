@@ -12,7 +12,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "debug:rs": "RUST_BACKTRACE=1 tauri dev --verbose"
   },
   "dependencies": {
     "@tauri-apps/api": "^1.1.0",
