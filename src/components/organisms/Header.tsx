@@ -20,7 +20,7 @@ const Header = (): JSX.Element => {
             </div>
             <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 bg-white shadow flex items-center group relative overflow-x-hidden">
                 <h1 className="text-3xl tracking-tight font-bold text-gray-900 flex-1">
-                    HackDayの議事録
+                    ノートタイトルダミー
                 </h1>
                 <div className="flex-none">
                     {isRecording ? <RecordStopButton /> : <RecordStartButton />}

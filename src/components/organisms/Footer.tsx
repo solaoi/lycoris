@@ -14,7 +14,8 @@ const Footer = (): JSX.Element => {
                 speech_type: "memo",
                 unix_time: new Date().getTime(),
                 content: inputEl.current?.value || "",
-                wav: ""
+                wav: "",
+                model: "manual"
             }]
         )
 

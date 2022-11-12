@@ -10,10 +10,7 @@ use crate::BUNDLE_IDENTIFIER;
 use std::{
     fs::remove_file,
     path::PathBuf,
-    sync::{
-        mpsc::{sync_channel, Receiver},
-        Arc, Mutex,
-    },
+    sync::{mpsc::sync_channel, Arc, Mutex},
     thread,
 };
 
@@ -22,9 +19,12 @@ use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
     SampleFormat,
 };
+use crossbeam_channel::{unbounded, Receiver};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
-use super::{recognizer::MyRecognizer, writer::Writer};
+use super::{
+    recognizer::MyRecognizer, sqlite::Sqlite, transcription::Transcription, writer::Writer,
+};
 
 pub struct Record {
     app_handle: AppHandle,
@@ -56,8 +56,8 @@ impl Record {
             eprintln!("an error occurred on stream: {}", err);
         };
 
-        let app_handle = self.app_handle.clone();
-        let recognizer = MyRecognizer::build(app_handle.clone(), config.sample_rate().0 as f32);
+        let recognizer =
+            MyRecognizer::build(self.app_handle.clone(), config.sample_rate().0 as f32);
         let recognizer = Arc::new(Mutex::new(recognizer));
         let recognizer_clone = recognizer.clone();
         let mut last_partial = String::new();
@@ -65,7 +65,7 @@ impl Record {
         let spec = Writer::wav_spec_from_config(&config);
         let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
         let audio_path = data_dir
-            .join(BUNDLE_IDENTIFIER)
+            .join(BUNDLE_IDENTIFIER.to_string())
             .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
         let writer = Arc::new(Mutex::new(Some(Writer::build(
             &audio_path.to_str().expect("error"),
@@ -74,6 +74,7 @@ impl Record {
         let writer_clone = writer.clone();
         let (notify_decoding_state_is_finalized_tx, notify_decoding_state_is_finalized_rx) =
             sync_channel(1);
+        let app_handle = self.app_handle.clone();
 
         let stream = match config.sample_format() {
             SampleFormat::F32 => device.build_input_stream(
@@ -126,28 +127,55 @@ impl Record {
 
         stream.play().expect("Could not play stream");
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
+        let is_converting = Arc::new(Mutex::new(false));
+        let (stop_convert_tx, stop_convert_rx) = unbounded();
+
         let app_handle = self.app_handle.clone();
         thread::spawn(move || loop {
             match notify_decoding_state_is_finalized_rx.try_recv() {
                 Ok(text) => {
                     let (w, path) = writer.lock().unwrap().take().unwrap();
                     w.finalize().expect("Error finalizing writer");
+
+                    let now = Local::now().timestamp();
+                    let content = text.replace(" ", "");
+
+                    let speech = Sqlite::new().save_speech(
+                        "speech".to_string(),
+                        now as u64,
+                        content,
+                        path,
+                        "vosk".to_string(),
+                    );
+
                     app_handle
-                        .emit_all(
-                            "finalTextRecognized",
-                            Payload {
-                                text: text.replace(" ", ""),
-                                wav: path,
-                            },
-                        )
+                        .clone()
+                        .emit_all("finalTextRecognized", speech.unwrap())
                         .unwrap();
+
                     let audio_path = data_dir
-                        .join(BUNDLE_IDENTIFIER)
-                        .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
-                    writer.lock().unwrap().replace(Writer::build(
-                        &audio_path.to_str().expect("Error audio path"),
-                        spec,
-                    ));
+                        .join(BUNDLE_IDENTIFIER.to_string())
+                        .join(&format!("{}.wav", &now.to_string()));
+                    writer
+                        .lock()
+                        .unwrap()
+                        .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
+
+                    if !*is_converting.lock().unwrap() {
+                        let is_converting_clone = Arc::clone(&is_converting);
+                        let app_handle_clone = app_handle.clone();
+                        let stop_convert_rx_clone = stop_convert_rx.clone();
+                        std::thread::spawn(move || {
+                            let mut lock = is_converting_clone.lock().unwrap();
+                            *lock = true;
+                            drop(lock);
+                            let transcription = Transcription::new(app_handle_clone);
+                            transcription.start(stop_convert_rx_clone);
+                            let mut lock = is_converting_clone.lock().unwrap();
+                            *lock = false;
+                            drop(lock);
+                        });
+                    };
                 }
                 _ => (),
             }
@@ -163,5 +191,6 @@ impl Record {
             .expect("failed to receive the message");
         drop(stream);
         stop_writer_tx.send(()).unwrap();
+        stop_convert_tx.send(()).unwrap();
     }
 }

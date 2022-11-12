@@ -27,12 +27,12 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                         </div>
                     )
                 }
-                let date = dayjs(h.unix_time).format('H:mm')
-                if (i > 0 && date === dayjs(histories[i - 1].unix_time).format('H:mm')) {
+                let date = dayjs.unix(h.unix_time).format('H:mm')
+                if (i > 0 && date === dayjs.unix(histories[i - 1].unix_time).format('H:mm')) {
                     date = ""
                 }
                 return (
-                    <div className="flex pb-1" key={"history_" + i}>
+                    <div className={"flex pb-1" + (h.model === "vosk" ? "  text-gray-400" : "")} key={"history_" + i}>
                         <div className="w-16 flex-none">{date}</div>
                         <div>{h.content}</div>
                     </div>
