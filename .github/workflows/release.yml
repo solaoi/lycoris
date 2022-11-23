@@ -9,7 +9,11 @@ jobs:
   release:
     runs-on: macos-latest
     timeout-minutes: 90
-
+    strategy:
+      matrix:
+        target:
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
     steps:
     - uses: actions/checkout@v2
 
@@ -22,7 +26,9 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: x86_64-apple-darwin
+        target: ${{ matrix.target }}
+        profile: minimal
+        override: true
 
     - uses: Swatinem/rust-cache@v1
       with:
