@@ -42,15 +42,7 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - name: install Rust stable
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        target: aarch64-apple-darwin
-        profile: minimal
-        override: true
-
-    - uses: solaoi/tauri-action@dev
+    - uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
@@ -65,4 +57,4 @@ jobs:
         releaseBody: "See the assets to download this version and install."
         releaseDraft: true
         prerelease: false
-        args: --target universal-apple-darwin
+        args: --target x86_64-apple-darwin
