@@ -3573,9 +3573,9 @@ dependencies = [
 
 [[package]]
 name = "tao"
-version = "0.15.2"
+version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3732f018e98c1df9d26c12892750b04b49e044ccdc01f2596a7f887569ad8c31"
+checksum = "42c460173627564bde252ca5ebf346ba5b37c5cee1a445782bacc8e9b8d38b5e"
 dependencies = [
  "bitflags",
  "cairo-rs",
@@ -4405,7 +4405,7 @@ dependencies = [
 [[package]]
 name = "whisper-rs"
 version = "0.2.0"
-source = "git+https://github.com/solaoi/whisper-rs.git#851f06081279811e6c75b9cead73679aaa6da1b5"
+source = "git+https://github.com/solaoi/whisper-rs.git#3931737276f25b046f13a75c4981c6e1ec365342"
 dependencies = [
  "whisper-rs-sys",
 ]
@@ -4413,7 +4413,7 @@ dependencies = [
 [[package]]
 name = "whisper-rs-sys"
 version = "0.2.0"
-source = "git+https://github.com/solaoi/whisper-rs.git#851f06081279811e6c75b9cead73679aaa6da1b5"
+source = "git+https://github.com/solaoi/whisper-rs.git#3931737276f25b046f13a75c4981c6e1ec365342"
 dependencies = [
  "bindgen 0.61.0",
 ]
