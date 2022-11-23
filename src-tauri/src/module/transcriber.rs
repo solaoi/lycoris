@@ -20,8 +20,8 @@ impl Transcriber {
     pub fn build_params() -> FullParams<'static> {
         let mut params = FullParams::new(SamplingStrategy::Greedy { n_past: 0 });
         let hardware_concurrency = cmp::min(
-            4,
-            available_parallelism().map(|n| n.get() as i32).unwrap_or(4),
+            8,
+            available_parallelism().map(|n| n.get() as i32).unwrap_or(8),
         );
         println!("working on {} threads.", hardware_concurrency);
         params.set_n_threads(hardware_concurrency);
