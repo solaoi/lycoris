@@ -9,11 +9,7 @@ jobs:
   release:
     runs-on: macos-latest
     timeout-minutes: 90
-    strategy:
-      matrix:
-        target:
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
+
     steps:
     - uses: actions/checkout@v2
 
@@ -26,7 +22,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: ${{ matrix.target }}
+        target: x86_64-apple-darwin
         profile: minimal
         override: true
 
@@ -45,6 +41,14 @@ jobs:
 
     - name: install app dependencies
       run: yarn install --frozen-lockfile
+
+    - name: install Rust stable
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: aarch64-apple-darwin
+        profile: minimal
+        override: true
 
     - uses: solaoi/tauri-action@dev
       env:
