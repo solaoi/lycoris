@@ -22,7 +22,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: aarch64-apple-darwin
+        target: x86_64-apple-darwin
 
     - uses: Swatinem/rust-cache@v1
       with:
