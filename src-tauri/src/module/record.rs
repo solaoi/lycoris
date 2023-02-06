@@ -169,7 +169,7 @@ impl Record {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
-                            let transcription = Transcription::new(app_handle_clone);
+                            let mut transcription = Transcription::new(app_handle_clone);
                             transcription.start(stop_convert_rx_clone);
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = false;

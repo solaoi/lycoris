@@ -17,7 +17,7 @@ impl Transcriber {
         return WhisperContext::new(&model_path).expect("failed to load whisper model");
     }
 
-    pub fn build_params() -> FullParams<'static> {
+    pub fn build_params() -> FullParams<'static, 'static> {
         let mut params = FullParams::new(SamplingStrategy::Greedy { n_past: 0 });
         let hardware_concurrency = cmp::min(
             8,
@@ -27,7 +27,7 @@ impl Transcriber {
         params.set_n_threads(hardware_concurrency);
         params.set_translate(false);
         params.set_language("ja");
-        params.set_print_special_tokens(false);
+        params.set_print_special(false);
         params.set_print_progress(false);
         params.set_print_realtime(false);
         params.set_print_timestamps(false);
