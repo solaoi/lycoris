@@ -5,21 +5,25 @@ use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use tauri::{AppHandle, Manager};
+use whisper_rs::WhisperContext;
 
 pub struct Transcription {
     app_handle: AppHandle,
     sqlite: Sqlite,
+    ctx: WhisperContext,
 }
 
 impl Transcription {
     pub fn new(app_handle: AppHandle) -> Self {
+        let app_handle_clone = app_handle.clone();
         Self {
             app_handle,
             sqlite: Sqlite::new(),
+            ctx: Transcriber::build(app_handle_clone)
         }
     }
 
-    pub fn start(&self, stop_convert_rx: Receiver<()>) {
+    pub fn start(&mut self, stop_convert_rx: Receiver<()>) {
         while Self::convert(self).is_ok() {
             if stop_convert_rx.try_recv().is_ok() {
                 break;
@@ -27,9 +31,8 @@ impl Transcription {
         }
     }
 
-    fn convert(&self) -> Result<(), rusqlite::Error> {
+    fn convert(&mut self) -> Result<(), rusqlite::Error> {
         let vosk_speech = self.sqlite.select_vosk();
-
         return vosk_speech.and_then(|speech| {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 
@@ -77,13 +80,14 @@ impl Transcription {
             )
             .unwrap();
 
-            let mut ctx = Transcriber::build(self.app_handle.clone());
-            let result = ctx.full(Transcriber::build_params(), &audio_data[..]);
+            // let mut ctx = Transcriber::build(self.app_handle.clone());
+            // let mut ctx = self.ctx;
+            let result = self.ctx.full(Transcriber::build_params(), &audio_data[..]);
             if result.is_ok() {
-                let num_segments = ctx.full_n_segments();
+                let num_segments = self.ctx.full_n_segments();
                 let mut converted: Vec<String> = vec!["".to_string()];
                 for i in 0..num_segments {
-                    let segment = ctx.full_get_segment_text(i).expect("failed to get segment");
+                    let segment = self.ctx.full_get_segment_text(i).expect("failed to get segment");
                     let last = converted.last().unwrap().as_str();
                     if segment != last
                         && segment != "(音楽)"
@@ -93,12 +97,11 @@ impl Transcription {
                         && segment != "(EN)"
                         && segment != "(笑)"
                     {
-                        converted.push(segment);
+                        converted.push(segment.to_string());
                     }
                 }
 
-                let updated = self
-                    .sqlite
+                let updated = self.sqlite
                     .update_model_vosk_to_whisper(speech.id, converted.join(""));
 
                 let updated = updated.unwrap();

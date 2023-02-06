@@ -4393,9 +4393,9 @@ dependencies = [
 
 [[package]]
 name = "which"
-version = "4.3.0"
+version = "4.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c831fbbee9e129a8cf93e7747a82da9d95ba8e16621cae60ec2cdc849bacb7b"
+checksum = "2441c784c52b289a054b7201fc93253e288f094e2f4be9058343127c4226a269"
 dependencies = [
  "either",
  "libc",
@@ -4404,16 +4404,18 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.2.0"
-source = "git+https://github.com/solaoi/whisper-rs.git#3931737276f25b046f13a75c4981c6e1ec365342"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "765f458a6afe493758e1738b909ed0283acd7f8507e4aaaea68a4fc0dddc7ef5"
 dependencies = [
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.2.0"
-source = "git+https://github.com/solaoi/whisper-rs.git#3931737276f25b046f13a75c4981c6e1ec365342"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec896ab68673b4f260f01e71c4c39616bc31c0e81198d3992980d83a46da009c"
 dependencies = [
  "bindgen 0.61.0",
 ]

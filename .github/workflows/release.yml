@@ -22,9 +22,7 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: x86_64-apple-darwin
-        profile: minimal
-        override: true
+        target: aarch64-apple-darwin
 
     - uses: Swatinem/rust-cache@v1
       with:
@@ -42,7 +40,7 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - uses: tauri-apps/tauri-action@v0
+    - uses: solaoi/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
@@ -57,4 +55,4 @@ jobs:
         releaseBody: "See the assets to download this version and install."
         releaseDraft: true
         prerelease: false
-        args: --target x86_64-apple-darwin
+        args: --target universal-apple-darwin
