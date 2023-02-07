@@ -40,7 +40,7 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - uses: solaoi/tauri-action@dev
+    - uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
