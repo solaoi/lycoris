@@ -22,7 +22,11 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        target: aarch64-apple-darwin
+
+    - name: install Rust target
+      run: |
+        rustup target add aarch64-apple-darwin
+        rustup target add x86_64-apple-darwin
 
     - uses: Swatinem/rust-cache@v1
       with:
@@ -42,7 +46,6 @@ jobs:
 
     - uses: tauri-apps/tauri-action@dev
       env:
-        WHISPER_DONT_GENERATE_BINDINGS: 1
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
         APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
