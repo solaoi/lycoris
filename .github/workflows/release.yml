@@ -40,13 +40,9 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - name: Setup for MacOS Build
-      run: |
-        echo "SDKROOT=$(xcrun -sdk macosx --show-sdk-path)" >> $GITHUB_ENV
-        echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx --show-sdk-platform-version)" >> $GITHUB_ENV
-
     - uses: tauri-apps/tauri-action@dev
       env:
+        WHISPER_DONT_GENERATE_BINDINGS: 1
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
         APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
