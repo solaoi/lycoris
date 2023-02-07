@@ -22,16 +22,17 @@ jobs:
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-
-    - name: install Rust target
-      run: |
-        rustup target add aarch64-apple-darwin
-        rustup target add x86_64-apple-darwin
+        target: aarch64-apple-darwin
 
     - uses: Swatinem/rust-cache@v1
       with:
         working-directory: ./src-tauri
         target-dir: ./src-tauri/target
+
+    - name: XCode Version
+      run: |
+        sudo xcode-select -s /Applications/Xcode_12.4.app &&
+        sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
 
     - name: download Vosk model
       run: |
