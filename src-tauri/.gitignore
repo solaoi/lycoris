@@ -3,4 +3,3 @@
 /target/
 
 /resources/*/*
-!/resources/whisper/ggml-small.bin

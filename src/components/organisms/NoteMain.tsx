@@ -4,10 +4,17 @@ import { SpeechHistory } from '../molecules/SpeechHistory'
 import { useRecoilState } from 'recoil'
 import { speechHistoryAtom } from '../../store/atoms/speechHistoryAtom'
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
+import { MemoFilterButton } from '../molecules/MemoFilterButton'
+import { RecordStopButton } from '../molecules/RecordStopButton'
+import { RecordStartButton } from '../molecules/RecordStartButton'
+import { useRecoilValue } from "recoil"
+import { recordState } from "../../store/atoms/recordState"
+import { NoteFooter } from './NoteFooter'
 
-const Main = (): JSX.Element => {
+const NoteMain = (): JSX.Element => {
     const [partialText, setPartialText] = useState<string | null>(null)
     const [histories, setHistories] = useRecoilState(speechHistoryAtom)
+    const isRecording = useRecoilValue(recordState)
     const bottomRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,13 +67,27 @@ const Main = (): JSX.Element => {
     }, [])
 
     return (
-        <main>
-            <div className="p-5">
+        <>
+            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }}>
+                <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-3xl tracking-tight font-bold text-gray-900 flex-1">
+                    ノートタイトルダミー
+                </h1>
+                <div className="flex-none">
+                    {isRecording ? <RecordStopButton /> : <RecordStartButton />}
+                </div>
+                {/* shine box */}
+                <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${isRecording && "animate-shine"}`} />
+            </div>
+            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center border-t" style={{ height: "32px" }}>
+                <MemoFilterButton />
+            </div>
+            <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }}>
                 <SpeechHistory histories={histories} />
                 <div className="ml-16 pb-1 mb-[72px] text-gray-400" ref={bottomRef} >{partialText}</div>
+                <NoteFooter />
             </div>
-        </main>
+        </>
     )
 }
 
-export { Main }
+export { NoteMain }

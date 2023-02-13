@@ -16,15 +16,16 @@
     "debug:rs": "RUST_BACKTRACE=1 tauri dev --verbose"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.1.0",
+    "@tauri-apps/api": "^1.2.0",
     "dayjs": "^1.11.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-h5-audio-player": "^3.8.6",
     "recoil": "^0.7.5",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.1.1",
+    "@tauri-apps/cli": "^1.2.3",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@vitejs/plugin-react": "^2.0.1",
