@@ -70,7 +70,7 @@ const NoteMain = (): JSX.Element => {
         <>
             <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }}>
                 <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-3xl tracking-tight font-bold text-gray-900 flex-1">
-                    ノートタイトルダミー
+                    ノート1
                 </h1>
                 <div className="flex-none">
                     {isRecording ? <RecordStopButton /> : <RecordStartButton />}

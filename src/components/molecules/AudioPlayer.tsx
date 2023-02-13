@@ -3,17 +3,24 @@ import 'react-h5-audio-player/lib/styles.css';
 
 type AudioPlayerProps = {
     filePath: string
+    className: string
+    style: React.CSSProperties
 }
 
 const AudioPlayer = (props: AudioPlayerProps): JSX.Element => {
-    const { filePath } = props
+    const { style, className, filePath } = props
 
     return (
-        <Player
-            src={filePath}
-            onPlay={e => console.log("onPlay")}
-        // other props here
-        />
+        <div style={style} className={className} >
+            <Player
+                src={filePath}
+                onPlay={e => console.log("onPlay")}
+                style={{ background: "rgba(255,255,255,0.9)", height: "100px" }}
+                customAdditionalControls={[<></>]}
+                showSkipControls={true}
+            // other props here
+            />
+        </div>
     )
 }
 
