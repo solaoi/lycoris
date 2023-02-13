@@ -1,15 +1,17 @@
-import { Header } from './components/organisms/Header'
+import { Header } from './components/Header'
 import { RecoilRoot } from 'recoil'
-import { Footer } from './components/organisms/Footer'
-import { Main } from './components/organisms/Main'
+import { Main } from './components/Main'
+import { SideMenu } from './components/SideMenu'
 
 function App() {
 
   return (
     <RecoilRoot>
       <Header />
-      <Main />
-      <Footer />
+      <div style={{display: "flex"}}>
+        <SideMenu />
+        <Main />
+      </div>
     </RecoilRoot>
   )
 }

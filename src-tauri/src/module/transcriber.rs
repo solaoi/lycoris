@@ -9,7 +9,7 @@ impl Transcriber {
     pub fn build(app_handle: AppHandle) -> WhisperContext {
         let model_path = app_handle
             .path_resolver()
-            .resolve_resource("resources/whisper/ggml-small.bin")
+            .resolve_resource("resources/whisper/ggml-large.bin")
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -18,7 +18,10 @@ impl Transcriber {
     }
 
     pub fn build_params() -> FullParams<'static, 'static> {
-        let mut params = FullParams::new(SamplingStrategy::Greedy { n_past: 0 });
+        let mut params = FullParams::new(SamplingStrategy::BeamSearch {
+            beam_size: 5,
+            patience: 1.0,
+        });
         let hardware_concurrency = cmp::min(
             8,
             available_parallelism().map(|n| n.get() as i32).unwrap_or(8),
@@ -26,7 +29,7 @@ impl Transcriber {
         println!("working on {} threads.", hardware_concurrency);
         params.set_n_threads(hardware_concurrency);
         params.set_translate(false);
-        params.set_language("ja");
+        params.set_language(Some("ja"));
         params.set_print_special(false);
         params.set_print_progress(false);
         params.set_print_realtime(false);

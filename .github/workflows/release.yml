@@ -36,6 +36,11 @@ jobs:
         unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri/resources
         rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
 
+    # - name: download Whisper model
+    #   run: |
+    #     curl -LO https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-large.bin
+    #     mv ggml-large.bin ./src-tauri/resources
+
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 

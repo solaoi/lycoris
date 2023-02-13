@@ -8,7 +8,6 @@ const AudioDevices = (): JSX.Element => {
     const setAudioDevice = useSetRecoilState(audioDeviceState)
 
     const change = (e: ChangeEvent<HTMLSelectElement>) => {
-        // const deviceId = parseInt(e.target.value, 10)
         const deviceLabel = e.target.value
         setAudioDevice(deviceLabel)
     }
