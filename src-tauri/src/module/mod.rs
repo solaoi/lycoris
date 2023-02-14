@@ -1,6 +1,7 @@
 pub mod device;
 pub mod downloader;
-pub mod model_type;
+pub mod model_type_whisper;
+pub mod model_type_vosk;
 mod recognizer;
 pub mod record;
 mod sqlite;

@@ -4,7 +4,8 @@
 )]
 
 use crossbeam_channel::Sender;
-use module::model_type::ModelType;
+use module::model_type_vosk::ModelTypeVosk;
+use module::model_type_whisper::ModelTypeWhisper;
 use tauri::http::HttpRange;
 use tauri::http::ResponseBuilder;
 use tauri::Manager;
@@ -30,10 +31,19 @@ struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
 const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
 
 #[tauri::command]
-fn download_model_command(window: tauri::Window, model: String) {
+fn download_whisper_model_command(window: tauri::Window, model: String) {
     std::thread::spawn(move || {
-        let dl = module::downloader::WhisperModelDownloader::new(window.app_handle().clone());
-        dl.download(ModelType::from_str(&model).unwrap())
+        let dl =
+            module::downloader::whisper::WhisperModelDownloader::new(window.app_handle().clone());
+        dl.download(ModelTypeWhisper::from_str(&model).unwrap())
+    });
+}
+
+#[tauri::command]
+fn download_vosk_model_command(window: tauri::Window, model: String) {
+    std::thread::spawn(move || {
+        let dl = module::downloader::vosk::VoskModelDownloader::new(window.app_handle().clone());
+        dl.download(ModelTypeVosk::from_str(&model).unwrap())
     });
 }
 
@@ -116,7 +126,8 @@ fn main() {
         ))
         .manage(RecordState(Default::default()))
         .invoke_handler(tauri::generate_handler![
-            download_model_command,
+            download_whisper_model_command,
+            download_vosk_model_command,
             list_devices_command,
             start_command,
             stop_command,

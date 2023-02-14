@@ -1,17 +1,17 @@
 import { invoke } from '@tauri-apps/api/tauri'
 import { useRecoilState } from 'recoil'
-import { downloadModelState } from '../../store/atoms/downloadModelState'
+import { downloadWhisperModelState } from '../../store/atoms/downloadWhisperModelState'
 
 type Props = {
     modelType: string
 }
 
-const ModelDownloadButton = (props: Props): JSX.Element => {
+const ModelDownloadWhisperButton = (props: Props): JSX.Element => {
     const { modelType } = props
-    const [downloadingModels, setDownloadingModels] = useRecoilState(downloadModelState)
+    const [downloadingModels, setDownloadingModels] = useRecoilState(downloadWhisperModelState)
     const click = () => {
         setDownloadingModels([...downloadingModels, modelType])
-        invoke('download_model_command', { model: modelType })
+        invoke('download_whisper_model_command', { model: modelType })
     }
 
     return (
@@ -24,4 +24,4 @@ const ModelDownloadButton = (props: Props): JSX.Element => {
     )
 }
 
-export { ModelDownloadButton }
+export { ModelDownloadWhisperButton }

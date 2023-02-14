@@ -5,7 +5,7 @@ use std::cmp::min;
 use std::fs::File;
 use std::io::{Seek, Write};
 
-use super::model_type::ModelType;
+use crate::module::model_type_vosk::ModelTypeVosk;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Progress {
@@ -14,17 +14,17 @@ pub struct Progress {
     pub is_progress: bool,
 }
 
-pub struct WhisperModelDownloader {
+pub struct VoskModelDownloader {
     app_handle: AppHandle,
 }
-impl WhisperModelDownloader {
+impl VoskModelDownloader {
     pub fn new(app_handle: AppHandle) -> Self {
         Self { app_handle }
     }
 
     #[tokio::main]
-    pub async fn download(&self, model_type: ModelType) {
-        let model_path: &str = &format!("resources/whisper/ggml-{}.bin", model_type.as_str());
+    pub async fn download(&self, model_type: ModelTypeVosk) {
+        let model_path: &str = &format!("resources/vosk-model-{}-0.22.zip", model_type.as_str());
         let path: &str = &self
             .app_handle
             .path_resolver()
@@ -33,7 +33,7 @@ impl WhisperModelDownloader {
             .to_string_lossy()
             .to_string();
         let url: &str = &format!(
-            "https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-{}.bin",
+            "https://alphacephei.com/vosk/models/vosk-model-{}-0.22.zip",
             model_type.as_str()
         );
         let res = reqwest::get(url).await.unwrap();
@@ -43,7 +43,7 @@ impl WhisperModelDownloader {
             .unwrap();
 
         let _ = &self.app_handle.emit_all(
-            "downloadProgress",
+            "downloadVoskProgress",
             Progress {
                 model_type: model_type.as_str().to_string(),
                 rate: 0.0,
@@ -89,7 +89,7 @@ impl WhisperModelDownloader {
             let current_rate = ((new as f64 * 100.0) / total_size as f64).round();
             if rate != current_rate {
                 let _ = &self.app_handle.emit_all(
-                    "downloadProgress",
+                    "downloadVoskProgress",
                     Progress {
                         model_type: model_type.as_str().to_string(),
                         rate: current_rate,
@@ -100,11 +100,29 @@ impl WhisperModelDownloader {
             }
         }
 
+        let dir: &str = &self
+            .app_handle
+            .path_resolver()
+            .resolve_resource("resources")
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        let _ = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(format!("unzip {} -d {}", path, dir))
+            .output()
+            .expect("failed");
+        let _ = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(format!("rm {}", path))
+            .output()
+            .expect("failed");
+
         let _ = &self.app_handle.emit_all(
-            "downloadProgress",
+            "downloadVoskProgress",
             Progress {
                 model_type: model_type.as_str().to_string(),
-                rate,
+                rate: 0.0,
                 is_progress: false,
             },
         );
