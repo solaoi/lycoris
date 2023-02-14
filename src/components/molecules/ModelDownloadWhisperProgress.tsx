@@ -1,5 +1,5 @@
 import { useRecoilState } from 'recoil'
-import { downloadModelState } from '../../store/atoms/downloadModelState'
+import { downloadWhisperModelState } from '../../store/atoms/downloadWhisperModelState'
 import { listen } from '@tauri-apps/api/event'
 import { useEffect, useState } from 'react'
 import { ProgressType } from '../../type/progress.type'
@@ -8,9 +8,9 @@ type Props = {
     modelType: string
 }
 
-const ModelDownloadProgress = (props: Props): JSX.Element => {
+const ModelDownloadWhisperProgress = (props: Props): JSX.Element => {
     const { modelType } = props
-    const [downloadingModels, setDownloadingModels] = useRecoilState(downloadModelState)
+    const [downloadingModels, setDownloadingModels] = useRecoilState(downloadWhisperModelState)
     const [progress, setProgress] = useState<ProgressType>({
         model_type: modelType,
         rate: 0,
@@ -20,7 +20,7 @@ const ModelDownloadProgress = (props: Props): JSX.Element => {
         let unlistenDownloadProgress: any;
 
         async function f() {
-            unlistenDownloadProgress = await listen('downloadProgress', event => {
+            unlistenDownloadProgress = await listen('downloadWhisperProgress', event => {
                 const p = event.payload as ProgressType
                 if (p.model_type === modelType) {
                     setProgress(p)
@@ -45,4 +45,4 @@ const ModelDownloadProgress = (props: Props): JSX.Element => {
     return (<></>)
 }
 
-export { ModelDownloadProgress }
+export { ModelDownloadWhisperProgress }

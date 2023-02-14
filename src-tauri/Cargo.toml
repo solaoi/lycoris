@@ -34,7 +34,6 @@ tokio = { version = "1", features = ["full"] }
 futures-util = "0.3.26"
 # serve audio
 urlencoding = "2.1.0"
-
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/tauri-plugin-sql"
 branch = "release"
