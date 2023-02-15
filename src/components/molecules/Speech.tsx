@@ -39,7 +39,7 @@ const Speech = (props: SpeechProps): JSX.Element => {
                 onMouseEnter={() => {
                     setHover(true);
                     if (window.innerHeight - bottom > 100) {
-                        setLazyHoverId(setTimeout(() => { setLazyHover(true) }, 500));
+                        setLazyHoverId(setTimeout(() => { setLazyHover(true) }, 1000));
                     }
                 }} ref={targetRef} >
                 <div className="w-16 pl-2 flex-none">{date}</div>

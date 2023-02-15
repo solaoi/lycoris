@@ -30,6 +30,10 @@ export default class DB {
     return await this.db.select('SELECT * FROM speeches')
   }
 
+  public async loadDownloadedModels(model_type: string): Promise<{model_name: string}[]> {
+    return await this.db.select('SELECT model_name FROM models WHERE is_downloaded = 1 AND model_type = $1', [model_type])
+  }
+
   public async saveSpeech(speech: SpeechHistoryType): Promise<SpeechHistoryType> {
     const { lastInsertId } = await this.db.execute(
       'INSERT INTO speeches(speech_type, unix_time, content, wav, model) VALUES($1, $2, $3, $4, $5)',

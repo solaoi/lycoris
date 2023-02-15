@@ -3,9 +3,10 @@ use tauri::{AppHandle, Manager};
 use futures_util::StreamExt;
 use std::cmp::min;
 use std::fs::File;
-use std::io::{Seek, Write};
+use std::io::Write;
 
 use crate::module::model_type_whisper::ModelTypeWhisper;
+use crate::module::sqlite::Sqlite;
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Progress {
@@ -57,22 +58,12 @@ impl WhisperModelDownloader {
 
         println!("Seeking in file.");
         if std::path::Path::new(&path).exists() {
-            println!("File exists. Resuming.");
-            file = std::fs::OpenOptions::new()
-                .read(true)
-                .append(true)
-                .open(&path)
-                .unwrap();
-
-            let file_size = std::fs::metadata(&path).unwrap().len();
-            file.seek(std::io::SeekFrom::Start(file_size)).unwrap();
-            downloaded = file_size;
-        } else {
-            println!("Fresh file..");
-            file = File::create(&path)
-                .or(Err(format!("Failed to create file '{}'", &path)))
-                .unwrap();
+            println!("File exists. Removig...");
+            let _ = std::fs::remove_file(&path);
         }
+        file = File::create(&path)
+            .or(Err(format!("Failed to create file '{}'", &path)))
+            .unwrap();
 
         println!("Commencing transfer");
         let mut rate = 0.0;
@@ -99,6 +90,8 @@ impl WhisperModelDownloader {
                 rate = current_rate
             }
         }
+
+        let _ = Sqlite::new().update_model_is_downloaded(model_type.as_str().to_string(), 1);
 
         let _ = &self.app_handle.emit_all(
             "downloadWhisperProgress",

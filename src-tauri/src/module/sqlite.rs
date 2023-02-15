@@ -72,6 +72,17 @@ impl Sqlite {
         }
     }
 
+    pub fn update_model_is_downloaded(
+        &self,
+        model_name: String,
+        is_downloaded: u16,
+    ) -> Result<usize, rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE models SET is_downloaded = ?1 WHERE model_name = ?2",
+            params![is_downloaded, model_name],
+        )
+    }
+
     pub fn save_speech(
         &self,
         speech_type: String,
