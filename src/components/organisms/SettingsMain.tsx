@@ -11,17 +11,17 @@ const SettingsMain = (): JSX.Element => {
                 <h2 className="text-xl mt-5">話し手の言語</h2>
                 <div className="px-5 mt-2">
                     <div className="mb-5">
-                        <p>音声認識を行う対象の言語の言語パックをダウンロードしてください。</p>
+                        <p>音声認識を行う対象言語の言語パックをダウンロードしてください。</p>
                     </div>
-                    <div style={{ height: "82px" }}>
-                        <div className="flex items-center mb-2">
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
                             <p>言語パック（日本語）</p>
                             <ModelDownloadVoskButton modelType="ja" />
                         </div>
                         <ModelDownloadVoskProgress modelType="ja" />
                     </div>
                     <div>
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-between mb-2">
                             <p>言語パック（英語）</p>
                             <ModelDownloadVoskButton modelType="en-us" />
                         </div>
@@ -30,21 +30,21 @@ const SettingsMain = (): JSX.Element => {
                 </div>
             </div>
             <div className="px-5">
-                <h2 className="text-xl mt-5">高精度認識</h2>
+                <h2 className="text-xl mt-5">追っかけ高精度認識</h2>
                 <div className="px-5 mt-2">
                     <div className="mb-5">
-                        <p>高精度の認識を行う場合には、下記言語パックをダウンロードしてください。</p>
+                        <p>追っかけ高精度認識を行う場合には、下記言語パックをダウンロードしてください。</p>
                         <p>ただし、高精度なものほど認識に時間を要します。</p>
                     </div>
-                    <div style={{ height: "82px" }}>
-                        <div className="flex items-center mb-2">
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
                             <p>言語パック（精度：中）</p>
                             <ModelDownloadWhisperButton modelType="medium" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="medium" />
                     </div>
                     <div>
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-between mb-2">
                             <p>言語パック（精度：高）</p>
                             <ModelDownloadWhisperButton modelType="large" />
                         </div>

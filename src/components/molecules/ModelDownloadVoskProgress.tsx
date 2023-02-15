@@ -1,8 +1,9 @@
 import { useRecoilState } from 'recoil'
-import { downloadVoskModelState } from '../../store/atoms/downloadVoskModelState'
+import { modelVoskDownloadingState } from '../../store/atoms/modelVoskDownloadingState'
 import { listen } from '@tauri-apps/api/event'
 import { useEffect, useState } from 'react'
 import { ProgressType } from '../../type/progress.type'
+import { modelVoskDownloadedState } from '../../store/atoms/modelVoskDownloadedState'
 
 type Props = {
     modelType: string
@@ -10,7 +11,8 @@ type Props = {
 
 const ModelDownloadVoskProgress = (props: Props): JSX.Element => {
     const { modelType } = props
-    const [downloadingModels, setDownloadingModels] = useRecoilState(downloadVoskModelState)
+    const [downloadedModels, setDownloadedModel] = useRecoilState(modelVoskDownloadedState)
+    const [downloadingModels, setDownloadingModels] = useRecoilState(modelVoskDownloadingState)
     const [progress, setProgress] = useState<ProgressType>({
         model_type: modelType,
         rate: 0,
@@ -24,9 +26,10 @@ const ModelDownloadVoskProgress = (props: Props): JSX.Element => {
                 const p = event.payload as ProgressType
                 if (p.model_type === modelType) {
                     setProgress(p)
-                }
-                if (!p.is_progress) {
-                    setDownloadingModels(downloadingModels.filter(m => m !== modelType))
+                    if (!p.is_progress) {
+                        setDownloadingModels(downloadingModels.filter(m => m !== modelType))
+                        setDownloadedModel([...downloadedModels, modelType])
+                    }
                 }
             });
         }
