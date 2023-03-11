@@ -10,7 +10,7 @@ use tauri::http::HttpRange;
 use tauri::http::ResponseBuilder;
 use tauri::Manager;
 use tauri::State;
-use tauri_plugin_sql::{Migration, MigrationKind, TauriSql};
+use tauri_plugin_sql::{Migration, MigrationKind};
 
 use crossbeam_channel::unbounded;
 use std::cmp::min;
@@ -126,15 +126,19 @@ fn main() {
             }
             response.mimetype("audio/wav").status(status_code).body(buf)
         })
-        .plugin(TauriSql::default().add_migrations(
-            "sqlite:speeches.db",
-            vec![Migration {
-                version: 1,
-                description: "create speeches table",
-                sql: include_str!("../migrations/001.sql"),
-                kind: MigrationKind::Up,
-            }],
-        ))
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations(
+                    "sqlite:speeches.db",
+                    vec![Migration {
+                        version: 1,
+                        description: "create speeches table",
+                        sql: include_str!("../migrations/001.sql"),
+                        kind: MigrationKind::Up,
+                    }],
+                )
+                .build(),
+        )
         .manage(RecordState(Default::default()))
         .invoke_handler(tauri::generate_handler![
             download_whisper_model_command,
