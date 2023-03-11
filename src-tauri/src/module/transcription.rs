@@ -24,8 +24,8 @@ impl Transcription {
         Self {
             app_handle,
             sqlite: Sqlite::new(),
-            ctx: Transcriber::build(app_handle_clone, transcription_accuracy.to_string()),
-            speaker_language: speaker_language.to_string(),
+            ctx: Transcriber::build(app_handle_clone, transcription_accuracy),
+            speaker_language: speaker_language,
         }
     }
 
