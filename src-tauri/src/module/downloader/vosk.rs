@@ -25,7 +25,7 @@ impl VoskModelDownloader {
 
     #[tokio::main]
     pub async fn download(&self, model_type: ModelTypeVosk) {
-        let model_path: &str = &format!("resources/vosk-model-{}-0.22.zip", model_type.as_str());
+        let model_path: &str = &format!("resources/vosk-model-{}.zip", model_type.as_str());
         let path: &str = &self
             .app_handle
             .path_resolver()
@@ -34,7 +34,7 @@ impl VoskModelDownloader {
             .to_string_lossy()
             .to_string();
         let url: &str = &format!(
-            "https://alphacephei.com/vosk/models/vosk-model-{}-0.22.zip",
+            "https://object-storage.tyo1.conoha.io/v1/nc_b22de95e3cf1434da07499038766e2b7/lycoris/vosk-model-{}.zip",
             model_type.as_str()
         );
         let res = reqwest::get(url).await.unwrap();

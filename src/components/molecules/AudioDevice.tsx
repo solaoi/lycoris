@@ -13,8 +13,8 @@ const AudioDevices = (): JSX.Element => {
     }
 
     return (
-        <select className="select select-bordered w-full max-w-xs focus:outline-none" name="audio-devices" onChange={change} defaultValue="mic-selector">
-            <option disabled value="mic-selector">マイクを選択してください</option>
+        <select className="select select-bordered w-full max-w-xs focus:outline-none text-xs" name="audio-devices" onChange={change} defaultValue="mic-selector">
+            <option disabled value="mic-selector">利用するマイク</option>
             {audioDevices?.map((device, i) => (
                 <option key={"audio-device" + i} value={device.label}>{device.label}</option>
             ))}

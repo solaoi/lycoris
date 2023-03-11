@@ -53,14 +53,25 @@ fn list_devices_command() -> Vec<Device> {
 }
 
 #[tauri::command]
-fn start_command(state: State<'_, RecordState>, window: tauri::Window, device_label: String) {
+fn start_command(
+    state: State<'_, RecordState>,
+    window: tauri::Window,
+    device_label: String,
+    speaker_language: String,
+    transcription_accuracy: String,
+) {
     let mut lock = state.0.lock().unwrap();
     let (stop_record_tx, stop_record_rx) = unbounded();
     *lock = Some(stop_record_tx);
 
     std::thread::spawn(move || {
         let record = module::record::Record::new(window.app_handle().clone());
-        record.start(device_label, stop_record_rx);
+        record.start(
+            device_label,
+            speaker_language,
+            transcription_accuracy,
+            stop_record_rx,
+        );
     });
 }
 

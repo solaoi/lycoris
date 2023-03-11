@@ -1,4 +1,4 @@
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import { modelWhisperDownloadingState } from '../../store/atoms/modelWhisperDownloadingState'
 import { listen } from '@tauri-apps/api/event'
 import { useEffect, useState } from 'react'
@@ -11,7 +11,7 @@ type Props = {
 
 const ModelDownloadWhisperProgress = (props: Props): JSX.Element => {
     const { modelType } = props
-    const [downloadedModels, setDownloadedModel] = useRecoilState(modelWhisperDownloadedState)
+    const setDownloadedModel = useSetRecoilState(modelWhisperDownloadedState)
     const [downloadingModels, setDownloadingModels] = useRecoilState(modelWhisperDownloadingState)
     const [progress, setProgress] = useState<ProgressType>({
         model_type: modelType,
@@ -19,23 +19,18 @@ const ModelDownloadWhisperProgress = (props: Props): JSX.Element => {
         is_progress: false
     })
     useEffect(() => {
-        let unlistenDownloadProgress: any;
-
-        async function f() {
-            unlistenDownloadProgress = await listen('downloadWhisperProgress', event => {
-                const p = event.payload as ProgressType
-                if (p.model_type === modelType) {
-                    setProgress(p)
-                    if (!p.is_progress) {
-                        setDownloadingModels(downloadingModels.filter(m => m !== modelType))
-                        setDownloadedModel([...downloadedModels, modelType])
-                    }
+        const unlisten = listen('downloadWhisperProgress', event => {
+            const p = event.payload as ProgressType
+            if (p.model_type === modelType) {
+                setProgress(p)
+                if (!p.is_progress) {
+                    setDownloadingModels(prev => prev.filter(m => m !== modelType))
+                    setDownloadedModel(prev => [...prev, modelType])
                 }
-            });
-        }
-        f();
+            }
+        })
         return () => {
-            if (unlistenDownloadProgress) unlistenDownloadProgress();
+            unlisten.then(f => f());
         }
     }, [])
     if (downloadingModels.filter(m => m === modelType).length > 0) {
