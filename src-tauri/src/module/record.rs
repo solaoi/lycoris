@@ -40,7 +40,13 @@ impl Record {
         Self { app_handle }
     }
 
-    pub fn start(&self, device_label: String, stop_record_rx: Receiver<()>) {
+    pub fn start(
+        &self,
+        device_label: String,
+        speaker_language: String,
+        transcription_accuracy: String,
+        stop_record_rx: Receiver<()>,
+    ) {
         let host = cpal::default_host();
         let device = host
             .input_devices()
@@ -56,8 +62,11 @@ impl Record {
             eprintln!("an error occurred on stream: {}", err);
         };
 
-        let recognizer =
-            MyRecognizer::build(self.app_handle.clone(), config.sample_rate().0 as f32);
+        let recognizer = MyRecognizer::build(
+            self.app_handle.clone(),
+            speaker_language.clone(),
+            config.sample_rate().0 as f32,
+        );
         let recognizer = Arc::new(Mutex::new(recognizer));
         let recognizer_clone = recognizer.clone();
         let mut last_partial = String::new();
@@ -133,17 +142,21 @@ impl Record {
         let app_handle = self.app_handle.clone();
         thread::spawn(move || loop {
             match notify_decoding_state_is_finalized_rx.try_recv() {
-                Ok(text) => {
+                Ok(mut text) => {
                     let (w, path) = writer.lock().unwrap().take().unwrap();
                     w.finalize().expect("Error finalizing writer");
 
                     let now = Local::now().timestamp();
-                    let content = text.replace(" ", "");
+                    if speaker_language.starts_with("ja")
+                        || speaker_language.starts_with("small-ja")
+                    {
+                        text = text.replace(" ", "");
+                    }
 
                     let speech = Sqlite::new().save_speech(
                         "speech".to_string(),
                         now as u64,
-                        content,
+                        text,
                         path,
                         "vosk".to_string(),
                     );
@@ -165,11 +178,17 @@ impl Record {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
                         let stop_convert_rx_clone = stop_convert_rx.clone();
+                        let transcription_accuracy_clone = transcription_accuracy.clone();
+                        let speaker_language_clone = speaker_language.clone();
                         std::thread::spawn(move || {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
-                            let mut transcription = Transcription::new(app_handle_clone);
+                            let mut transcription = Transcription::new(
+                                app_handle_clone,
+                                transcription_accuracy_clone,
+                                speaker_language_clone,
+                            );
                             transcription.start(stop_convert_rx_clone);
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = false;

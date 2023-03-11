@@ -9,10 +9,10 @@ use vosk::{DecodingState, Model, Recognizer};
 pub struct MyRecognizer {}
 
 impl MyRecognizer {
-    pub fn build(app_handle: AppHandle, sample_rate: f32) -> Recognizer {
+    pub fn build(app_handle: AppHandle, speaker_language: String, sample_rate: f32) -> Recognizer {
         let model_path = app_handle
             .path_resolver()
-            .resolve_resource("resources/vosk-model-ja-0.22")
+            .resolve_resource(format!("resources/vosk-model-{}", speaker_language))
             .unwrap()
             .to_string_lossy()
             .to_string();

@@ -11,15 +11,21 @@ pub struct Transcription {
     app_handle: AppHandle,
     sqlite: Sqlite,
     ctx: WhisperContext,
+    speaker_language: String,
 }
 
 impl Transcription {
-    pub fn new(app_handle: AppHandle) -> Self {
+    pub fn new(
+        app_handle: AppHandle,
+        transcription_accuracy: String,
+        speaker_language: String,
+    ) -> Self {
         let app_handle_clone = app_handle.clone();
         Self {
             app_handle,
             sqlite: Sqlite::new(),
-            ctx: Transcriber::build(app_handle_clone)
+            ctx: Transcriber::build(app_handle_clone, transcription_accuracy.to_string()),
+            speaker_language: speaker_language.to_string(),
         }
     }
 
@@ -82,12 +88,18 @@ impl Transcription {
 
             // let mut ctx = Transcriber::build(self.app_handle.clone());
             // let mut ctx = self.ctx;
-            let result = self.ctx.full(Transcriber::build_params(), &audio_data[..]);
+            let result = self.ctx.full(
+                Transcriber::build_params(self.speaker_language.clone()),
+                &audio_data[..],
+            );
             if result.is_ok() {
                 let num_segments = self.ctx.full_n_segments();
                 let mut converted: Vec<String> = vec!["".to_string()];
                 for i in 0..num_segments {
-                    let segment = self.ctx.full_get_segment_text(i).expect("failed to get segment");
+                    let segment = self
+                        .ctx
+                        .full_get_segment_text(i)
+                        .expect("failed to get segment");
                     let last = converted.last().unwrap().as_str();
                     if segment != last
                         && segment != "(音楽)"
@@ -101,7 +113,8 @@ impl Transcription {
                     }
                 }
 
-                let updated = self.sqlite
+                let updated = self
+                    .sqlite
                     .update_model_vosk_to_whisper(speech.id, converted.join(""));
 
                 let updated = updated.unwrap();
