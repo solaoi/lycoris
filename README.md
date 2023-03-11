@@ -81,6 +81,21 @@ codesign -dvvv ./src-tauri/lib/libvosk.dylib
 codesign -fs 'キーチェーンアクセスの該当鍵（Developer ID Application: ...）' ./src-tauri/lib/libvosk.dylib
 ```
 
+### Self Hosted Runnerの利用
+
+GitHub ActionsのRunnerにApple Siliconが追加されるまで   
+Self Hosted Runnerを利用する。
+
+```
+# Self Hosted Runnerの初期設定
+ mkdir actions-runner && cd actions-runner
+curl -o actions-runner-osx-arm64-2.302.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.302.1/actions-runner-osx-arm64-2.302.1.tar.gz
+tar xzf ./actions-runner-osx-arm64-2.302.1.tar.gz
+./config.sh --url https://github.com/solaoi/lycoris --token XXXXXXXXXXXXXXXXXXXX
+# Self Hosted Runnerの実行
+./run.sh
+```
+
 ### 開発者モードで起動
 
 ```

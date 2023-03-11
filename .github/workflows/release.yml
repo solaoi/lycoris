@@ -7,8 +7,11 @@ on:
 
 jobs:
   release:
-    runs-on: macos-latest
-    timeout-minutes: 90
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, self-hosted] # self-hosted means macos-m2-local
+    timeout-minutes: 60
 
     steps:
     - uses: actions/checkout@v2
@@ -44,7 +47,8 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - uses: tauri-apps/tauri-action@dev
+    - if: matrix.os == 'macos-latest'
+      uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
@@ -60,3 +64,21 @@ jobs:
         releaseDraft: true
         prerelease: false
         args: --target x86_64-apple-darwin
+
+    - if: matrix.os == 'self-hosted'
+      uses: tauri-apps/tauri-action@dev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ENABLE_CODE_SIGNING: ${{ secrets.APPLE_CERTIFICATE }}
+        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      with:
+        tagName: lycoris-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+        releaseName: "Lycoris v__VERSION__"
+        releaseBody: "See the assets to download this version and install."
+        releaseDraft: true
+        prerelease: false
+        args: --target aarch64-apple-darwin
