@@ -15,7 +15,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const mapModel = (model: string) => {
         switch (model) {
             case "small":
-                return "追っかけ：低";
+                return "追っかけ：小";
             case "medium":
                 return "追っかけ：中";
             case "large":
@@ -30,7 +30,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             <option disabled value="accuracy-selector">追っかけ高精度</option>
             <option value="off">追っかけ：オフ</option>
             {downloadedModels?.map((model, i) => (
-                <option key={"transcription-accuracy" + i} value={model}>{mapModel(model)}</option>
+                <option key={"transcription-accuracy" + i} value={model} selected={model === transcriptionAccuracy}>{mapModel(model)}</option>
             ))}
         </select>
     )

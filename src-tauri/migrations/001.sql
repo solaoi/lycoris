@@ -6,6 +6,13 @@ CREATE TABLE speeches (
     wav TEXT,
     model TEXT
 );
+CREATE TABLE settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    setting_name TEXT,
+    setting_status TEXT
+);
+INSERT INTO settings(setting_name, setting_status) VALUES("speakerLanguage", NULL);
+INSERT INTO settings(setting_name, setting_status) VALUES("transcriptionAccuracy", "off");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,

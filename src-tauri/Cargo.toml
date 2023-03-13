@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/solaoi/lycoris"
 default-run = "lycoris"
 edition = "2021"
-rust-version = "1.67"
+rust-version = "1.68"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]

@@ -24,7 +24,7 @@ const sqliteEffect: AtomEffect<SpeechHistoryType[]> = ({setSelf, onSet, trigger}
       if (old.length !== newValue.length) {
         const current = newValue[newValue.length - 1];
         if (current.speech_type === "memo"){
-          db.saveSpeech(current);
+          await db.saveSpeech(current);
         }
       }
     }

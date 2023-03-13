@@ -34,6 +34,18 @@ export default class DB {
     return await this.db.select('SELECT model_name FROM models WHERE is_downloaded = 1 AND model_type = $1', [model_type])
   }
 
+  public async loadSetting(setting_name: string): Promise<{setting_status: string}> {
+    const settings:{setting_status: string}[] = await this.db.select('SELECT setting_status FROM settings WHERE setting_name = $1', [setting_name])
+    return settings[0];
+  }
+
+  public async updateSetting(setting_name: string, setting_status: string|null) {
+    await this.db.execute(
+      'UPDATE settings SET setting_status = $2 WHERE setting_name = $1',
+      [setting_name, setting_status]
+    );
+  }
+
   public async saveSpeech(speech: SpeechHistoryType): Promise<SpeechHistoryType> {
     const { lastInsertId } = await this.db.execute(
       'INSERT INTO speeches(speech_type, unix_time, content, wav, model) VALUES($1, $2, $3, $4, $5)',

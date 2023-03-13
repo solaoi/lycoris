@@ -31,7 +31,7 @@ const SpeakerLanguage = (): JSX.Element => {
         <select className="select select-bordered w-full max-w-xs focus:outline-none text-xs" name="speaker-languages" onChange={change} defaultValue={speakerLanguage ?? "speaker-selector"}>
             <option disabled value="speaker-selector">話し手の言語</option>
             {downloadedModels?.map((model, i) => (
-                <option key={"speaker-language" + i} value={model}>{mapModel(model)}</option>
+                <option key={"speaker-language" + i} value={model} selected={model === speakerLanguage}>{mapModel(model)}</option>
             ))}
         </select>
     )
