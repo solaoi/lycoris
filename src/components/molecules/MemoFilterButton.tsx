@@ -8,7 +8,7 @@ const MemoFilterButton = (): JSX.Element => {
     }
 
     return (
-        <button className={`badge badge-md gap-2 text-white border-none ${filterd ? "bg-orange-900" : "bg-orange-400"}`} onClick={click}>
+        <button className={`select-none badge badge-md gap-2 text-white border-none ${filterd ? "bg-orange-900" : "bg-orange-400"}`} onClick={click}>
             メモのみ表示
         </button>
     )

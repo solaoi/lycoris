@@ -1,8 +1,10 @@
 export type SpeechHistoryType = {
     id? : number
     speech_type: "speech" | "memo"
-    unix_time: number
+    created_at_unixtime: number
     content: string
     wav: string
-    model: "manual" | "vosk" | "whisper-tiny" | "whisper-base" |  "whisper-small" |  "whisper-medium"  
+    model: string
+    model_description: string
+    note_id: number
 }

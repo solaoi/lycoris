@@ -1,11 +1,14 @@
 import { invoke } from '@tauri-apps/api/tauri'
-import { useRecoilState } from 'recoil'
+import { useSetRecoilState } from 'recoil'
+import { recordingNoteState } from '../../store/atoms/recordingNoteState'
 import { recordState } from '../../store/atoms/recordState'
 
 const RecordStopButton = (): JSX.Element => {
-    const [_, setRecording] = useRecoilState(recordState)
+    const setRecording = useSetRecoilState(recordState)
+    const setRecordingNote = useSetRecoilState(recordingNoteState)
     const click = () => {
         setRecording(false)
+        setRecordingNote(null)
         invoke('stop_command')
     }
 

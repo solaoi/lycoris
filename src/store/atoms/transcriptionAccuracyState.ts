@@ -5,7 +5,11 @@ const sqliteEffect: AtomEffect<string|null> = ({setSelf, onSet, trigger}) => {
   const loadPersisted = async () => {
     const db = (await DB.getInstance())
     const savedValue =  await db.loadSetting("transcriptionAccuracy");
-    setSelf(savedValue.setting_status);
+    if (savedValue === null) {
+      setSelf(null);
+    }else{
+      setSelf(savedValue.setting_status);
+    }
   };
 
   if (trigger === 'get') {

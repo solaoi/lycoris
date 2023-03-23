@@ -12,6 +12,7 @@ pub struct Transcription {
     sqlite: Sqlite,
     ctx: WhisperContext,
     speaker_language: String,
+    note_id: u64,
 }
 
 impl Transcription {
@@ -19,13 +20,15 @@ impl Transcription {
         app_handle: AppHandle,
         transcription_accuracy: String,
         speaker_language: String,
+        note_id: u64,
     ) -> Self {
         let app_handle_clone = app_handle.clone();
         Self {
             app_handle,
             sqlite: Sqlite::new(),
             ctx: Transcriber::build(app_handle_clone, transcription_accuracy),
-            speaker_language: speaker_language,
+            speaker_language,
+            note_id,
         }
     }
 
@@ -38,7 +41,7 @@ impl Transcription {
     }
 
     fn convert(&mut self) -> Result<(), rusqlite::Error> {
-        let vosk_speech = self.sqlite.select_vosk();
+        let vosk_speech = self.sqlite.select_vosk(self.note_id);
         return vosk_speech.and_then(|speech| {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 

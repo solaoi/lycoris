@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        transform-origin: 0 -1.25rem;
+        transform: scale(1, 0);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        transform-origin: 0 1.25rem;
+        transform: scale(1, 0);
+        opacity: 0;
+    }
+
+    to {
+        transform-origin: 0 1.25rem;
+        transform: scale(1, 1);
+        opacity: 1;
+    }
+}

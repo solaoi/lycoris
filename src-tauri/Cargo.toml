@@ -38,6 +38,9 @@ urlencoding = "2.1.0"
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "dev"
 features = ["sqlite"]
+[dependencies.tauri-plugin-window-state]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "dev"
 
 [features]
 # by default Tauri runs in production mode
