@@ -28,12 +28,12 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                         </div>
                     )
                 }
-                let date = dayjs.unix(h.unix_time).format('H:mm')
-                if (i > 0 && date === dayjs.unix(histories[i - 1].unix_time).format('H:mm')) {
+                let date = dayjs.unix(h.created_at_unixtime).format('H:mm')
+                if (i > 0 && date === dayjs.unix(histories[i - 1].created_at_unixtime).format('H:mm')) {
                     date = ""
                 }
                 return (
-                    <Speech key={"history_" + i} model={h.model} date={date} content={h.content} wav={h.wav} />
+                    <Speech key={"history_" + i} model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />
                 )
             }
             )}

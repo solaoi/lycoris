@@ -45,6 +45,7 @@ impl Record {
         device_label: String,
         speaker_language: String,
         transcription_accuracy: String,
+        note_id: u64,
         stop_record_rx: Receiver<()>,
     ) {
         let host = cpal::default_host();
@@ -159,6 +160,8 @@ impl Record {
                         text,
                         path,
                         "vosk".to_string(),
+                        speaker_language.clone(),
+                        note_id,
                     );
 
                     app_handle
@@ -188,6 +191,7 @@ impl Record {
                                 app_handle_clone,
                                 transcription_accuracy_clone,
                                 speaker_language_clone,
+                                note_id
                             );
                             transcription.start(stop_convert_rx_clone);
                             let mut lock = is_converting_clone.lock().unwrap();

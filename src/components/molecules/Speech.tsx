@@ -5,6 +5,7 @@ import { useGetElementProperty } from "../../hooks/useGetElementProperty";
 
 type SpeechProps = {
     model: string
+    model_description: string
     date: string
     content: string
     wav: string
@@ -34,8 +35,8 @@ const Speech = (props: SpeechProps): JSX.Element => {
 
     return (
         <div onMouseLeave={leave} >
-            {/* (model === "vosk" ? "  text-gray-400" : "") */}
             <div className={"flex mb-1 cursor-pointer" + (isHover && " bg-gray-400 text-white rounded")}
+                onClick={() => setLazyHover(true)}
                 onMouseEnter={() => {
                     setHover(true);
                     if (window.innerHeight - bottom > 100) {

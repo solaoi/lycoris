@@ -31,6 +31,14 @@ struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
 const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
 
 #[tauri::command]
+fn delete_note_command(window: tauri::Window, note_id: u64) {
+    std::thread::spawn(move || {
+        let deleter = module::deleter::NoteDeleter::new(window.app_handle().clone());
+        deleter.delete(note_id)
+    });
+}
+
+#[tauri::command]
 fn download_whisper_model_command(window: tauri::Window, model: String) {
     std::thread::spawn(move || {
         let dl =
@@ -59,6 +67,7 @@ fn start_command(
     device_label: String,
     speaker_language: String,
     transcription_accuracy: String,
+    note_id: u64,
 ) {
     let mut lock = state.0.lock().unwrap();
     let (stop_record_tx, stop_record_rx) = unbounded();
@@ -70,6 +79,7 @@ fn start_command(
             device_label,
             speaker_language,
             transcription_accuracy,
+            note_id,
             stop_record_rx,
         );
     });
@@ -126,6 +136,7 @@ fn main() {
             }
             response.mimetype("audio/wav").status(status_code).body(buf)
         })
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations(
@@ -141,6 +152,7 @@ fn main() {
         )
         .manage(RecordState(Default::default()))
         .invoke_handler(tauri::generate_handler![
+            delete_note_command,
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,

@@ -11,10 +11,12 @@ pub struct Sqlite {
 pub struct Speech {
     pub id: u16,
     pub speech_type: String,
-    pub unix_time: u64,
+    pub created_at_unixtime: u64,
     pub content: String,
     pub wav: String,
     pub model: String,
+    pub model_description: String,
+    pub note_id: u64,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -29,21 +31,44 @@ impl Sqlite {
         let db_path = data_dir.join(BUNDLE_IDENTIFIER).join("speeches.db");
         let conn = Connection::open(&db_path).unwrap();
         println!("{}", conn.is_autocommit());
+        conn.pragma_update(None, "foreign_keys", true).unwrap();
         Self { conn }
     }
 
-    pub fn select_vosk(&self) -> Result<Speech, rusqlite::Error> {
+    pub fn select_all_speeches_by(&self, note_id: u64) -> Result<Vec<Speech>, rusqlite::Error> {
+        let mut stmt = self.conn.prepare("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE note_id = ?1").unwrap();
+        let results = stmt
+            .query_map(params![note_id], |row| {
+                Ok(Speech {
+                    id: row.get_unwrap(0),
+                    speech_type: row.get_unwrap(1),
+                    created_at_unixtime: row.get_unwrap(2),
+                    content: row.get_unwrap(3),
+                    wav: row.get_unwrap(4),
+                    model: row.get_unwrap(5),
+                    model_description: row.get_unwrap(6),
+                    note_id: row.get_unwrap(7),
+                })
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn select_vosk(&self, note_id: u64) -> Result<Speech, rusqlite::Error> {
         return self.conn
-            .query_row("SELECT id,speech_type,unix_time,content,wav,model FROM speeches WHERE model = \"vosk\" ORDER BY unix_time ASC LIMIT 1", 
-            [],
+            .query_row("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE model = \"vosk\" AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
             |row| {
                 Ok(Speech {
                     id: row.get_unwrap(0),
                     speech_type: row.get_unwrap(1),
-                    unix_time: row.get_unwrap(2),
+                    created_at_unixtime: row.get_unwrap(2),
                     content: row.get_unwrap(3),
                     wav: row.get_unwrap(4),
                     model: row.get_unwrap(5),
+                    model_description: row.get_unwrap(6),
+                    note_id: row.get_unwrap(7)
                 })
             });
     }
@@ -55,7 +80,7 @@ impl Sqlite {
     ) -> Result<Updated, rusqlite::Error> {
         if content == "" {
             match self.conn.execute(
-                "UPDATE speeches SET model = 'whisper-small' WHERE id = ?1",
+                "UPDATE speeches SET model = 'whisper' WHERE id = ?1",
                 params![id],
             ) {
                 Ok(_) => Ok(Updated { id, content }),
@@ -63,7 +88,7 @@ impl Sqlite {
             }
         } else {
             match self.conn.execute(
-                "UPDATE speeches SET model = 'whisper-small', content = ?1 WHERE id = ?2",
+                "UPDATE speeches SET model = 'whisper', content = ?1 WHERE id = ?2",
                 params![content, id],
             ) {
                 Ok(_) => Ok(Updated { id, content }),
@@ -86,17 +111,29 @@ impl Sqlite {
     pub fn save_speech(
         &self,
         speech_type: String,
-        unix_time: u64,
+        created_at_unixtime: u64,
         content: String,
         wav: String,
         model: String,
+        model_description: String,
+        note_id: u64,
     ) -> Result<Speech, rusqlite::Error> {
         match self.conn.execute(
-            "INSERT INTO speeches (speech_type, unix_time, content, wav, model) VALUES (?1, ?2, ?3, ?4, ?5)",
-            params![speech_type, unix_time, content, wav, model],
+            "INSERT INTO speeches (speech_type, created_at_unixtime, content, wav, model, model_description, note_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![speech_type, created_at_unixtime, content, wav, model, model_description, note_id],
         ) {
-            Ok(_) => Ok(Speech { id: self.conn.last_insert_rowid() as u16, speech_type, unix_time, content, wav, model }),
+            Ok(_) => Ok(Speech { id: self.conn.last_insert_rowid() as u16, speech_type, created_at_unixtime, content, wav, model, model_description, note_id }),
             Err(err) => Err(err),
         }
+    }
+
+    pub fn delete_note(&self, note_id: u64) -> Result<usize, rusqlite::Error> {
+        self.conn
+            .execute("DELETE FROM notes WHERE id = ?1", params![note_id])
+    }
+
+    pub fn delete_speeches_by(&self, note_id: u64) -> Result<usize, rusqlite::Error> {
+        self.conn
+            .execute("DELETE FROM speeches WHERE note_id = ?1", params![note_id])
     }
 }

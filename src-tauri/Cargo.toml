@@ -1,13 +1,13 @@
 [package]
 name = "lycoris"
-version = "0.4.0"
+version = "0.5.0"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
 repository = "https://github.com/solaoi/lycoris"
 default-run = "lycoris"
 edition = "2021"
-rust-version = "1.67"
+rust-version = "1.68"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
@@ -38,6 +38,9 @@ urlencoding = "2.1.0"
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "dev"
 features = ["sqlite"]
+[dependencies.tauri-plugin-window-state]
+git = "https://github.com/tauri-apps/plugins-workspace"
+branch = "dev"
 
 [features]
 # by default Tauri runs in production mode

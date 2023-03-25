@@ -1,10 +1,12 @@
 import { useRef, KeyboardEvent } from 'react'
-import { useSetRecoilState } from 'recoil'
-import { speechHistoryAtom } from '../../store/atoms/speechHistoryAtom'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { selectedNoteState } from '../../store/atoms/selectedNoteState'
+import { speechHistoryState } from '../../store/atoms/speechHistoryState'
 
 const NoteFooter = (): JSX.Element => {
     const inputEl = useRef<HTMLInputElement>(null)
-    const setHistories = useSetRecoilState(speechHistoryAtom)
+    const selectedNote = useRecoilValue(selectedNoteState)
+    const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
     const enter = async (e: KeyboardEvent<HTMLInputElement>) => {
         if (!(e.key === "Enter" && e.keyCode === 13)) {
             return
@@ -12,10 +14,12 @@ const NoteFooter = (): JSX.Element => {
         setHistories(prev =>
             [...prev, {
                 speech_type: "memo",
-                unix_time: new Date().getTime(),
+                created_at_unixtime: new Date().getTime(),
                 content: inputEl.current?.value || "",
                 wav: "",
-                model: "manual"
+                model: "manual",
+                model_description: "manual",
+                note_id: selectedNote!.note_id
             }]
         )
 

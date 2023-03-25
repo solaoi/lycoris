@@ -1,44 +1,73 @@
-import { useSetRecoilState } from "recoil"
-import { featureState } from "../store/atoms/featureState"
+import { invoke } from "@tauri-apps/api"
+import { listen } from "@tauri-apps/api/event"
+import { useEffect, useState } from "react"
+import { useRecoilState } from "recoil"
+import { notesState } from "../store/atoms/notesState"
+import { selectedNoteState } from "../store/atoms/selectedNoteState"
+import { DeleteCompletionType } from "../type/DeleteCompletion.type"
+import { SideMenuColumn } from "./organisms/SideMenuColumn"
 
 const SideMenu = (): JSX.Element => {
-    const setFeature = useSetRecoilState(featureState)
-
+    const [notes, setNotes] = useRecoilState(notesState);
+    const [isAdded, setAdded] = useState(false);
+    const [selectedNote, setSelectedNote] = useRecoilState(selectedNoteState);
+    useEffect(() => {
+        if (!notes[notes.length - 1]?.id) {
+            setAdded(true)
+        }
+    }, [notes]);
+    useEffect(() => {
+        const unlisten = listen('deleteCompletion', event => {
+            const d = event.payload as DeleteCompletionType
+            if (d.is_finished) {
+                setNotes(prev => prev.filter(note => note.id !== d.note_id))
+                if (selectedNote?.note_id === d.note_id) {
+                    setSelectedNote(null);
+                }
+            }
+        })
+        return () => {
+            unlisten.then(f => f());
+        }
+    }, [selectedNote])
+    const deleteAction = (note_id: number) => (e: any) => {
+        setAdded(false);
+        invoke('delete_note_command', { noteId: note_id });
+    }
     return (
         <div className="flex justify-between border-r" style={{ width: "320px", flexFlow: "column", height: `calc(100vh - 64px)` }}>
             <div className="flex" style={{ flexFlow: "column" }}>
                 <div className="bg-white flex items-center justify-center select-none text-xl" style={{ height: "64px" }}>
                     <input type="text" placeholder="ノートを検索..." className="input input-bordered focus:outline-none" />
-                    <button type="button" className="bg-base-200 hover:bg-base-300 focus:outline-none rounded-lg px-5 m-1" style={{ height: "48px" }}>
+                    <button type="button" className="bg-base-200 hover:bg-base-300 focus:outline-none rounded-lg px-5 m-1"
+                        style={{ height: "48px" }}
+                        onClick={() => {
+                            setNotes(prev => {
+                                const today = new Date();
+                                const note_title = today
+                                    .toLocaleDateString("ja-JP", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit"
+                                    })
+                                    .split("/")
+                                    .join("-") + " ";
+                                return [...prev, { note_title }]
+                            });
+                        }}
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
                     </button>
                 </div>
-                <div className="overflow-auto" style={{ height: `calc(100vh - 168px)` }}>
-                    <div className="bg-white flex cursor-pointer items-center select-none border-t p-5 hover:bg-gray-100" onClick={() => setFeature("note")}>
-                        <p>ノート1</p>
-                    </div>
-                    <div className="bg-white flex cursor-pointer items-center select-none border-t p-5 hover:bg-gray-100" onClick={() => setFeature("note")}>
-                        <p>ノート2</p>
-                    </div>
-                    <div className="bg-white flex cursor-pointer items-center select-none border-t p-5 hover:bg-gray-100" onClick={() => setFeature("note")}>
-                        <p>ノート3</p>
-                    </div>
-                    <div className="bg-white flex cursor-pointer items-center select-none border-t p-5 hover:bg-gray-100" onClick={() => setFeature("note")}>
-                        <p>ノート4</p>
-                    </div>
-                    <div className="bg-white flex cursor-pointer items-center select-none border-t p-5 hover:bg-gray-100" onClick={() => setFeature("note")}>
-                        <p>ノート5</p>
-                    </div>
+                <div className="overflow-auto" style={{ height: `calc(100vh - 128px)` }} >
+                    {notes.map((note, i) => {
+                        return (
+                            <SideMenuColumn key={`note_${note.id}`} note={note} deleteAction={deleteAction(note.id!)} isAdded={i === 0 ? isAdded : false} setAdded={setAdded} />
+                        )
+                    })}
                 </div>
-            </div>
-            <div className="bg-base-200 flex cursor-pointer items-center select-none text-xl p-5 hover:bg-base-300" style={{ height: "32px" }} onClick={() => setFeature("settings")}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <p>設定</p>
             </div>
         </div>
     )
