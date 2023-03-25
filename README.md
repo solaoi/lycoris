@@ -4,11 +4,9 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/solaoi/lycoris)](https://github.com/solaoi/lycoris/releases)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/solaoi?color=db61a2)](https://github.com/sponsors/solaoi)
 
-外部データ通信無しで、リアルタイム音声認識で文字起こしを行う、デスクトップアプリケーションを作りました。
+外部データ通信無しで、リアルタイム音声認識で文字起こしを行う音声ノートアプリケーションです。
 
-文字起こしと同じタイムライン上で、メモを残すこともできます。
-
-<img width="802" alt="スクリーンショット 2022-09-17 18 31 40" src="https://user-images.githubusercontent.com/46414076/190865611-0e107efd-3112-4229-bab7-ea7e904718ee.png">
+<img width="800" alt="スクリーンショット 2023-03-26 0 41 18" src="https://user-images.githubusercontent.com/46414076/227727380-1a98f141-a690-4424-926d-4afcf0ee2d04.png">
 
 ## 対応環境
 
