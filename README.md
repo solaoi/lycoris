@@ -6,7 +6,11 @@
 
 外部データ通信無しで、リアルタイム音声認識で文字起こしを行う音声ノートアプリケーションです。
 
-<img width="800" alt="スクリーンショット 2023-03-26 0 41 18" src="https://user-images.githubusercontent.com/46414076/227727380-1a98f141-a690-4424-926d-4afcf0ee2d04.png">
+<div align="center">
+  <a href="https://github.com/solaoi/lycoris">
+    <img width="600" alt="lycoris" src="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png">
+  </a>
+</div>
 
 ## 対応環境
 
