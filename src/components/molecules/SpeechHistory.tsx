@@ -3,6 +3,8 @@ import dayjs from '../../lib/dayjs'
 import { memoFilterState } from '../../store/atoms/memoFilterState'
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
 import { Speech } from './Speech'
+import { markdownToSimpleHtml } from 'zenn-markdown-html';
+import 'zenn-content-css';
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -19,12 +21,14 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
             ).map((h, i) => {
                 if (h.speech_type === "memo") {
                     return (
-                        <div className='flex mb-1 cursor-pointer hover:rounded hover:bg-gray-400 hover:text-white' key={"memo_" + i}>
+                        <div className='flex items-center mb-1 cursor-pointer hover:rounded hover:bg-gray-400 hover:text-white' key={"memo_" + i}>
                             <div className="w-16 pl-2 flex-none" />
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            <p className="ml-2 pr-2">{h.content}</p>
+                            <div className='pr-[10px]'>
+                                <svg width="8" height="8" viewBox="0, 0, 8, 8" xmlns="http://www.w3.org/2000/svg">
+                                    <rect width="8" height="8" opacity="0.6" />
+                                </svg>
+                            </div>
+                            <div className="pr-2 znc" dangerouslySetInnerHTML={{ __html: markdownToSimpleHtml(h.content) }} />
                         </div>
                     )
                 }
@@ -32,9 +36,14 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                 if (i > 0 && date === dayjs.unix(histories[i - 1].created_at_unixtime).format('H:mm')) {
                     date = ""
                 }
-                return (
+                let cal = dayjs.unix(h.created_at_unixtime).format('YYYY-M-D')
+                if (i > 0 && cal === dayjs.unix(histories[i - 1].created_at_unixtime).format('YYYY-M-D')) {
+                    cal = ""
+                }
+                return (<>
+                    {cal && <div className={(i > 0 ? 'mt-6 ' : '') + 'mb-2'}>[{cal}]</div>}
                     <Speech key={"history_" + i} model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />
-                )
+                </>)
             }
             )}
         </div>

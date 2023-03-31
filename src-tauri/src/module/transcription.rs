@@ -7,6 +7,9 @@ use samplerate_rs::{convert, ConverterType};
 use tauri::{AppHandle, Manager};
 use whisper_rs::WhisperContext;
 
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct TraceCompletion {}
+
 pub struct Transcription {
     app_handle: AppHandle,
     sqlite: Sqlite,
@@ -32,9 +35,40 @@ impl Transcription {
         }
     }
 
-    pub fn start(&mut self, stop_convert_rx: Receiver<()>) {
+    pub fn start(&mut self, stop_convert_rx: Receiver<()>, is_continuous: bool) {
         while Self::convert(self).is_ok() {
+            if is_continuous {
+                let vosk_speech = self.sqlite.select_vosk(self.note_id);
+                if vosk_speech.is_err() {
+                    self.app_handle
+                        .clone()
+                        .emit_all(
+                            "traceCompletion",
+                            TraceCompletion {},
+                        )
+                        .unwrap();
+                    break;
+                }
+            }
             if stop_convert_rx.try_recv().is_ok() {
+                let vosk_speech = self.sqlite.select_vosk(self.note_id);
+                if vosk_speech.is_err() {
+                    self.app_handle
+                        .clone()
+                        .emit_all(
+                            "traceCompletion",
+                            TraceCompletion {},
+                        )
+                        .unwrap();
+                } else {
+                    self.app_handle
+                        .clone()
+                        .emit_all(
+                            "traceUnCompletion",
+                            TraceCompletion {},
+                        )
+                        .unwrap();
+                }
                 break;
             }
         }
@@ -103,17 +137,7 @@ impl Transcription {
                         .ctx
                         .full_get_segment_text(i)
                         .expect("failed to get segment");
-                    let last = converted.last().unwrap().as_str();
-                    if segment != last
-                        && segment != "(音楽)"
-                        && segment != "[音楽]"
-                        && segment != "(音声)"
-                        && segment != "(小声)"
-                        && segment != "(EN)"
-                        && segment != "(笑)"
-                    {
-                        converted.push(segment.to_string());
-                    }
+                    converted.push(segment.to_string());
                 }
 
                 let updated = self

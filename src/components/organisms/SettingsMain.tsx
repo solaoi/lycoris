@@ -90,7 +90,7 @@ const SettingsMain = (): JSX.Element => {
                     </div>
                 </div>
             </div>
-            <div className="px-5">
+            {/* <div className="px-5">
                 <h2 className="text-xl mt-5 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
@@ -100,7 +100,7 @@ const SettingsMain = (): JSX.Element => {
                 <div className="px-5 mt-2">
                     <div className="mb-5">
                         <p>OpenAI社のAPIを利用することで、</p>
-                        <p>高速な追っかけ文字起こし・翻訳や、要約機能及びカスタムメニューが有効となります。</p>
+                        <p>高速な追っかけ文字起こしが選択可能となります。</p>
                         <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
                     </div>
                     <div className="flex items-center">
@@ -108,7 +108,7 @@ const SettingsMain = (): JSX.Element => {
                         <input type="text" placeholder="xx-XXXXXXXXXXXXXXXXXXXXXXXX" className="input input-bordered focus:outline-none flex-1" />
                     </div>
                 </div>
-            </div>
+            </div> */}
         </div>
     )
 }

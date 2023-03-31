@@ -7,5 +7,5 @@ mod recognizer;
 pub mod record;
 mod sqlite;
 mod transcriber;
-mod transcription;
+pub mod transcription;
 mod writer;

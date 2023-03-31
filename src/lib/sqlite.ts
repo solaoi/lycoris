@@ -32,7 +32,7 @@ export default class DB {
   }
 
   public async selectSpeechesBy(note_id: number): Promise<SpeechHistoryType[]> {
-    return await this.db.select('SELECT * FROM speeches WHERE note_id = $1 ORDER BY created_at_unixtime DESC', [note_id])
+    return await this.db.select('SELECT * FROM speeches WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
   }
 
   public async loadDownloadedModels(model_type: string): Promise<{model_name: string}[]> {

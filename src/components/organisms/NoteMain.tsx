@@ -14,16 +14,22 @@ import { transcriptionAccuracyState } from '../../store/atoms/transcriptionAccur
 import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 import { notesState } from '../../store/atoms/notesState'
 import { recordingNoteState } from '../../store/atoms/recordingNoteState'
+import { TraceStartButton } from '../molecules/TraceStartButton'
+import { TraceStopButton } from '../molecules/TraceStopButton'
+import { tracingState } from '../../store/atoms/tracingState'
+import { tracingNoteState } from '../../store/atoms/tracingNoteState'
 
 const NoteMain = (): JSX.Element => {
     const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState)
     const [partialText, setPartialText] = useState<string | null>(null)
     const [selectedNote, setSelectedNote] = useRecoilState(selectedNoteState)
     const recordingNote = useRecoilValue(recordingNoteState)
+    const tracingNote = useRecoilValue(tracingNoteState)
     const setNotes = useSetRecoilState(notesState)
     const [histories, setHistories] = useRecoilState(speechHistoryState(selectedNote!.note_id))
     const isRecording = useRecoilValue(recordState);
     const [editTitle, setEditTitle] = useState(false);
+    const isTracing = useRecoilValue(tracingState);
     const bottomRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
@@ -73,14 +79,14 @@ const NoteMain = (): JSX.Element => {
             unlistenFinalText.then(f => f());
             unlistenFinalTextConverted.then(f => f());
         }
-    }, [recordingNote])
+    }, [recordingNote, isTracing])
 
     return (<>
         <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }}>
-            <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer"
+            <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
                 onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                 {editTitle ?
-                    <input className='w-5/6 bg-base-200 rounded-lg p-1 focus:outline-none' autoFocus value={selectedNote!.note_title}
+                    <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title}
                         onKeyDown={e => {
                             if (e.key === "Enter" && e.keyCode === 13) {
                                 setEditTitle(false)
@@ -98,19 +104,25 @@ const NoteMain = (): JSX.Element => {
                                 }
                             }))
                         }} />
-                    : selectedNote!.note_title}
+                    : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
             </h1>
+            <div className="flex-none mr-2">
+                {isTracing && tracingNote === selectedNote?.note_id ?
+                    <TraceStopButton /> :
+                    <TraceStartButton />}
+            </div>
             <div className="flex-none">
                 {(isRecording && recordingNote === selectedNote?.note_id) ? <RecordStopButton /> : <RecordStartButton />}
             </div>
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
         </div>
         <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center border-t" style={{ height: "32px" }}>
+            フィルター：
             <MemoFilterButton />
         </div>
         <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }}>
             <SpeechHistory histories={histories} />
-            <div className="ml-16 pb-1 mb-[72px] text-gray-400" ref={bottomRef} >{partialText}</div>
+            <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >{partialText}</div>
             <NoteFooter />
         </div>
     </>)
