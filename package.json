@@ -22,7 +22,9 @@
     "react-dom": "^18.2.0",
     "react-h5-audio-player": "^3.8.6",
     "recoil": "^0.7.7",
-    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release"
+    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release",
+    "zenn-content-css": "^0.1.141",
+    "zenn-markdown-html": "^0.1.141"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.3",

@@ -8,7 +8,7 @@ function App() {
   return (
     <RecoilRoot>
       <Header />
-      <div style={{display: "flex"}}>
+      <div style={{ display: "flex" }}>
         <SideMenu />
         <Main />
       </div>

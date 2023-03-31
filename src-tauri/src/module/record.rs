@@ -139,6 +139,7 @@ impl Record {
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
         let is_converting = Arc::new(Mutex::new(false));
         let (stop_convert_tx, stop_convert_rx) = unbounded();
+        let is_no_transcription = transcription_accuracy == "off";
 
         let app_handle = self.app_handle.clone();
         thread::spawn(move || loop {
@@ -177,7 +178,7 @@ impl Record {
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
 
-                    if !*is_converting.lock().unwrap() {
+                    if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
                         let stop_convert_rx_clone = stop_convert_rx.clone();
@@ -191,9 +192,9 @@ impl Record {
                                 app_handle_clone,
                                 transcription_accuracy_clone,
                                 speaker_language_clone,
-                                note_id
+                                note_id,
                             );
-                            transcription.start(stop_convert_rx_clone);
+                            transcription.start(stop_convert_rx_clone, false);
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = false;
                             drop(lock);
@@ -214,6 +215,10 @@ impl Record {
             .expect("failed to receive the message");
         drop(stream);
         stop_writer_tx.send(()).unwrap();
-        stop_convert_tx.send(()).unwrap();
+        if !is_no_transcription {
+            stop_convert_tx.send(()).unwrap();
+        } else {
+            drop(stop_convert_tx)
+        }
     }
 }

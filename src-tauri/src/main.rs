@@ -6,6 +6,7 @@
 use crossbeam_channel::Sender;
 use module::model_type_vosk::ModelTypeVosk;
 use module::model_type_whisper::ModelTypeWhisper;
+use module::transcription::TraceCompletion;
 use tauri::http::HttpRange;
 use tauri::http::ResponseBuilder;
 use tauri::Manager;
@@ -93,6 +94,45 @@ fn stop_command(state: State<'_, RecordState>) {
     }
 }
 
+#[tauri::command]
+fn start_trace_command(
+    state: State<'_, RecordState>,
+    window: tauri::Window,
+    speaker_language: String,
+    transcription_accuracy: String,
+    note_id: u64,
+) {
+    let mut lock = state.0.lock().unwrap();
+    let (stop_convert_tx, stop_convert_rx) = unbounded();
+    *lock = Some(stop_convert_tx);
+
+    std::thread::spawn(move || {
+        let mut transcription = module::transcription::Transcription::new(
+            window.app_handle(),
+            transcription_accuracy,
+            speaker_language,
+            note_id,
+        );
+        transcription.start(stop_convert_rx, true);
+    });
+}
+
+#[tauri::command]
+fn stop_trace_command(state: State<'_, RecordState>, window: tauri::Window) {
+    let mut lock = state.0.lock().unwrap();
+    if let Some(stop_convert_tx) = lock.take() {
+        stop_convert_tx.send(()).unwrap_or_else(|_| {
+            window
+                .app_handle()
+                .emit_all(
+                    "traceCompletion",
+                    TraceCompletion {},
+                )
+                .unwrap();
+        })
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
@@ -158,6 +198,8 @@ fn main() {
             list_devices_command,
             start_command,
             stop_command,
+            start_trace_command,
+            stop_trace_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
