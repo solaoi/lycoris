@@ -17,7 +17,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const mapModel = (model: string) => {
         switch (model) {
             case "small":
-                return "文字起こし：小";
+                return "文字起こし：低";
             case "medium":
                 return "文字起こし：中";
             case "large":

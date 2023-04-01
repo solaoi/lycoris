@@ -1,9 +1,13 @@
+import { useRecoilValue } from "recoil"
+import { settingLanguageState } from "../../store/atoms/settingLanguageState"
 import { ModelDownloadVoskButton } from "../molecules/ModelDownloadVoskButton"
 import { ModelDownloadVoskProgress } from "../molecules/ModelDownloadVoskProgress"
 import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperButton"
 import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperProgress"
+import { SettingLanguages } from "../molecules/SettingLanguages"
 
 const SettingsMain = (): JSX.Element => {
+    const settingLanguage = useRecoilValue(settingLanguageState);
     return (
         <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 64px)` }}>
             <h1 className="text-3xl flex items-center">
@@ -25,34 +29,41 @@ const SettingsMain = (): JSX.Element => {
                         <p>音声認識を行う対象言語の、言語パックをダウンロードしてください。</p>
                         <p>なお利用メモリが切迫している場合は、低容量版がオススメです。</p>
                     </div>
-                    <div style={{ height: "86px" }}>
-                        <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（日本語：低）</p>
-                            <ModelDownloadVoskButton modelType="small-ja-0.22" />
-                        </div>
-                        <ModelDownloadVoskProgress modelType="small-ja-0.22" />
+                    <div className="mb-5">
+                        <SettingLanguages />
                     </div>
-                    <div style={{ height: "86px" }}>
-                        <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（日本語）</p>
-                            <ModelDownloadVoskButton modelType="ja-0.22" />
+                    {settingLanguage === "日本語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（日本語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-ja-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-ja-0.22" />
                         </div>
-                        <ModelDownloadVoskProgress modelType="ja-0.22" />
-                    </div>
-                    <div style={{ height: "86px" }}>
-                        <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（英語：低）</p>
-                            <ModelDownloadVoskButton modelType="small-en-us-0.15" />
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（日本語）</p>
+                                <ModelDownloadVoskButton modelType="ja-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="ja-0.22" />
                         </div>
-                        <ModelDownloadVoskProgress modelType="small-en-us-0.15" />
-                    </div>
-                    <div style={{ height: "86px" }}>
-                        <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（英語）</p>
-                            <ModelDownloadVoskButton modelType="en-us-0.22" />
+                    </>}
+                    {settingLanguage === "英語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（英語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-en-us-0.15" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-en-us-0.15" />
                         </div>
-                        <ModelDownloadVoskProgress modelType="en-us-0.22" />
-                    </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（英語）</p>
+                                <ModelDownloadVoskButton modelType="en-us-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="en-us-0.22" />
+                        </div>
+                    </>}
                 </div>
             </div>
             <div className="px-5">
@@ -69,7 +80,7 @@ const SettingsMain = (): JSX.Element => {
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：小）</p>
+                            <p>言語パック（精度：低）</p>
                             <ModelDownloadWhisperButton modelType="small" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="small" />
