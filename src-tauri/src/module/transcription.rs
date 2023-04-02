@@ -15,6 +15,7 @@ pub struct Transcription {
     sqlite: Sqlite,
     ctx: WhisperContext,
     speaker_language: String,
+    transcription_accuracy: String,
     note_id: u64,
 }
 
@@ -29,8 +30,9 @@ impl Transcription {
         Self {
             app_handle,
             sqlite: Sqlite::new(),
-            ctx: Transcriber::build(app_handle_clone, transcription_accuracy),
+            ctx: Transcriber::build(app_handle_clone, transcription_accuracy.clone()),
             speaker_language,
+            transcription_accuracy,
             note_id,
         }
     }
@@ -42,10 +44,7 @@ impl Transcription {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all(
-                            "traceCompletion",
-                            TraceCompletion {},
-                        )
+                        .emit_all("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -55,18 +54,12 @@ impl Transcription {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all(
-                            "traceCompletion",
-                            TraceCompletion {},
-                        )
+                        .emit_all("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all(
-                            "traceUnCompletion",
-                            TraceCompletion {},
-                        )
+                        .emit_all("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -126,7 +119,10 @@ impl Transcription {
             // let mut ctx = Transcriber::build(self.app_handle.clone());
             // let mut ctx = self.ctx;
             let result = self.ctx.full(
-                Transcriber::build_params(self.speaker_language.clone()),
+                Transcriber::build_params(
+                    self.speaker_language.clone(),
+                    self.transcription_accuracy.clone(),
+                ),
                 &audio_data[..],
             );
             if result.is_ok() {

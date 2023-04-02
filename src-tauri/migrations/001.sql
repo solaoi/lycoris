@@ -11,7 +11,7 @@ CREATE TABLE speeches (
     content TEXT,
     wav TEXT,
     model TEXT, -- manual|vosk|whisper
-    model_description TEXT, -- ja-0.22|small-ja-0.22|en-us-0.22|small-en-us-0.15|small|medium|large
+    model_description TEXT, -- ja-0.22|small-ja-0.22|en-us-0.22|small-en-us-0.15|cn-0.22|small-cn-0.22|small-ko-0.22|fr-0.22|small-fr-0.22|de-0.21|small-de-0.15|ru-0.42|small-ru-0.22|es-0.42|small-es-0.42|small-pt-0.3|small-tr-0.3|vn-0.4|small-vn-0.4|it-0.22|small-it-0.22|small-nl-0.22|small-ca-0.4|small-uk-v3-small|uk-v3|small-sv-rhasspy-0.15|small-hi-0.22|hi-0.22|small-cs-0.4-rhasspy|small-pl-0.22|small|medium|large
     note_id INTEGER NOT NULL,
     FOREIGN KEY(note_id) REFERENCES notes(id)
 );
@@ -40,5 +40,31 @@ INSERT INTO models(model_name, model_type) VALUES("tiny", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("tiny.en", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("ja-0.22", "vosk");
 INSERT INTO models(model_name, model_type) VALUES("en-us-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("cn-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("fr-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("de-0.21", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("ru-0.42", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("es-0.42", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("vn-0.4", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("it-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("uk-v3", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("hi-0.22", "vosk");
 INSERT INTO models(model_name, model_type) VALUES("small-ja-0.22", "vosk");
 INSERT INTO models(model_name, model_type) VALUES("small-en-us-0.15", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-cn-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-ko-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-fr-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-de-0.15", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-ru-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-es-0.42", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-pt-0.3", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-tr-0.3", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-vn-0.4", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-it-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-nl-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-ca-0.4", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-uk-v3-small", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-sv-rhasspy-0.15", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-hi-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-cs-0.4-rhasspy", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("small-pl-0.22", "vosk");
