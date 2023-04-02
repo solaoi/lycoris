@@ -24,6 +24,40 @@ impl Transcriber {
         let mut language = "ja";
         if speaker_language.starts_with("en-us") || speaker_language.starts_with("small-en-us") {
             language = "en";
+        } else if speaker_language.starts_with("cn") || speaker_language.starts_with("small-cn") {
+            language = "zh";
+        } else if speaker_language.starts_with("small-ko") {
+            language = "ko";
+        } else if speaker_language.starts_with("fr") || speaker_language.starts_with("small-fr") {
+            language = "fr";
+        } else if speaker_language.starts_with("de") || speaker_language.starts_with("small-de") {
+            language = "de";
+        } else if speaker_language.starts_with("ru") || speaker_language.starts_with("small-ru") {
+            language = "ru";
+        } else if speaker_language.starts_with("es") || speaker_language.starts_with("small-es") {
+            language = "es";
+        } else if speaker_language.starts_with("small-pt") {
+            language = "pt";
+        } else if speaker_language.starts_with("small-tr") {
+            language = "tr";
+        } else if speaker_language.starts_with("vn") || speaker_language.starts_with("small-vn") {
+            language = "vi";
+        } else if speaker_language.starts_with("it") || speaker_language.starts_with("small-it") {
+            language = "it";
+        } else if speaker_language.starts_with("small-nl") {
+            language = "nl";
+        } else if speaker_language.starts_with("small-ca") {
+            language = "ca";
+        } else if speaker_language.starts_with("uk") || speaker_language.starts_with("small-uk") {
+            language = "uk";
+        } else if speaker_language.starts_with("small-sv") {
+            language = "sv";
+        } else if speaker_language.starts_with("hi") || speaker_language.starts_with("small-hi") {
+            language = "hi";
+        } else if speaker_language.starts_with("small-cs") {
+            language = "cs";
+        } else if speaker_language.starts_with("small-pl") {
+            language = "pl";
         }
         let mut params = FullParams::new(SamplingStrategy::BeamSearch {
             beam_size: 5,

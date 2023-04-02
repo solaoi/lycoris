@@ -64,6 +64,222 @@ const SettingsMain = (): JSX.Element => {
                             <ModelDownloadVoskProgress modelType="en-us-0.22" />
                         </div>
                     </>}
+                    {settingLanguage === "中国語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（中国語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-cn-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-cn-0.22" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（中国語）</p>
+                                <ModelDownloadVoskButton modelType="cn-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="cn-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "韓国語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（韓国語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-ko-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-ko-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "フランス語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（フランス語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-fr-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-fr-0.22" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（フランス語）</p>
+                                <ModelDownloadVoskButton modelType="fr-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="fr-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ドイツ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ドイツ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-de-0.15" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-de-0.15" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ドイツ語）</p>
+                                <ModelDownloadVoskButton modelType="de-0.21" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="de-0.21" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ロシア語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ロシア語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-ru-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-ru-0.22" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ロシア語）</p>
+                                <ModelDownloadVoskButton modelType="ru-0.42" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="ru-0.42" />
+                        </div>
+                    </>}
+                    {settingLanguage === "スペイン語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（スペイン語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-es-0.42" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-es-0.42" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（スペイン語）</p>
+                                <ModelDownloadVoskButton modelType="es-0.42" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="es-0.42" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ポルトガル語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ポルトガル語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-pt-0.3" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-pt-0.3" />
+                        </div>
+                    </>}
+                    {settingLanguage === "トルコ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（トルコ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-tr-0.3" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-tr-0.3" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ベトナム語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ベトナム語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-vn-0.4" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-vn-0.4" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ベトナム語）</p>
+                                <ModelDownloadVoskButton modelType="vn-0.4" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="vn-0.4" />
+                        </div>
+                    </>}
+                    {settingLanguage === "イタリア語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（イタリア語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-it-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-it-0.22" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（イタリア語）</p>
+                                <ModelDownloadVoskButton modelType="it-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="it-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "オランダ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（オランダ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-nl-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-nl-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "カタルーニャ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（カタルーニャ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-ca-0.4" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-ca-0.4" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ウクライナ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ウクライナ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-uk-v3-small" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-uk-v3-small" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ウクライナ語）</p>
+                                <ModelDownloadVoskButton modelType="uk-v3" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="uk-v3" />
+                        </div>
+                    </>}
+                    {settingLanguage === "スウェーデン語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（スウェーデン語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-sv-rhasspy-0.15" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-sv-rhasspy-0.15" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ヒンディー語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ヒンディー語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-hi-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-hi-0.22" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ヒンディー語）</p>
+                                <ModelDownloadVoskButton modelType="hi-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="hi-0.22" />
+                        </div>
+                    </>}
+                    {settingLanguage === "チェコ語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（チェコ語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-cs-0.4-rhasspy" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-cs-0.4-rhasspy" />
+                        </div>
+                    </>}
+                    {settingLanguage === "ポーランド語" && <>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <p>言語パック（ポーランド語：低）</p>
+                                <ModelDownloadVoskButton modelType="small-pl-0.22" />
+                            </div>
+                            <ModelDownloadVoskProgress modelType="small-pl-0.22" />
+                        </div>
+                    </>}
                 </div>
             </div>
             <div className="px-5">
