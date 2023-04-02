@@ -7,12 +7,17 @@ pub struct Transcriber {}
 
 impl Transcriber {
     pub fn build(app_handle: AppHandle, transcription_accuracy: String) -> WhisperContext {
+        let mut model_type = "";
+        if transcription_accuracy.starts_with("small") {
+            model_type = "small";
+        } else if transcription_accuracy.starts_with("medium") {
+            model_type = "medium"
+        } else if transcription_accuracy.starts_with("large") {
+            model_type = "large"
+        }
         let model_path = app_handle
             .path_resolver()
-            .resolve_resource(format!(
-                "resources/whisper/ggml-{}.bin",
-                transcription_accuracy
-            ))
+            .resolve_resource(format!("resources/whisper/ggml-{}.bin", model_type))
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -20,7 +25,10 @@ impl Transcriber {
         return WhisperContext::new(&model_path).expect("failed to load whisper model");
     }
 
-    pub fn build_params(speaker_language: String) -> FullParams<'static, 'static> {
+    pub fn build_params(
+        speaker_language: String,
+        transcription_accuracy: String,
+    ) -> FullParams<'static, 'static> {
         let mut language = "ja";
         if speaker_language.starts_with("en-us") || speaker_language.starts_with("small-en-us") {
             language = "en";
@@ -69,7 +77,11 @@ impl Transcriber {
         );
         println!("working on {} threads.", hardware_concurrency);
         params.set_n_threads(hardware_concurrency);
-        params.set_translate(false);
+        if transcription_accuracy.ends_with("en") {
+            params.set_translate(true);
+        } else {
+            params.set_translate(false);
+        }
         params.set_language(Some(language));
         params.set_print_special(false);
         params.set_print_progress(false);
