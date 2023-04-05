@@ -31,6 +31,7 @@ const NoteMain = (): JSX.Element => {
     const [editTitle, setEditTitle] = useState(false);
     const isTracing = useRecoilValue(tracingState);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const inputEl = useRef<HTMLInputElement>(null);
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
             bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,7 +87,7 @@ const NoteMain = (): JSX.Element => {
             <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
                 onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                 {editTitle ?
-                    <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title}
+                    <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
                         onKeyDown={e => {
                             if (e.key === "Enter" && e.keyCode === 13) {
                                 setEditTitle(false)
@@ -124,7 +125,7 @@ const NoteMain = (): JSX.Element => {
         <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }}>
             <SpeechHistory histories={histories} />
             <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >{partialText}</div>
-            <NoteFooter />
+            <NoteFooter titleRef={inputEl}/>
         </div>
     </>)
 }

@@ -28,8 +28,8 @@ hound = "3.4.0"
 whisper-rs = "0.4.0"
 rusqlite = "*"
 samplerate-rs = "0.1.0"
-# download model
-reqwest = { version = "0.11", features = ["stream"] }
+# download model and openai request
+reqwest = { version = "0.11", features = ["stream", "multipart", "json"] }
 tokio = { version = "1", features = ["full"] }
 futures-util = "0.3.26"
 # serve audio

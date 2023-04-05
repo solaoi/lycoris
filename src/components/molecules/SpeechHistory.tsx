@@ -40,10 +40,10 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                 if (i > 0 && cal === dayjs.unix(histories[i - 1].created_at_unixtime).format('YYYY-M-D')) {
                     cal = ""
                 }
-                return (<>
+                return (<div key={"history_" + i}>
                     {cal && <div className={(i > 0 ? 'mt-6 ' : '') + 'mb-2'}>[{cal}]</div>}
-                    <Speech key={"history_" + i} model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />
-                </>)
+                    <Speech model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />
+                </div>)
             }
             )}
         </div>

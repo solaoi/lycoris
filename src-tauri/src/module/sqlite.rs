@@ -73,6 +73,14 @@ impl Sqlite {
             });
     }
 
+    pub fn select_whisper_token(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingKey\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
     pub fn update_model_vosk_to_whisper(
         &self,
         id: u16,

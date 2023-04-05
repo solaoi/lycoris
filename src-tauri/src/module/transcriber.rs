@@ -29,44 +29,47 @@ impl Transcriber {
         speaker_language: String,
         transcription_accuracy: String,
     ) -> FullParams<'static, 'static> {
-        let mut language = "ja";
-        if speaker_language.starts_with("en-us") || speaker_language.starts_with("small-en-us") {
-            language = "en";
+        let language = if speaker_language.starts_with("en-us")
+            || speaker_language.starts_with("small-en-us")
+        {
+            "en"
         } else if speaker_language.starts_with("cn") || speaker_language.starts_with("small-cn") {
-            language = "zh";
+            "zh"
         } else if speaker_language.starts_with("small-ko") {
-            language = "ko";
+            "ko"
         } else if speaker_language.starts_with("fr") || speaker_language.starts_with("small-fr") {
-            language = "fr";
+            "fr"
         } else if speaker_language.starts_with("de") || speaker_language.starts_with("small-de") {
-            language = "de";
+            "de"
         } else if speaker_language.starts_with("ru") || speaker_language.starts_with("small-ru") {
-            language = "ru";
+            "ru"
         } else if speaker_language.starts_with("es") || speaker_language.starts_with("small-es") {
-            language = "es";
+            "es"
         } else if speaker_language.starts_with("small-pt") {
-            language = "pt";
+            "pt"
         } else if speaker_language.starts_with("small-tr") {
-            language = "tr";
+            "tr"
         } else if speaker_language.starts_with("vn") || speaker_language.starts_with("small-vn") {
-            language = "vi";
+            "vi"
         } else if speaker_language.starts_with("it") || speaker_language.starts_with("small-it") {
-            language = "it";
+            "it"
         } else if speaker_language.starts_with("small-nl") {
-            language = "nl";
+            "nl"
         } else if speaker_language.starts_with("small-ca") {
-            language = "ca";
+            "ca"
         } else if speaker_language.starts_with("uk") || speaker_language.starts_with("small-uk") {
-            language = "uk";
+            "uk"
         } else if speaker_language.starts_with("small-sv") {
-            language = "sv";
+            "sv"
         } else if speaker_language.starts_with("hi") || speaker_language.starts_with("small-hi") {
-            language = "hi";
+            "hi"
         } else if speaker_language.starts_with("small-cs") {
-            language = "cs";
+            "cs"
         } else if speaker_language.starts_with("small-pl") {
-            language = "pl";
-        }
+            "pl"
+        } else {
+            "ja"
+        };
         let mut params = FullParams::new(SamplingStrategy::BeamSearch {
             beam_size: 5,
             patience: 1.0,

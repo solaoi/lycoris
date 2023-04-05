@@ -1,14 +1,14 @@
 import { atom, AtomEffect } from 'recoil'
 import DB from '../../lib/sqlite';
 
-const sqliteEffect: AtomEffect<string|null> = ({setSelf, onSet, trigger}) => {
+const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
   const loadPersisted = async () => {
     const db = (await DB.getInstance())
-    const savedValue =  await db.loadSetting("speakerLanguage");
+    const savedValue =  await db.loadSetting("settingKey");
     if (savedValue === null) {
-      setSelf(null);
+      setSelf("");
     } else {
-      setSelf(savedValue.setting_status);
+      setSelf(savedValue!.setting_status);
     }
   };
 
@@ -19,16 +19,16 @@ const sqliteEffect: AtomEffect<string|null> = ({setSelf, onSet, trigger}) => {
   onSet(async(newValue, _, isReset:any) => {
     const db = await DB.getInstance()
     if (isReset) {
-      await db.updateSetting("speakerLanguage", null)
+      await db.updateSetting("settingKey", "")
     } else {
-      await db.updateSetting("speakerLanguage", newValue)
+      await db.updateSetting("settingKey", newValue)
     }
   });
 };
 
-export const speakerLanguageState = atom<string|null>({
-  key: 'speakerLanguageState',
-  default: null,
+export const settingKeyState = atom<string>({
+  key: 'settingKeyState',
+  default: "",
   effects: [
     sqliteEffect,
   ]

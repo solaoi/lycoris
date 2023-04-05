@@ -73,7 +73,6 @@ fn start_command(
     let mut lock = state.0.lock().unwrap();
     let (stop_record_tx, stop_record_rx) = unbounded();
     *lock = Some(stop_record_tx);
-
     std::thread::spawn(move || {
         let record = module::record::Record::new(window.app_handle().clone());
         record.start(
@@ -107,13 +106,23 @@ fn start_trace_command(
     *lock = Some(stop_convert_tx);
 
     std::thread::spawn(move || {
-        let mut transcription = module::transcription::Transcription::new(
-            window.app_handle(),
-            transcription_accuracy,
-            speaker_language,
-            note_id,
-        );
-        transcription.start(stop_convert_rx, true);
+        if transcription_accuracy.starts_with("online") {
+            let mut transcription_online = module::transcription_online::TranscriptionOnline::new(
+                window.app_handle(),
+                transcription_accuracy,
+                speaker_language,
+                note_id,
+            );
+            transcription_online.start(stop_convert_rx, true);
+        } else {
+            let mut transcription = module::transcription::Transcription::new(
+                window.app_handle(),
+                transcription_accuracy,
+                speaker_language,
+                note_id,
+            );
+            transcription.start(stop_convert_rx, true);
+        }
     });
 }
 
@@ -124,10 +133,7 @@ fn stop_trace_command(state: State<'_, RecordState>, window: tauri::Window) {
         stop_convert_tx.send(()).unwrap_or_else(|_| {
             window
                 .app_handle()
-                .emit_all(
-                    "traceCompletion",
-                    TraceCompletion {},
-                )
+                .emit_all("traceCompletion", TraceCompletion {})
                 .unwrap();
         })
     }

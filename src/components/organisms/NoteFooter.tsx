@@ -3,7 +3,12 @@ import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 import { speechHistoryState } from '../../store/atoms/speechHistoryState'
 
-const NoteFooter = (): JSX.Element => {
+type NoteFooterProps = {
+    titleRef: React.RefObject<HTMLInputElement>
+}
+
+const NoteFooter = (props: NoteFooterProps): JSX.Element => {
+    const { titleRef } = props;
     const inputEl = useRef<HTMLInputElement>(null)
     const selectedNote = useRecoilValue(selectedNoteState)
     const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
@@ -28,7 +33,7 @@ const NoteFooter = (): JSX.Element => {
         }
     }
     useEffect(() => {
-        if (inputEl.current) {
+        if (inputEl.current && (document.activeElement !== titleRef.current)) {
             inputEl.current.focus();
         }
     }, [selectedNote]);

@@ -22,6 +22,8 @@ CREATE TABLE settings (
 );
 INSERT INTO settings(setting_name, setting_status) VALUES("speakerLanguage", NULL);
 INSERT INTO settings(setting_name, setting_status) VALUES("transcriptionAccuracy", "off");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingKey", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingLanguage", "日本語");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,

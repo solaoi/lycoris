@@ -23,7 +23,8 @@ use crossbeam_channel::{unbounded, Receiver};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
 use super::{
-    recognizer::MyRecognizer, sqlite::Sqlite, transcription::Transcription, writer::Writer,
+    recognizer::MyRecognizer, sqlite::Sqlite, transcription::Transcription,
+    transcription_online::TranscriptionOnline, writer::Writer,
 };
 
 pub struct Record {
@@ -140,7 +141,6 @@ impl Record {
         let is_converting = Arc::new(Mutex::new(false));
         let (stop_convert_tx, stop_convert_rx) = unbounded();
         let is_no_transcription = transcription_accuracy == "off";
-
         let app_handle = self.app_handle.clone();
         thread::spawn(move || loop {
             match notify_decoding_state_is_finalized_rx.try_recv() {
@@ -177,7 +177,6 @@ impl Record {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
-
                     if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
@@ -188,13 +187,24 @@ impl Record {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
-                            let mut transcription = Transcription::new(
-                                app_handle_clone,
-                                transcription_accuracy_clone,
-                                speaker_language_clone,
-                                note_id,
-                            );
-                            transcription.start(stop_convert_rx_clone, false);
+                            if transcription_accuracy_clone.starts_with("online") {
+                                let mut transcription_online = TranscriptionOnline::new(
+                                    app_handle_clone,
+                                    transcription_accuracy_clone,
+                                    speaker_language_clone,
+                                    note_id,
+                                );
+                                transcription_online.start(stop_convert_rx_clone, false);
+                            } else {
+                                let mut transcription = Transcription::new(
+                                    app_handle_clone,
+                                    transcription_accuracy_clone,
+                                    speaker_language_clone,
+                                    note_id,
+                                );
+                                transcription.start(stop_convert_rx_clone, false);
+                            }
+
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = false;
                             drop(lock);
