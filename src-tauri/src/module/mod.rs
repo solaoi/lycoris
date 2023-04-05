@@ -8,4 +8,5 @@ pub mod record;
 mod sqlite;
 mod transcriber;
 pub mod transcription;
+pub mod transcription_online;
 mod writer;

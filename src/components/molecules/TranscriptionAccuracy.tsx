@@ -4,12 +4,14 @@ import { transcriptionAccuracyState } from "../../store/atoms/transcriptionAccur
 import { modelWhisperDownloadedState } from "../../store/atoms/modelWhisperDownloadedState";
 import { recordState } from "../../store/atoms/recordState";
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
+import { settingKeyState } from "../../store/atoms/settingKeyState";
 
 const TranscriptionAccuracy = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelWhisperDownloadedState)
     const [transcriptionAccuracy, setTranscriptionAccuracy] = useRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
     const speakerLanguage = useRecoilValue(speakerLanguageState)
+    const settingKey = useRecoilValue(settingKeyState)
 
     const change = (e: ChangeEvent<HTMLSelectElement>) => {
         const transcriptionAccuracy = e.target.value
@@ -36,9 +38,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
     }
 
     return (
-        <select className="select select-bordered w-full max-w-xs focus:outline-none text-xs disabled:bg-base-300" name="transcription-accuracy" disabled={isRecording} onChange={change} defaultValue={transcriptionAccuracy ?? "off"}>
-            <option disabled value="accuracy-selector">追っかけ設定</option>
-            <option value="off">オフ</option>
+        <select className="select select-bordered w-full max-w-xs focus:outline-none text-xs disabled:bg-base-300" name="transcription-accuracy" disabled={isRecording} onChange={change}>
+            <option disabled>追っかけ設定</option>
+            <option value="off" selected={transcriptionAccuracy === "off"}>オフ</option>
             {downloadedModels?.reduce((a: string[], c) => {
                 if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                     return [...a, c]
@@ -47,6 +49,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
             }, []).map((model, i) => (
                 <option key={"transcription-accuracy" + i} value={model} selected={model === transcriptionAccuracy}>{mapModel(model)}</option>
             ))}
+            {settingKey && <>
+                <option value="online-transcript" selected={"online-transcript" === transcriptionAccuracy}>文字起こし：オンライン</option>
+                <option value="online-translate-to-en" selected={"online-translate-to-en" === transcriptionAccuracy}>翻訳（英）：オンライン</option></>}
         </select>
     )
 }

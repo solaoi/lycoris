@@ -5,7 +5,11 @@ const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
   const loadPersisted = async () => {
     const db = (await DB.getInstance())
     const savedValue =  await db.loadSetting("settingLanguage");
-    setSelf(savedValue!.setting_status);
+    if (savedValue === null) {
+      setSelf("日本語");
+    } else {
+      setSelf(savedValue!.setting_status);
+    }
   };
 
   if (trigger === 'get') {
