@@ -21,14 +21,6 @@ const Speech = (props: SpeechProps): JSX.Element => {
     const leave = () => {
         setHover(false);
     }
-    const scroll = () => {
-        setHover(false);
-    }
-    useEffect(() => {
-        window.addEventListener('scroll', scroll)
-        return () => window.removeEventListener('scroll', scroll)
-    }, [])
-
     return (
         <div onMouseLeave={leave} >
             <div className={"flex mb-1 cursor-pointer hover:bg-gray-400 hover:text-white hover:rounded"}
