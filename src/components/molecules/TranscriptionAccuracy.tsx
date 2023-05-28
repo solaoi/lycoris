@@ -11,7 +11,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const [transcriptionAccuracy, setTranscriptionAccuracy] = useRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
     const speakerLanguage = useRecoilValue(speakerLanguageState)
-    const settingKey = useRecoilValue(settingKeyState)
+    const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"))
 
     const change = (e: ChangeEvent<HTMLSelectElement>) => {
         const transcriptionAccuracy = e.target.value
@@ -49,8 +49,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
             }, []).map((model, i) => (
                 <option key={"transcription-accuracy" + i} value={model} selected={model === transcriptionAccuracy}>{mapModel(model)}</option>
             ))}
-            {settingKey && <>
+            {settingKeyOpenai && <>
                 <option value="online-transcript" selected={"online-transcript" === transcriptionAccuracy}>文字起こし：オンライン</option>
+                <option value="online-chat" selected={"online-chat" === transcriptionAccuracy}>AI：オンライン</option>
                 {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (<option value="online-translate-to-en" selected={"online-translate-to-en" === transcriptionAccuracy}>翻訳（英）：オンライン</option>)}</>}
         </select>
     )

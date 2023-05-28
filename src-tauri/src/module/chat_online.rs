@@ -5,38 +5,31 @@ use super::sqlite::Sqlite;
 use crossbeam_channel::Receiver;
 
 use reqwest::{
-    header::{HeaderMap, HeaderValue, AUTHORIZATION},
+    header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE},
     multipart, Client,
 };
-use serde_json::Value;
+use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
 
-pub struct TranscriptionOnline {
+pub struct ChatOnline {
     app_handle: AppHandle,
     sqlite: Sqlite,
     speaker_language: String,
-    transcription_accuracy: String,
     note_id: u64,
     token: String,
 }
 
-impl TranscriptionOnline {
-    pub fn new(
-        app_handle: AppHandle,
-        transcription_accuracy: String,
-        speaker_language: String,
-        note_id: u64,
-    ) -> Self {
+impl ChatOnline {
+    pub fn new(app_handle: AppHandle, speaker_language: String, note_id: u64) -> Self {
         let sqlite = Sqlite::new();
         let token = sqlite.select_whisper_token().unwrap();
         Self {
             app_handle,
             sqlite,
             speaker_language,
-            transcription_accuracy,
             note_id,
             token,
         }
@@ -73,17 +66,12 @@ impl TranscriptionOnline {
     }
 
     #[tokio::main]
-    async fn request(
+    async fn request_whisper(
         speaker_language: String,
         file_path: String,
         token: String,
-        is_translate: bool,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        let url = if is_translate {
-            "https://api.openai.com/v1/audio/translations"
-        } else {
-            "https://api.openai.com/v1/audio/transcriptions"
-        };
+        let url = "https://api.openai.com/v1/audio/transcriptions";
 
         let model = "whisper-1";
 
@@ -146,16 +134,10 @@ impl TranscriptionOnline {
         };
         let part_language = multipart::Part::text(language);
 
-        let form = if is_translate {
-            multipart::Form::new()
-                .part("file", part_file)
-                .part("model", part_model)
-        } else {
-            multipart::Form::new()
-                .part("file", part_file)
-                .part("model", part_model)
-                .part("language", part_language)
-        };
+        let form = multipart::Form::new()
+            .part("file", part_file)
+            .part("model", part_model)
+            .part("language", part_language);
 
         let response = client
             .post(url)
@@ -174,29 +156,91 @@ impl TranscriptionOnline {
         Ok(response_text.to_string())
     }
 
+    #[tokio::main]
+    async fn request_gpt(
+        question: &str,
+        token: String,
+        template: String,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let url = "https://api.openai.com/v1/chat/completions";
+
+        let model = "gpt-3.5-turbo";
+        let temperature = 0;
+
+        let client = Client::new();
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("Bearer {}", token))?,
+        );
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+        let post_body = if template != "" {
+            json!({
+              "model": model,
+              "temperature": temperature,
+              "messages": [{"role": "system", "content": template},{"role": "user", "content": question}]
+            })
+        } else {
+            json!({
+              "model": model,
+              "temperature": temperature,
+              "messages": [{"role": "user", "content": question}]
+            })
+        };
+
+        let response = client
+            .post(url)
+            .headers(headers)
+            .json(&post_body)
+            .send()
+            .await?;
+
+        println!("Status: {}", response.status());
+        let json_response: Value = response.json().await?;
+        println!("Response: {:?}", json_response);
+        let response_text = json_response["choices"][0]["message"]["content"]
+            .as_str()
+            .unwrap_or("choices[0].message.content field not found");
+
+        Ok(response_text.to_string())
+    }
+
     fn convert(&mut self) -> Result<(), rusqlite::Error> {
         let vosk_speech = self.sqlite.select_vosk(self.note_id);
         return vosk_speech.and_then(|speech| {
-            let result = Self::request(
+            let result = Self::request_whisper(
                 self.speaker_language.clone(),
                 speech.wav,
                 self.token.clone(),
-                self.transcription_accuracy.ends_with("en"),
             );
-
             if result.is_ok() {
-                let updated = self
-                    .sqlite
-                    .update_model_vosk_to_whisper(speech.id, result.unwrap());
+                let question = result.unwrap();
+                let result = self.sqlite.select_ai_template();
+                let template = if result.is_ok() {
+                    result.unwrap()
+                } else {
+                    "".to_string()
+                };
+                let result = Self::request_gpt(&question, self.token.clone(), template);
+                if result.is_ok() {
+                    let answer = result.unwrap();
+                    let updated = self.sqlite.update_model_vosk_to_whisper(
+                        speech.id,
+                        format!("Q. {}\nA. {}", question, answer),
+                    );
 
-                self.app_handle
-                    .clone()
-                    .emit_all("finalTextConverted", updated.unwrap())
-                    .unwrap();
+                    self.app_handle
+                        .clone()
+                        .emit_all("finalTextConverted", updated.unwrap())
+                        .unwrap();
+                } else {
+                    println!("gpt api is temporally failed, so skipping...")
+                }
             } else {
                 println!("whisper api is temporally failed, so skipping...")
             }
-
             Ok(())
         });
     }
