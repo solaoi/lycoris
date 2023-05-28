@@ -106,7 +106,7 @@ fn start_trace_command(
     *lock = Some(stop_convert_tx);
 
     std::thread::spawn(move || {
-        if transcription_accuracy.starts_with("online") {
+        if transcription_accuracy.starts_with("online-transcript") {
             let mut transcription_online = module::transcription_online::TranscriptionOnline::new(
                 window.app_handle(),
                 transcription_accuracy,
@@ -114,6 +114,13 @@ fn start_trace_command(
                 note_id,
             );
             transcription_online.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("online-chat") {
+            let mut chat_online = module::chat_online::ChatOnline::new(
+                window.app_handle(),
+                speaker_language,
+                note_id,
+            );
+            chat_online.start(stop_convert_rx, true);
         } else {
             let mut transcription = module::transcription::Transcription::new(
                 window.app_handle(),

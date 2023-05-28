@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { listen } from '@tauri-apps/api/event'
 import { SpeechHistory } from '../molecules/SpeechHistory'
 import { useRecoilState, useSetRecoilState } from 'recoil'
@@ -32,6 +32,27 @@ const NoteMain = (): JSX.Element => {
     const isTracing = useRecoilValue(tracingState);
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputEl = useRef<HTMLInputElement>(null);
+    const [showGotoBottom, setShowGotoBottom] = useState(true);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const scroll = useCallback(() => {
+        if (scrollContainerRef.current?.scrollTop !== 0 || scrollContainerRef.current?.scrollHeight === scrollContainerRef.current?.clientHeight) {
+            setShowGotoBottom(false);
+        } else {
+            setShowGotoBottom(true);
+        }
+    }, []);
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (scrollContainer) {
+            if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
+                setShowGotoBottom(false);
+            } else {
+                setShowGotoBottom(true);
+            }
+            scrollContainer.addEventListener('scroll', scroll);
+            return () => scrollContainer.removeEventListener('scroll', scroll);
+        }
+    }, [selectedNote]);
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
             bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,7 +104,7 @@ const NoteMain = (): JSX.Element => {
     }, [recordingNote, isTracing])
 
     return (<>
-        <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }}>
+        <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
             <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
                 onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                 {editTitle ?
@@ -122,10 +143,15 @@ const NoteMain = (): JSX.Element => {
             フィルター：
             <MemoFilterButton />
         </div>
-        <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }}>
+        <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} />
             <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >{partialText}</div>
-            <NoteFooter titleRef={inputEl}/>
+            <NoteFooter titleRef={inputEl} />
+        </div>
+        <div className={"flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-5 bg-base-200 rounded-lg drop-shadow-lg cursor-pointer hover:bg-base-300" + (!showGotoBottom && " hidden")} onClick={() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={"w-6 h-6"}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" />
+            </svg>
         </div>
     </>)
 }
