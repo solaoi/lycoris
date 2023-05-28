@@ -80,7 +80,7 @@ impl Transcriber {
         );
         println!("working on {} threads.", hardware_concurrency);
         params.set_n_threads(hardware_concurrency);
-        if transcription_accuracy.ends_with("en") {
+        if transcription_accuracy.ends_with("to-en") {
             params.set_translate(true);
         } else {
             params.set_translate(false);

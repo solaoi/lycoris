@@ -1,4 +1,4 @@
-use super::{sqlite::Sqlite, transcriber::Transcriber};
+use super::{sqlite::Sqlite, transcriber::Transcriber, translator::Translator, speaker::Speaker};
 
 use crossbeam_channel::Receiver;
 
@@ -103,7 +103,7 @@ impl Transcription {
                 ),
             }
             let data = if spec.channels != 1 {
-                whisper_rs::convert_stereo_to_mono_audio(&data)
+                whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
             } else {
                 data
             };
@@ -135,18 +135,26 @@ impl Transcription {
                         .expect("failed to get segment");
                     converted.push(segment.to_string());
                 }
-
-                let updated = self
-                    .sqlite
-                    .update_model_vosk_to_whisper(speech.id, converted.join(""));
-
-                let updated = updated.unwrap();
-                if updated.content != "" {
-                    self.app_handle
-                        .clone()
-                        .emit_all("finalTextConverted", updated)
-                        .unwrap();
+                let mut content = converted.join("");
+                if self.transcription_accuracy.ends_with("translate") {
+                    let translator = Translator::new(self.app_handle.clone());
+                    content = if self.transcription_accuracy.ends_with("high-translate") {
+                        translator
+                            .translate_to_japanese(self.speaker_language.clone(), true, &content)
+                            .unwrap()
+                    } else {
+                        translator
+                            .translate_to_japanese(self.speaker_language.clone(), false, &content)
+                            .unwrap()
+                    };
                 }
+
+                let updated = self.sqlite.update_model_vosk_to_whisper(speech.id, content);
+
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated.unwrap())
+                    .unwrap();
             } else {
                 println!("whisper is temporally failed, so skipping...")
             }

@@ -11,7 +11,7 @@ CREATE TABLE speeches (
     content TEXT,
     wav TEXT,
     model TEXT, -- manual|vosk|whisper
-    model_description TEXT, -- ja-0.22|small-ja-0.22|en-us-0.22|small-en-us-0.15|cn-0.22|small-cn-0.22|small-ko-0.22|fr-0.22|small-fr-0.22|de-0.21|small-de-0.15|ru-0.42|small-ru-0.22|es-0.42|small-es-0.42|small-pt-0.3|small-tr-0.3|vn-0.4|small-vn-0.4|it-0.22|small-it-0.22|small-nl-0.22|small-ca-0.4|small-uk-v3-small|uk-v3|small-sv-rhasspy-0.15|small-hi-0.22|hi-0.22|small-cs-0.4-rhasspy|small-pl-0.22|small|medium|large
+    model_description TEXT, -- ja-0.22|small-ja-0.22|en-us-0.22|small-en-us-0.15|cn-0.22|small-cn-0.22|small-ko-0.22|fr-0.22|small-fr-0.22|de-0.21|small-de-0.15|ru-0.42|small-ru-0.22|es-0.42|small-es-0.42|small-pt-0.3|small-tr-0.3|vn-0.4|small-vn-0.4|it-0.22|small-it-0.22|small-nl-0.22|small-ca-0.4|small-uk-v3-small|uk-v3|small-sv-rhasspy-0.15|small-hi-0.22|hi-0.22|small-cs-0.4-rhasspy|small-pl-0.22|small|medium|large|distilled-600m|1_3b
     note_id INTEGER NOT NULL,
     FOREIGN KEY(note_id) REFERENCES notes(id)
 );
@@ -22,7 +22,9 @@ CREATE TABLE settings (
 );
 INSERT INTO settings(setting_name, setting_status) VALUES("speakerLanguage", NULL);
 INSERT INTO settings(setting_name, setting_status) VALUES("transcriptionAccuracy", "off");
-INSERT INTO settings(setting_name, setting_status) VALUES("settingKey", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingKeyOpenai", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingKeyDeepl", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingPlan", "free");
 INSERT INTO settings(setting_name, setting_status) VALUES("settingLanguage", "日本語");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,3 +72,5 @@ INSERT INTO models(model_name, model_type) VALUES("small-sv-rhasspy-0.15", "vosk
 INSERT INTO models(model_name, model_type) VALUES("small-hi-0.22", "vosk");
 INSERT INTO models(model_name, model_type) VALUES("small-cs-0.4-rhasspy", "vosk");
 INSERT INTO models(model_name, model_type) VALUES("small-pl-0.22", "vosk");
+INSERT INTO models(model_name, model_type) VALUES("distilled-600m", "nllb");
+INSERT INTO models(model_name, model_type) VALUES("1_3b", "nllb");

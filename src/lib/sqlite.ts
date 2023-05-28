@@ -39,9 +39,27 @@ export default class DB {
     return await this.db.select('SELECT model_name FROM models WHERE is_downloaded = 1 AND model_type = $1', [model_type])
   }
 
+  public async loadActiveTranslationLanguages(): Promise<{setting_status: string}[]> {
+    return await this.db.select('SELECT setting_status FROM settings WHERE setting_name = "translationActive"')
+  }
+
   public async loadSetting(setting_name: string): Promise<{setting_status: string} | null> {
     const settings:{setting_status: string}[] = await this.db.select('SELECT setting_status FROM settings WHERE setting_name = $1', [setting_name])
     return settings[0] || null;
+  }
+
+  public async insertSetting(setting_name: string, setting_status: string) {
+    await this.db.execute(
+      'INSERT INTO settings(setting_name, setting_status) VALUES($1, $2)',
+      [setting_name, setting_status]
+    );
+  }
+
+  public async deleteSetting(setting_name: string, setting_status: string) {
+    await this.db.execute(
+      'DELETE FROM settings WHERE setting_name = $1 AND setting_status = $2',
+      [setting_name, setting_status]
+    );
   }
 
   public async updateSetting(setting_name: string, setting_status: string|null) {

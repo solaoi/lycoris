@@ -6,6 +6,10 @@ import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperBut
 import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperProgress"
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
+import { ModelDownloadNllbButton } from "../molecules/ModelDownloadNllbButton"
+import { ModelDownloadNllbProgress } from "../molecules/ModelDownloadNllbProgress"
+import { SettingsSelectTranslations } from "../molecules/SettingsSelectTranslations"
+import { SettingPlan } from "../molecules/SettingPlan"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -19,31 +23,31 @@ const SettingsMain = (): JSX.Element => {
                 設定
             </h1>
             <div className="px-5 select-none cursor-default">
-                <h2 className="text-xl mt-5 flex items-center">
+                <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
                     </svg>
                     話し手の言語
                 </h2>
-                <div className="px-5 mt-2">
-                    <div className="mb-5">
-                        <p>音声認識を行う対象言語の、言語パックをダウンロードしてください。</p>
+                <div className="px-5">
+                    <div className="mb-8">
+                        <p>音声認識を行う対象の、言語パックをダウンロードしてください。</p>
                         <p>なお利用メモリが切迫している場合は、低容量版がオススメです。</p>
                     </div>
-                    <div className="mb-5">
+                    <div className="mb-4 border-b">
                         <SettingLanguages />
                     </div>
                     {settingLanguage === "日本語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（日本語：低）</p>
+                                <p>言語パック（日本語：低 - 48 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-ja-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-ja-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（日本語）</p>
+                                <p>言語パック（日本語 - 1.0 GB ）</p>
                                 <ModelDownloadVoskButton modelType="ja-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="ja-0.22" />
@@ -52,14 +56,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "英語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（英語：低）</p>
+                                <p>言語パック（英語：低 - 40 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-en-us-0.15" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-en-us-0.15" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（英語）</p>
+                                <p>言語パック（英語 - 1.8 GB ）</p>
                                 <ModelDownloadVoskButton modelType="en-us-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="en-us-0.22" />
@@ -68,14 +72,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "中国語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（中国語：低）</p>
+                                <p>言語パック（中国語：低 - 42 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-cn-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-cn-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（中国語）</p>
+                                <p>言語パック（中国語 - 1.3 GB ）</p>
                                 <ModelDownloadVoskButton modelType="cn-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="cn-0.22" />
@@ -84,7 +88,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "韓国語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（韓国語：低）</p>
+                                <p>言語パック（韓国語：低 - 82 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-ko-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-ko-0.22" />
@@ -93,14 +97,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "フランス語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（フランス語：低）</p>
+                                <p>言語パック（フランス語：低 - 41 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-fr-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-fr-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（フランス語）</p>
+                                <p>言語パック（フランス語 - 1.4 GB ）</p>
                                 <ModelDownloadVoskButton modelType="fr-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="fr-0.22" />
@@ -109,14 +113,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ドイツ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ドイツ語：低）</p>
+                                <p>言語パック（ドイツ語：低 - 45 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-de-0.15" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-de-0.15" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ドイツ語）</p>
+                                <p>言語パック（ドイツ語 - 1.9 GB ）</p>
                                 <ModelDownloadVoskButton modelType="de-0.21" />
                             </div>
                             <ModelDownloadVoskProgress modelType="de-0.21" />
@@ -125,14 +129,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ロシア語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ロシア語：低）</p>
+                                <p>言語パック（ロシア語：低 - 45 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-ru-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-ru-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ロシア語）</p>
+                                <p>言語パック（ロシア語 - 1.8 GB ）</p>
                                 <ModelDownloadVoskButton modelType="ru-0.42" />
                             </div>
                             <ModelDownloadVoskProgress modelType="ru-0.42" />
@@ -141,14 +145,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "スペイン語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（スペイン語：低）</p>
+                                <p>言語パック（スペイン語：低 - 39 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-es-0.42" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-es-0.42" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（スペイン語）</p>
+                                <p>言語パック（スペイン語 - 1.4 GB ）</p>
                                 <ModelDownloadVoskButton modelType="es-0.42" />
                             </div>
                             <ModelDownloadVoskProgress modelType="es-0.42" />
@@ -157,7 +161,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ポルトガル語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ポルトガル語：低）</p>
+                                <p>言語パック（ポルトガル語：低 - 31 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-pt-0.3" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-pt-0.3" />
@@ -166,7 +170,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "トルコ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（トルコ語：低）</p>
+                                <p>言語パック（トルコ語：低 - 35 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-tr-0.3" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-tr-0.3" />
@@ -175,14 +179,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ベトナム語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ベトナム語：低）</p>
+                                <p>言語パック（ベトナム語：低 - 32 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-vn-0.4" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-vn-0.4" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ベトナム語）</p>
+                                <p>言語パック（ベトナム語 - 78 MB ）</p>
                                 <ModelDownloadVoskButton modelType="vn-0.4" />
                             </div>
                             <ModelDownloadVoskProgress modelType="vn-0.4" />
@@ -191,14 +195,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "イタリア語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（イタリア語：低）</p>
+                                <p>言語パック（イタリア語：低 - 48 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-it-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-it-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（イタリア語）</p>
+                                <p>言語パック（イタリア語 - 1.2 GB ）</p>
                                 <ModelDownloadVoskButton modelType="it-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="it-0.22" />
@@ -207,7 +211,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "オランダ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（オランダ語：低）</p>
+                                <p>言語パック（オランダ語：低 - 39 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-nl-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-nl-0.22" />
@@ -216,7 +220,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "カタルーニャ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（カタルーニャ語：低）</p>
+                                <p>言語パック（カタルーニャ語：低 - 42 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-ca-0.4" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-ca-0.4" />
@@ -225,14 +229,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ウクライナ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ウクライナ語：低）</p>
+                                <p>言語パック（ウクライナ語：低 - 133 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-uk-v3-small" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-uk-v3-small" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ウクライナ語）</p>
+                                <p>言語パック（ウクライナ語 - 343 MB ）</p>
                                 <ModelDownloadVoskButton modelType="uk-v3" />
                             </div>
                             <ModelDownloadVoskProgress modelType="uk-v3" />
@@ -241,7 +245,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "スウェーデン語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（スウェーデン語：低）</p>
+                                <p>言語パック（スウェーデン語：低 - 289 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-sv-rhasspy-0.15" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-sv-rhasspy-0.15" />
@@ -250,14 +254,14 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ヒンディー語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ヒンディー語：低）</p>
+                                <p>言語パック（ヒンディー語：低 - 42 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-hi-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-hi-0.22" />
                         </div>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ヒンディー語）</p>
+                                <p>言語パック（ヒンディー語 - 1.5 GB ）</p>
                                 <ModelDownloadVoskButton modelType="hi-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="hi-0.22" />
@@ -266,7 +270,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "チェコ語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（チェコ語：低）</p>
+                                <p>言語パック（チェコ語：低 - 44 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-cs-0.4-rhasspy" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-cs-0.4-rhasspy" />
@@ -275,7 +279,7 @@ const SettingsMain = (): JSX.Element => {
                     {settingLanguage === "ポーランド語" && <>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
-                                <p>言語パック（ポーランド語：低）</p>
+                                <p>言語パック（ポーランド語：低 - 50 MB ）</p>
                                 <ModelDownloadVoskButton modelType="small-pl-0.22" />
                             </div>
                             <ModelDownloadVoskProgress modelType="small-pl-0.22" />
@@ -284,54 +288,93 @@ const SettingsMain = (): JSX.Element => {
                 </div>
             </div>
             <div className="px-5 select-none cursor-default">
-                <h2 className="text-xl mt-5 flex items-center">
+                <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                     </svg>
-                    追っかけ文字起こし・翻訳
+                    追っかけ文字起こし・追っかけ翻訳（英語への翻訳）
                 </h2>
-                <div className="px-5 mt-2">
-                    <div className="mb-5">
-                        <p>通常の文字起こしを追いかける形で、高精度で文字起こしや翻訳を行います。</p>
-                        <p>下記言語パックをダウンロードするか、オンライン設定を行ってください。</p>
+                <div className="px-5">
+                    <div className="mb-8">
+                        <p>通常の文字起こしを追いかける形で、高精度な文字起こしや英語への翻訳を行います。</p>
+                        <p>下記言語パックをダウンロードするか、オンライン設定（ OpenAI ）を行ってください。</p>
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：低）</p>
+                            <p>言語パック（精度：低 - 488 MB ）</p>
                             <ModelDownloadWhisperButton modelType="small" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="small" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：中）</p>
+                            <p>言語パック（精度：中 - 1.5 GB ）</p>
                             <ModelDownloadWhisperButton modelType="medium" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="medium" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：高）</p>
+                            <p>言語パック（精度：高 - 3.1 GB ）</p>
                             <ModelDownloadWhisperButton modelType="large" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large" />
                     </div>
                 </div>
             </div>
-            <div className="px-5">
+            <div className="px-5 select-none cursor-default">
+                <h2 className="text-xl mt-5 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                    </svg>
+                    追っかけ翻訳（英語以外への翻訳）
+                </h2>
+                <div className="px-5">
+                    <div className="mb-8">
+                        <p>通常の文字起こしを追いかける形で、翻訳（英語以外への翻訳）を行います。</p>
+                        <p>上記言語パックと合わせて、追加で下記翻訳パックをダウンロードするか、</p>
+                        <p>オンライン設定（ DeepL ）を行ってください。</p>
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <p>翻訳パック（精度：通常 - 5.6 GB ）</p>
+                            <ModelDownloadNllbButton modelType="distilled-600m" />
+                        </div>
+                        <ModelDownloadNllbProgress modelType="distilled-600m" />
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <p>翻訳パック（精度：高 - 8.7 GB ）</p>
+                            <ModelDownloadNllbButton modelType="1_3b" />
+                        </div>
+                        <ModelDownloadNllbProgress modelType="1_3b" />
+                    </div>
+                    <SettingsSelectTranslations />
+                </div>
+            </div>
+            <div className="px-5 mb-20 select-none cursor-default">
                 <h2 className="text-xl mt-5 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
                     </svg>
                     オンライン設定
                 </h2>
-                <div className="px-5 mt-2">
-                    <div className="mb-5">
-                        <p>OpenAI社のAPIを利用することで、</p>
-                        <p>高速な追っかけ文字起こし・翻訳が選択可能となります。</p>
-                        <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
+                <div className="px-5 mt-6">
+                    <h3 className="pl-1 font-semibold pb-2 mb-4 border-b">OpenAI</h3>
+                    <div className="mb-8">
+                        <p>高速な追っかけ文字起こし・追っかけ翻訳（英語への翻訳）が選択可能となります。</p>
+                        <p>（ API の利用に関しては、 OpenAI 社の利用規約を参照ください。）</p>
                     </div>
-                    <SettingKey />
+                    <SettingKey settingName="settingKeyOpenai" />
+                </div>
+                <div className="px-5 mt-6">
+                    <h3 className="pl-1 font-semibold pb-2 mb-4 border-b">DeepL </h3>
+                    <div className="mb-8">
+                        <p>高速な追っかけ翻訳（英語以外への翻訳）が選択可能となります。</p>
+                        <p>（ API の利用に関しては、 DeepL 社の利用規約を参照ください。）</p>
+                    </div>
+                    <SettingPlan />
+                    <SettingKey settingName="settingKeyDeepl" />
                 </div>
             </div>
         </div>

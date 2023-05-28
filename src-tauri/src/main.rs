@@ -4,6 +4,7 @@
 )]
 
 use crossbeam_channel::Sender;
+use module::model_type_nllb::ModelTypeNllb;
 use module::model_type_vosk::ModelTypeVosk;
 use module::model_type_whisper::ModelTypeWhisper;
 use module::transcription::TraceCompletion;
@@ -53,6 +54,14 @@ fn download_vosk_model_command(window: tauri::Window, model: String) {
     std::thread::spawn(move || {
         let dl = module::downloader::vosk::VoskModelDownloader::new(window.app_handle().clone());
         dl.download(ModelTypeVosk::from_str(&model).unwrap())
+    });
+}
+
+#[tauri::command]
+fn download_nllb_model_command(window: tauri::Window, model: String) {
+    std::thread::spawn(move || {
+        let dl = module::downloader::nllb::NllbModelDownloader::new(window.app_handle().clone());
+        dl.download(ModelTypeNllb::from_str(&model).unwrap())
     });
 }
 
@@ -199,6 +208,7 @@ fn main() {
         .manage(RecordState(Default::default()))
         .invoke_handler(tauri::generate_handler![
             delete_note_command,
+            download_nllb_model_command,
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,

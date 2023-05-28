@@ -181,7 +181,7 @@ impl TranscriptionOnline {
                 self.speaker_language.clone(),
                 speech.wav,
                 self.token.clone(),
-                self.transcription_accuracy.ends_with("en"),
+                self.transcription_accuracy.ends_with("to-en"),
             );
 
             if result.is_ok() {
