@@ -9,4 +9,5 @@ mod sqlite;
 mod transcriber;
 pub mod transcription;
 pub mod transcription_online;
+pub mod chat_online;
 mod writer;

@@ -1,35 +1,38 @@
-import { atom, AtomEffect } from 'recoil'
+import { AtomEffect, atomFamily } from 'recoil'
 import DB from '../../lib/sqlite';
 
-const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
-  const loadPersisted = async () => {
-    const db = (await DB.getInstance())
-    const savedValue =  await db.loadSetting("settingKey");
-    if (savedValue === null) {
-      setSelf("");
-    } else {
-      setSelf(savedValue!.setting_status);
+const sqliteEffect: (setting_name:string) => AtomEffect<string> =
+  (setting_name) => {
+    return ({setSelf, onSet, trigger}) => {
+      const loadPersisted = async () => {
+        const db = (await DB.getInstance())
+        const savedValue =  await db.loadSetting(setting_name);
+        if (savedValue === null) {
+          setSelf("");
+        } else {
+          setSelf(savedValue!.setting_status);
+        }
+      };
+
+      if (trigger === 'get') {
+        loadPersisted();
+      }
+
+      onSet(async(newValue, _, isReset:any) => {
+        const db = await DB.getInstance()
+        if (isReset) {
+          await db.updateSetting(setting_name, "")
+        } else {
+          await db.updateSetting(setting_name, newValue)
+        }
+      });
     }
   };
 
-  if (trigger === 'get') {
-    loadPersisted();
-  }
-
-  onSet(async(newValue, _, isReset:any) => {
-    const db = await DB.getInstance()
-    if (isReset) {
-      await db.updateSetting("settingKey", "")
-    } else {
-      await db.updateSetting("settingKey", newValue)
-    }
-  });
-};
-
-export const settingKeyState = atom<string>({
+export const settingKeyState = atomFamily({
   key: 'settingKeyState',
   default: "",
-  effects: [
-    sqliteEffect,
+  effects: (setting_name:string) => [
+    sqliteEffect(setting_name),
   ]
 })

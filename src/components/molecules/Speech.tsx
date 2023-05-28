@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, Fragment } from "react"
 import { AudioPlayer } from "./AudioPlayer"
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { useGetElementProperty } from "../../hooks/useGetElementProperty";
@@ -21,14 +21,16 @@ const Speech = (props: SpeechProps): JSX.Element => {
     const leave = () => {
         setHover(false);
     }
-    const scroll = () => {
-        setHover(false);
+    const addNewLine = (s: string, key: string) => {
+        const texts = s.split(/(\n)/).map((item, i) => {
+            return (
+                <Fragment key={`${key}_${i}`}>
+                    {item.match(/\n/) ? <br /> : item}
+                </Fragment>
+            );
+        });
+        return <div>{texts}</div>;
     }
-    useEffect(() => {
-        window.addEventListener('scroll', scroll)
-        return () => window.removeEventListener('scroll', scroll)
-    }, [])
-
     return (
         <div onMouseLeave={leave} >
             <div className={"flex mb-1 cursor-pointer hover:bg-gray-400 hover:text-white hover:rounded"}
@@ -40,7 +42,7 @@ const Speech = (props: SpeechProps): JSX.Element => {
                         <circle cx="4" cy="4" r="3.6" opacity="0.6" {...(model !== "vosk" ? { fill: "#10b981" } : {})} />
                     </svg>
                 </div>
-                <div className="pr-2">{content}</div>
+                <div className="pr-2">{addNewLine(content, wav)}</div>
             </div>
             {isHover &&
                 <AudioPlayer filePath={convertFileSrc(wav, "stream")}

@@ -23,8 +23,8 @@ use crossbeam_channel::{unbounded, Receiver};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
 use super::{
-    recognizer::MyRecognizer, sqlite::Sqlite, transcription::Transcription,
-    transcription_online::TranscriptionOnline, writer::Writer,
+    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite,
+    transcription::Transcription, transcription_online::TranscriptionOnline, writer::Writer,
 };
 
 pub struct Record {
@@ -187,7 +187,7 @@ impl Record {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
-                            if transcription_accuracy_clone.starts_with("online") {
+                            if transcription_accuracy_clone.starts_with("online-transcript") {
                                 let mut transcription_online = TranscriptionOnline::new(
                                     app_handle_clone,
                                     transcription_accuracy_clone,
@@ -195,6 +195,13 @@ impl Record {
                                     note_id,
                                 );
                                 transcription_online.start(stop_convert_rx_clone, false);
+                            } else if transcription_accuracy_clone.starts_with("online-chat") {
+                                let mut chat_online = ChatOnline::new(
+                                    app_handle_clone,
+                                    speaker_language_clone,
+                                    note_id,
+                                );
+                                chat_online.start(stop_convert_rx_clone, false);
                             } else {
                                 let mut transcription = Transcription::new(
                                     app_handle_clone,

@@ -6,6 +6,7 @@ import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperBut
 import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperProgress"
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
+import { SettingTemplate } from "../molecules/SettingTemplate"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -328,10 +329,11 @@ const SettingsMain = (): JSX.Element => {
                 <div className="px-5 mt-2">
                     <div className="mb-5">
                         <p>OpenAI社のAPIを利用することで、</p>
-                        <p>高速な追っかけ文字起こし・翻訳が選択可能となります。</p>
+                        <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
                         <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
                     </div>
-                    <SettingKey />
+                    <SettingKey settingName="settingKeyOpenai" />
+                    <SettingTemplate templateName="settingTemplate" />
                 </div>
             </div>
         </div>
