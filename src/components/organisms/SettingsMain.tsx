@@ -7,6 +7,10 @@ import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperP
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
 import { SettingTemplate } from "../molecules/SettingTemplate"
+import { SettingHook } from "../molecules/SettingHook"
+import { SettingResource } from "../molecules/SettingResource"
+import { SettingModel } from "../molecules/SettingModel"
+import { SettingAILanguage } from "../molecules/SettingAILanguage"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -327,13 +331,33 @@ const SettingsMain = (): JSX.Element => {
                     オンライン設定
                 </h2>
                 <div className="px-5 mt-2">
-                    <div className="mb-5">
-                        <p>OpenAI社のAPIを利用することで、</p>
-                        <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
-                        <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
+                    <div className="mb-2">
+                        <h3 className="text-lg">
+                            <p>OpenAI</p>
+                        </h3>
+                        <hr /></div>
+                    <div className="px-3">
+                        <div className="mb-5">
+                            <p>OpenAI社のAPIを利用することで、</p>
+                            <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
+                            <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
+                        </div>
+                        <SettingKey settingName="settingKeyOpenai" />
+                        <SettingModel />
+                        <div className="mt-5 mb-2">
+                            <p >AI設定</p>
+                            <hr />
+                        </div>
+                        <div className="mb-2">
+                            <p>ターミナルで任意のコマンドを実行した結果をAIに渡したり（CLI Resource）、</p>
+                            <p>AIへの役割を設定したり（システム ロール）、</p>
+                            <p>AIからの返答に対して、ターミナルで任意のコマンドを実行できます。（CLI Hook）</p>
+                        </div>
+                        <SettingAILanguage />
+                        <SettingResource resourceName="settingResource" />
+                        <SettingTemplate templateName="settingTemplate" />
+                        <SettingHook hookName="settingHook" />
                     </div>
-                    <SettingKey settingName="settingKeyOpenai" />
-                    <SettingTemplate templateName="settingTemplate" />
                 </div>
             </div>
         </div>

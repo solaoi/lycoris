@@ -25,6 +25,10 @@ INSERT INTO settings(setting_name, setting_status) VALUES("transcriptionAccuracy
 INSERT INTO settings(setting_name, setting_status) VALUES("settingKeyOpenai", "");
 INSERT INTO settings(setting_name, setting_status) VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status) VALUES("settingTemplate", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingHook", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingResource", "");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingModel", "gpt-3.5-turbo");
+INSERT INTO settings(setting_name, setting_status) VALUES("settingAILanguage", "None");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,

@@ -15,9 +15,9 @@ const SettingTemplate = (props: SettingTemplateProps): JSX.Element => {
     }
 
     return (
-        <div className="flex items-center">
-            <p className="w-[9rem]">AI - System Role -</p>
-            <textarea rows={5} placeholder="あなたは○○の専門家です。" className="p-2.5 h-full rounded-2xl input input-bordered focus:outline-none flex-1" value={settingKey} onChange={change} />
+        <div className="flex items-center mb-2">
+            <p className="w-[8rem]">システム ロール</p>
+            <textarea rows={5} placeholder='あなたは〇〇の専門家です。&#13;&#13;最新の情報"""&#13;{{resource}}&#13;"""' className="p-2.5 h-full rounded-2xl input input-bordered focus:outline-none flex-1" value={settingKey} onChange={change} />
         </div>
     )
 }
