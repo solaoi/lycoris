@@ -158,13 +158,12 @@ impl ChatOnline {
 
     #[tokio::main]
     async fn request_gpt(
+        model: &str,
         question: &str,
         token: String,
         template: String,
     ) -> Result<String, Box<dyn std::error::Error>> {
         let url = "https://api.openai.com/v1/chat/completions";
-
-        let model = "gpt-3.5-turbo";
         let temperature = 0;
 
         let client = Client::new();
@@ -197,14 +196,20 @@ impl ChatOnline {
             .send()
             .await?;
 
-        println!("Status: {}", response.status());
+        // println!("Status: {}", response.status());
+        let status = response.status();
         let json_response: Value = response.json().await?;
-        println!("Response: {:?}", json_response);
-        let response_text = json_response["choices"][0]["message"]["content"]
-            .as_str()
-            .unwrap_or("choices[0].message.content field not found");
+        // println!("Response: {:?}", json_response);
+        let response_text = if status == 200 {
+            json_response["choices"][0]["message"]["content"]
+                .as_str()
+                .unwrap_or("choices[0].message.content field not found")
+                .to_string()
+        } else {
+            json_response.to_string()
+        };
 
-        Ok(response_text.to_string())
+        Ok(response_text)
     }
 
     fn convert(&mut self) -> Result<(), rusqlite::Error> {
@@ -217,24 +222,100 @@ impl ChatOnline {
             );
             if result.is_ok() {
                 let question = result.unwrap();
-                let result = self.sqlite.select_ai_template();
-                let template = if result.is_ok() {
-                    result.unwrap()
+
+                let result = self.sqlite.select_ai_resource();
+                let resource = if result.is_ok() {
+                    let command = result.unwrap().replace("{{question}}", &question);
+                    println!("command: {}", command);
+                    if command == "" {
+                        "".to_string()
+                    } else {
+                        let result = std::process::Command::new("sh")
+                            .arg("-c")
+                            .arg(command)
+                            .output()
+                            .expect("failed");
+                        if !result.stderr.is_empty() {
+                            String::from_utf8(result.stderr).expect("Found invalid UTF-8")
+                        } else {
+                            String::from_utf8(result.stdout).expect("Found invalid UTF-8")
+                        }
+                    }
                 } else {
                     "".to_string()
                 };
-                let result = Self::request_gpt(&question, self.token.clone(), template);
+                let result = self.sqlite.select_ai_template();
+                let template = if result.is_ok() {
+                    if resource == "" {
+                        result.unwrap()
+                    } else {
+                        result
+                            .unwrap()
+                            .replace("{{resource}}", &resource)
+                            .replace("{{question}}", &question)
+                    }
+                } else {
+                    "".to_string()
+                };
+
+                let result = self.sqlite.select_ai_model();
+                let model = if result.is_ok() {
+                    result.unwrap()
+                } else {
+                    "gpt-3.5-turbo".to_string()
+                };
+                let result = Self::request_gpt(&model, &question, self.token.clone(), template);
                 if result.is_ok() {
                     let answer = result.unwrap();
-                    let updated = self.sqlite.update_model_vosk_to_whisper(
-                        speech.id,
-                        format!("Q. {}\nA. {}", question, answer),
-                    );
+
+                    let result = self.sqlite.select_ai_hook();
+                    let hook = if result.is_ok() {
+                        result.unwrap()
+                    } else {
+                        "".to_string()
+                    };
+                    let output = if hook != "" {
+                        let command = hook
+                            .replace("{{resource}}", &resource)
+                            .replace("{{answer}}", &answer)
+                            .replace("{{question}}", &question);
+                        let result = std::process::Command::new("sh")
+                            .arg("-c")
+                            .arg(command)
+                            .output()
+                            .expect("failed");
+                        if !result.stderr.is_empty() {
+                            String::from_utf8(result.stderr).expect("Found invalid UTF-8")
+                        } else {
+                            String::from_utf8(result.stdout).expect("Found invalid UTF-8")
+                        }
+                    } else {
+                        "".to_string()
+                    };
+                    let message = if output != "" {
+                        format!("Q. {}\nA. {}\nCLI. {}", question, answer, output)
+                    } else {
+                        format!("Q. {}\nA. {}", question, answer)
+                    };
+
+                    let updated = self.sqlite.update_model_vosk_to_whisper(speech.id, message);
 
                     self.app_handle
                         .clone()
                         .emit_all("finalTextConverted", updated.unwrap())
                         .unwrap();
+
+                    let result = self.sqlite.select_ai_language();
+                    if result.is_ok() {
+                        let lang = result.unwrap();
+                        if lang != "None" {
+                            std::process::Command::new("sh")
+                                .arg("-c")
+                                .arg(format!("say -v {} \"{}\"", lang, answer))
+                                .output()
+                                .expect("failed");
+                        }
+                    }
                 } else {
                     println!("gpt api is temporally failed, so skipping...")
                 }

@@ -81,9 +81,41 @@ impl Sqlite {
         );
     }
 
+    pub fn select_ai_language(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingAILanguage\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
+    pub fn select_ai_model(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingModel\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
+    pub fn select_ai_resource(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingResource\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
     pub fn select_ai_template(&self) -> Result<String, rusqlite::Error> {
         return self.conn.query_row(
             "SELECT setting_status FROM settings WHERE setting_name = \"settingTemplate\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
+    pub fn select_ai_hook(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingHook\"",
             params![],
             |row| Ok(row.get_unwrap(0)),
         );
