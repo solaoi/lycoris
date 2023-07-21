@@ -146,9 +146,7 @@ impl ChatOnline {
             .send()
             .await?;
 
-        println!("Status: {}", response.status());
         let json_response: Value = response.json().await?;
-        println!("Response: {:?}", json_response);
         let response_text = json_response["text"]
             .as_str()
             .unwrap_or("text field not found");
@@ -243,7 +241,6 @@ impl ChatOnline {
         let status = response.status();
         let json_response: Value = response.json().await?;
 
-        println!("Response: {:?}", json_response);
         let response_text = if status == 200 {
             if functions != "" {
                 let name = serde_json::to_string(
@@ -288,7 +285,6 @@ impl ChatOnline {
                 let result = self.sqlite.select_ai_resource();
                 let resource = if result.is_ok() {
                     let command = result.unwrap().replace("{{question}}", &question);
-                    println!("command: {}", command);
                     if command == "" {
                         "".to_string()
                     } else {
