@@ -23,8 +23,10 @@ const SettingKey = (props: SettingKeyProps): JSX.Element => {
 
     return (
         <div className="flex items-center mb-2">
-            <p className="w-[8rem]">API キー</p>
-            <input type="password" placeholder={placeholder} className="rounded-2xl input input-bordered focus:outline-none flex-1" value={settingKey} onChange={change} />
+            <p className="w-[12rem]">API キー</p>
+            <div className="flex flex-col w-full">
+                <input type="password" placeholder={placeholder} className="rounded-2xl input input-bordered focus:outline-none" value={settingKey} onChange={change} />
+            </div>
         </div>
     )
 }

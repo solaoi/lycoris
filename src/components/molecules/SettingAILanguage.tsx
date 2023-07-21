@@ -60,12 +60,14 @@ const SettingAILanguage = (): JSX.Element => {
 
     return (
         <div className="flex items-center mb-2">
-            <p className="w-[8rem]">発話</p>
-            <select className="select select-bordered focus:outline-none text-xs" name="setting-aiLanguage" onChange={change} >
-                {settingAILanguages?.map((aiLanguage, i) => (
-                    <option key={"setting-aiLanguage" + i} value={aiLanguage} selected={aiLanguage === settingKey}>{mapper(aiLanguage)}</option>
-                ))}
-            </select>
+            <p className="w-[12rem]">発話</p>
+            <div className="flex flex-col w-full">
+                <select className="select select-bordered focus:outline-none text-xs w-fit" name="setting-aiLanguage" onChange={change} >
+                    {settingAILanguages?.map((aiLanguage, i) => (
+                        <option key={"setting-aiLanguage" + i} value={aiLanguage} selected={aiLanguage === settingKey}>{mapper(aiLanguage)}</option>
+                    ))}
+                </select>
+            </div>
         </div>
     )
 }

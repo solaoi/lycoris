@@ -162,6 +162,8 @@ impl ChatOnline {
         question: &str,
         token: String,
         template: String,
+        functions: &str,
+        function_call: &str,
     ) -> Result<String, Box<dyn std::error::Error>> {
         let url = "https://api.openai.com/v1/chat/completions";
         let temperature = 0;
@@ -176,11 +178,32 @@ impl ChatOnline {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
         let post_body = if template != "" {
-            json!({
-              "model": model,
-              "temperature": temperature,
-              "messages": [{"role": "system", "content": template},{"role": "user", "content": question}]
-            })
+            if functions != "" {
+                let func: Value = serde_json::from_str(functions).unwrap();
+                if function_call != "" {
+                    json!({
+                    "model": model,
+                    "temperature": temperature,
+                    "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
+                    "functions": func,
+                    "function_call" : json!({"name": function_call})
+                    })
+                } else {
+                    json!({
+                    "model": model,
+                    "temperature": temperature,
+                    "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
+                    "functions": func,
+                    "function_call" : "auto"
+                    })
+                }
+            } else {
+                json!({
+                "model": model,
+                "temperature": temperature,
+                "messages": [{"role": "system", "content": template},{"role": "user", "content": question}]
+                })
+            }
         } else {
             json!({
               "model": model,
@@ -196,15 +219,33 @@ impl ChatOnline {
             .send()
             .await?;
 
-        // println!("Status: {}", response.status());
         let status = response.status();
         let json_response: Value = response.json().await?;
-        // println!("Response: {:?}", json_response);
+
+        println!("Response: {:?}", json_response);
         let response_text = if status == 200 {
-            json_response["choices"][0]["message"]["content"]
-                .as_str()
-                .unwrap_or("choices[0].message.content field not found")
-                .to_string()
+            if functions != "" {
+                let name = serde_json::to_string(
+                    &json_response["choices"][0]["message"]["function_call"]["name"],
+                )
+                .unwrap_or("choices[0].message.function_call.name field not found".to_string());
+                let arguments = serde_json::to_string(
+                    &json_response["choices"][0]["message"]["function_call"]["arguments"],
+                )
+                .unwrap_or("choices[0].message.function_call.arguments field not found".to_string())
+                .replace("\\n", "")
+                .replace("\\r", "")
+                .replace("\\\"", "\"")
+                .replace("\"{", "{")
+                .replace("}\"", "}");
+
+                format!("{{\"name\": {}, \"arguments\": {}}}", name, arguments)
+            } else {
+                json_response["choices"][0]["message"]["content"]
+                    .as_str()
+                    .unwrap_or("choices[0].message.content field not found")
+                    .to_string()
+            }
         } else {
             json_response.to_string()
         };
@@ -264,7 +305,26 @@ impl ChatOnline {
                 } else {
                     "gpt-3.5-turbo".to_string()
                 };
-                let result = Self::request_gpt(&model, &question, self.token.clone(), template);
+                let result = self.sqlite.select_fc_functions();
+                let functions = if result.is_ok() {
+                    result.unwrap()
+                } else {
+                    "".to_string()
+                };
+                let result = self.sqlite.select_fc_function_call();
+                let function_call = if result.is_ok() {
+                    result.unwrap()
+                } else {
+                    "".to_string()
+                };
+                let result = Self::request_gpt(
+                    &model,
+                    &question,
+                    self.token.clone(),
+                    template,
+                    &functions,
+                    &function_call,
+                );
                 if result.is_ok() {
                     let answer = result.unwrap();
 
