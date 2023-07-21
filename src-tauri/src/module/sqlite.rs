@@ -113,6 +113,22 @@ impl Sqlite {
         );
     }
 
+    pub fn select_fc_functions(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingFCfunctions\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
+    pub fn select_fc_function_call(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingFCfunctionCall\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
     pub fn select_ai_hook(&self) -> Result<String, rusqlite::Error> {
         return self.conn.query_row(
             "SELECT setting_status FROM settings WHERE setting_name = \"settingHook\"",

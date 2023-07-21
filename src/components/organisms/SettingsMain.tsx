@@ -7,6 +7,8 @@ import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperP
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
 import { SettingTemplate } from "../molecules/SettingTemplate"
+import { SettingFCfunctions } from "../molecules/SettingFCfunctions"
+import { SettingFCfunctionCall } from "../molecules/SettingFCfunctionCall"
 import { SettingHook } from "../molecules/SettingHook"
 import { SettingResource } from "../molecules/SettingResource"
 import { SettingModel } from "../molecules/SettingModel"
@@ -331,32 +333,42 @@ const SettingsMain = (): JSX.Element => {
                     オンライン設定
                 </h2>
                 <div className="px-5 mt-2">
-                    <div className="mb-2">
-                        <h3 className="text-lg">
+                    <div className="mb-4">
+                        <h3 className="text-lg mb-2">
                             <p>OpenAI</p>
                         </h3>
-                        <hr /></div>
+                        <hr />
+                    </div>
                     <div className="px-3">
-                        <div className="mb-5">
+                        <div className="mb-4">
                             <p>OpenAI社のAPIを利用することで、</p>
                             <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
                             <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
                         </div>
-                        <SettingKey settingName="settingKeyOpenai" />
+                        <div className="mb-8">
+                            <SettingKey settingName="settingKeyOpenai" />
+                        </div>
                         <SettingModel />
-                        <div className="mt-5 mb-2">
-                            <p >AI設定</p>
+                        <div className="mt-8 mb-4">
+                            <p className="mb-2">AIオプション</p>
                             <hr />
                         </div>
-                        <div className="mb-2">
-                            <p>ターミナルで任意のコマンドを実行した結果をAIに渡したり（CLI Resource）、</p>
-                            <p>AIへの役割を設定したり（システム ロール）、</p>
-                            <p>AIからの返答に対して、ターミナルで任意のコマンドを実行できます。（CLI Hook）</p>
+                        <div className="mb-8">
+                            <SettingAILanguage />
                         </div>
-                        <SettingAILanguage />
-                        <SettingResource resourceName="settingResource" />
-                        <SettingTemplate templateName="settingTemplate" />
-                        <SettingHook hookName="settingHook" />
+                        <div className="mb-8">
+                            <SettingResource />
+                        </div>
+                        <div className="mb-8">
+                            <SettingTemplate />
+                        </div>
+                        <div className="mb-8">
+                            <SettingFCfunctions />
+                        </div>
+                        <div className="mb-8">
+                            <SettingFCfunctionCall />
+                        </div>
+                        <SettingHook />
                     </div>
                 </div>
             </div>
