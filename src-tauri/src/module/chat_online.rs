@@ -205,11 +205,32 @@ impl ChatOnline {
                 })
             }
         } else {
-            json!({
-              "model": model,
-              "temperature": temperature,
-              "messages": [{"role": "user", "content": question}]
-            })
+            if functions != "" {
+                let func: Value = serde_json::from_str(functions).unwrap();
+                if function_call != "" {
+                    json!({
+                      "model": model,
+                      "temperature": temperature,
+                      "messages": [{"role": "user", "content": question}],
+                      "functions": func,
+                      "function_call" : json!({"name": function_call})
+                    })
+                } else {
+                    json!({
+                      "model": model,
+                      "temperature": temperature,
+                      "messages": [{"role": "user", "content": question}],
+                      "functions": func,
+                      "function_call" : "auto"
+                    })
+                }
+            } else {
+                json!({
+                  "model": model,
+                  "temperature": temperature,
+                  "messages": [{"role": "user", "content": question}]
+                })
+            }
         };
 
         let response = client
