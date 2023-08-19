@@ -103,7 +103,7 @@ impl Transcription {
                 ),
             }
             let data = if spec.channels != 1 {
-                whisper_rs::convert_stereo_to_mono_audio(&data)
+                whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
             } else {
                 data
             };
