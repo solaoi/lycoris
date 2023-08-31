@@ -25,7 +25,7 @@ impl WhisperModelDownloader {
 
     #[tokio::main]
     pub async fn download(&self, model_type: ModelTypeWhisper) {
-        let model_path: &str = &format!("resources/whisper/ggml-{}.bin", model_type.as_str());
+        let model_path: &str = &format!("resources/whisper/ggml-{}.zip", model_type.as_str());
         let path: &str = &self
             .app_handle
             .path_resolver()
@@ -34,7 +34,7 @@ impl WhisperModelDownloader {
             .to_string_lossy()
             .to_string();
         let url: &str = &format!(
-            "https://object-storage.tyo1.conoha.io/v1/nc_b22de95e3cf1434da07499038766e2b7/lycoris/ggml-{}.bin",
+            "https://object-storage.tyo1.conoha.io/v1/nc_b22de95e3cf1434da07499038766e2b7/lycoris/ggml-{}.zip",
             model_type.as_str()
         );
         let res = reqwest::get(url).await.unwrap();
@@ -90,6 +90,24 @@ impl WhisperModelDownloader {
                 rate = current_rate
             }
         }
+
+        let dir: &str = &self
+            .app_handle
+            .path_resolver()
+            .resolve_resource("resources/whisper")
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        let _ = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(format!("unzip {} -d {}", path, dir))
+            .output()
+            .expect("failed");
+        let _ = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(format!("rm {}", path))
+            .output()
+            .expect("failed");
 
         let _ = Sqlite::new().update_model_is_downloaded(model_type.as_str().to_string(), 1);
 
