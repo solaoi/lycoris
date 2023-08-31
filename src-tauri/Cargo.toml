@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.3"
+version = "0.9.4"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -25,7 +25,7 @@ once_cell = "1.13.1"
 crossbeam-channel = "0.5.6"
 chrono = "0.4.22"
 hound = "3.4.0"
-whisper-rs = "0.4.0"
+whisper-rs = "0.8.0"
 rusqlite = "*"
 samplerate-rs = "0.1.0"
 # download model and openai request
@@ -41,6 +41,8 @@ features = ["sqlite"]
 [dependencies.tauri-plugin-window-state]
 git = "https://github.com/tauri-apps/plugins-workspace"
 branch = "dev"
+[target.'cfg(target_arch = "aarch64")'.dependencies.whisper-rs]
+features = ["coreml"]
 
 [features]
 # by default Tauri runs in production mode

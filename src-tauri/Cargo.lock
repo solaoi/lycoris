@@ -2004,7 +2004,7 @@ dependencies = [
 
 [[package]]
 name = "lycoris"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "chrono",
  "cpal",
@@ -4654,20 +4654,21 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.4.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "124d641b84e8aa4a1ef0a2155d4da393155099c4b7fa6ad296506272cb98d01f"
+checksum = "2c950fb18ad556b053ba615b88fd4d01ed6020be740c3371eb0fc4aec64a0639"
 dependencies = [
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.3.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "761859cea9cd0b640f33db272747437ce4b83871741cc3e68605564b840bf39b"
+checksum = "094a5bd86f6f52562bbc74c28f27cd80197e54656cfb7213cf4ba37b5246cc9e"
 dependencies = [
  "bindgen 0.64.0",
+ "cfg-if",
 ]
 
 [[package]]
