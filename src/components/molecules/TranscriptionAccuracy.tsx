@@ -74,6 +74,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             ))}
             {settingKeyOpenai && <>
                 <option value="online-transcript" selected={"online-transcript" === transcriptionAccuracy}>文字起こし：オンライン</option>
+                <option value="online-chat" selected={"online-chat" === transcriptionAccuracy}>AI：オンライン</option>
                 {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (<option value="online-translate-to-en" selected={"online-translate-to-en" === transcriptionAccuracy}>翻訳（英）：オンライン</option>)}</>}
         </select>
     )

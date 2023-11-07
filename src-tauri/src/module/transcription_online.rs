@@ -189,13 +189,10 @@ impl TranscriptionOnline {
                     .sqlite
                     .update_model_vosk_to_whisper(speech.id, result.unwrap());
 
-                let updated = updated.unwrap();
-                if updated.content != "" {
-                    self.app_handle
-                        .clone()
-                        .emit_all("finalTextConverted", updated)
-                        .unwrap();
-                }
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated.unwrap())
+                    .unwrap();
             } else {
                 println!("whisper api is temporally failed, so skipping...")
             }

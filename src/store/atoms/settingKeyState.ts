@@ -23,7 +23,6 @@ const sqliteEffect: (setting_name:string) => AtomEffect<string> =
         if (isReset) {
           await db.updateSetting(setting_name, "")
         } else {
-          console.log("aaaaa")
           await db.updateSetting(setting_name, newValue)
         }
       });

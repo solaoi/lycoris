@@ -116,9 +116,8 @@ impl Transcription {
             )
             .unwrap();
 
-            // let mut ctx = Transcriber::build(self.app_handle.clone());
-            // let mut ctx = self.ctx;
-            let result = self.ctx.full(
+            let mut state = self.ctx.create_state().expect("failed to create state");
+            let result = state.full(
                 Transcriber::build_params(
                     self.speaker_language.clone(),
                     self.transcription_accuracy.clone(),
@@ -126,11 +125,12 @@ impl Transcription {
                 &audio_data[..],
             );
             if result.is_ok() {
-                let num_segments = self.ctx.full_n_segments();
+                let num_segments = state
+                    .full_n_segments()
+                    .expect("failed to get number of segments");
                 let mut converted: Vec<String> = vec!["".to_string()];
                 for i in 0..num_segments {
-                    let segment = self
-                        .ctx
+                    let segment = state
                         .full_get_segment_text(i)
                         .expect("failed to get segment");
                     converted.push(segment.to_string());

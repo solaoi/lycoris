@@ -300,9 +300,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.10.0"
+version = "3.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37ccbd214614c6783386c1af30caf03192f17891059cecc394b4fb119e363de3"
+checksum = "0d261e256854913907f67ed06efbc3338dfe6179796deefc1ff763fc1aee5535"
 
 [[package]]
 name = "bytemuck"
@@ -1662,9 +1662,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.3.15"
+version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f9f29bc9dda355256b2916cf526ab02ce0aeaaaf2bad60d65ef3f12f11dd0f4"
+checksum = "66b91535aa35fea1523ad1b86cb6b53c28e0ae566ba4a460f4457e936cad7c6f"
 dependencies = [
  "bytes",
  "fnv",
@@ -2230,7 +2230,7 @@ dependencies = [
 
 [[package]]
 name = "lycoris"
-version = "0.5.0"
+version = "0.9.4"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2710,9 +2710,9 @@ dependencies = [
 
 [[package]]
 name = "openssl"
-version = "0.10.41"
+version = "0.10.55"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "618febf65336490dfcf20b73f885f5651a0c89c64c2d4a8c3662585a70bf5bd0"
+checksum = "345df152bc43501c5eb9e4654ff05f794effb78d4efe3d53abc158baddc0703d"
 dependencies = [
  "bitflags 1.3.2",
  "cfg-if",
@@ -2742,11 +2742,10 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "openssl-sys"
-version = "0.9.75"
+version = "0.9.90"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5f9bd0c2710541a3cda73d6f9ac4f1b240de4ae261065d309dbe73d9dceb42f"
+checksum = "374533b0e45f3a7ced10fcaeccca020e66656bc03dac384f852e4e5a7a8104a6"
 dependencies = [
- "autocfg",
  "cc",
  "libc",
  "pkg-config",
@@ -4182,9 +4181,9 @@ dependencies = [
 
 [[package]]
 name = "tauri"
-version = "1.2.4"
+version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe7e0f1d535e7cbbbab43c82be4fc992b84f9156c16c160955617e0260ebc449"
+checksum = "e3a1fe72365a6d860fddf3403934649a5157b2bbb6f0b50dd3a8858cd1a22412"
 dependencies = [
  "anyhow",
  "attohttpc",
@@ -4321,9 +4320,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime"
-version = "0.12.1"
+version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c507d954d08ac8705d235bc70ec6975b9054fb95ff7823af72dbb04186596f3b"
+checksum = "dc36898ad4acb6c381878acf903c320a36cf29b68b74f6e791d6045b6557128c"
 dependencies = [
  "gtk",
  "http",
@@ -4334,6 +4333,7 @@ dependencies = [
  "serde_json",
  "tauri-utils",
  "thiserror",
+ "url",
  "uuid 1.2.1",
  "webview2-com",
  "windows 0.39.0",
@@ -4341,9 +4341,9 @@ dependencies = [
 
 [[package]]
 name = "tauri-runtime-wry"
-version = "0.12.2"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36b1c5764a41a13176a4599b5b7bd0881bea7d94dfe45e1e755f789b98317e30"
+checksum = "e2ebc22bc5566ba33310744fadd86709fa591ed163491b165855474523ac1aab"
 dependencies = [
  "cocoa",
  "gtk",
@@ -4352,6 +4352,7 @@ dependencies = [
  "raw-window-handle",
  "tauri-runtime",
  "tauri-utils",
+ "url",
  "uuid 1.2.1",
  "webkit2gtk",
  "webview2-com",
@@ -5123,20 +5124,21 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.5.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa7e1b9b003aa3285a0e4469219566266aa1d51ced1be38587251a4f713a1677"
+checksum = "2c950fb18ad556b053ba615b88fd4d01ed6020be740c3371eb0fc4aec64a0639"
 dependencies = [
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.3.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "761859cea9cd0b640f33db272747437ce4b83871741cc3e68605564b840bf39b"
+checksum = "094a5bd86f6f52562bbc74c28f27cd80197e54656cfb7213cf4ba37b5246cc9e"
 dependencies = [
  "bindgen 0.64.0",
+ "cfg-if",
 ]
 
 [[package]]
@@ -5567,9 +5569,9 @@ dependencies = [
 
 [[package]]
 name = "xml-rs"
-version = "0.8.4"
+version = "0.8.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2d7d3948613f75c98fd9328cfdcc45acc4d360655289d0a7d4ec931392200a3"
+checksum = "52839dc911083a8ef63efa4d039d1f58b5e409f923e44c80828f206f66e5541c"
 
 [[package]]
 name = "zip"

@@ -10,6 +10,13 @@ import { ModelDownloadNllbButton } from "../molecules/ModelDownloadNllbButton"
 import { ModelDownloadNllbProgress } from "../molecules/ModelDownloadNllbProgress"
 import { SettingsSelectTranslations } from "../molecules/SettingsSelectTranslations"
 import { SettingPlan } from "../molecules/SettingPlan"
+import { SettingTemplate } from "../molecules/SettingTemplate"
+import { SettingFCfunctions } from "../molecules/SettingFCfunctions"
+import { SettingFCfunctionCall } from "../molecules/SettingFCfunctionCall"
+import { SettingHook } from "../molecules/SettingHook"
+import { SettingResource } from "../molecules/SettingResource"
+import { SettingModel } from "../molecules/SettingModel"
+import { SettingAILanguage } from "../molecules/SettingAILanguage"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -359,22 +366,60 @@ const SettingsMain = (): JSX.Element => {
                     </svg>
                     オンライン設定
                 </h2>
-                <div className="px-5 mt-6">
-                    <h3 className="pl-1 font-semibold pb-2 mb-4 border-b">OpenAI</h3>
-                    <div className="mb-8">
-                        <p>高速な追っかけ文字起こし・追っかけ翻訳（英語への翻訳）が選択可能となります。</p>
-                        <p>（ API の利用に関しては、 OpenAI 社の利用規約を参照ください。）</p>
+                <div className="px-5 mt-2">
+                    <div className="mb-4">
+                        <h3 className="text-lg mb-2">
+                            <p>OpenAI</p>
+                        </h3>
+                        <hr />
                     </div>
-                    <SettingKey settingName="settingKeyOpenai" />
-                </div>
-                <div className="px-5 mt-6">
-                    <h3 className="pl-1 font-semibold pb-2 mb-4 border-b">DeepL </h3>
-                    <div className="mb-8">
-                        <p>高速な追っかけ翻訳（英語以外への翻訳）が選択可能となります。</p>
-                        <p>（ API の利用に関しては、 DeepL 社の利用規約を参照ください。）</p>
+                    <div className="px-3">
+                        <div className="mb-4">
+                            <p>OpenAI社のAPIを利用することで、</p>
+                            <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
+                            <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
+                        </div>
+                        <div className="mb-8">
+                            <SettingKey settingName="settingKeyOpenai" />
+                        </div>
+                        <SettingModel />
+                        <div className="mt-8 mb-4">
+                            <p className="mb-2">AIオプション</p>
+                            <hr />
+                        </div>
+                        <div className="mb-8">
+                            <SettingAILanguage />
+                        </div>
+                        <div className="mb-8">
+                            <SettingResource />
+                        </div>
+                        <div className="mb-8">
+                            <SettingTemplate />
+                        </div>
+                        <div className="mb-8">
+                            <SettingFCfunctions />
+                        </div>
+                        <div className="mb-8">
+                            <SettingFCfunctionCall />
+                        </div>
+                        <SettingHook />
                     </div>
-                    <SettingPlan />
-                    <SettingKey settingName="settingKeyDeepl" />
+                    <div className="mb-4">
+                        <h3 className="text-lg mb-2">
+                            <p>DeepL</p>
+                        </h3>
+                        <hr />
+                    </div>
+                    <div className="px-3">
+                        <div className="mb-4">
+                            <p>DeepL社のAPIを利用することで、</p>
+                            <p>高速な追っかけ翻訳（英語以外への翻訳）が選択可能となります。</p>
+                            <p>（APIの利用に関しては、DeepL社の利用規約を参照ください。）</p>
+                        </div>
+                        <div className="mb-8">
+                            <SettingKey settingName="settingKeyDeepl" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

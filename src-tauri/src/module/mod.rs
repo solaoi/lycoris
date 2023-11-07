@@ -11,5 +11,6 @@ mod transcriber;
 pub mod transcription;
 pub mod transcription_online;
 mod translator;
+pub mod chat_online;
 mod writer;
 mod speaker;
