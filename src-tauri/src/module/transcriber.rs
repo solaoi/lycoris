@@ -71,7 +71,7 @@ impl Transcriber {
             "ja"
         };
         let mut params = FullParams::new(SamplingStrategy::BeamSearch {
-            beam_size: 5,
+            beam_size: 2,
             patience: 1.0,
         });
         let hardware_concurrency = cmp::min(
