@@ -39,7 +39,6 @@ CREATE TABLE models (
 );
 INSERT INTO models(model_name, model_type) VALUES("base", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("base.en", "whisper");
-INSERT INTO models(model_name, model_type) VALUES("large-v1", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("large", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("medium", "whisper");
 INSERT INTO models(model_name, model_type) VALUES("medium.en", "whisper");

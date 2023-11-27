@@ -3,7 +3,6 @@ use std::str::FromStr;
 pub enum ModelTypeWhisper {
     Base,
     BaseEn,
-    LargeV1,
     Large,
     Medium,
     MediumEn,
@@ -18,7 +17,6 @@ impl ModelTypeWhisper {
         match self {
             ModelTypeWhisper::Base => "base",
             ModelTypeWhisper::BaseEn => "base.en",
-            ModelTypeWhisper::LargeV1 => "large-v1",
             ModelTypeWhisper::Large => "large",
             ModelTypeWhisper::Medium => "medium",
             ModelTypeWhisper::MediumEn => "medium.en",
@@ -37,7 +35,6 @@ impl FromStr for ModelTypeWhisper {
         match input {
             "base" => Ok(ModelTypeWhisper::Base),
             "base.en" => Ok(ModelTypeWhisper::BaseEn),
-            "large-v1" => Ok(ModelTypeWhisper::LargeV1),
             "large" => Ok(ModelTypeWhisper::Large),
             "medium" => Ok(ModelTypeWhisper::Medium),
             "medium.en" => Ok(ModelTypeWhisper::MediumEn),
