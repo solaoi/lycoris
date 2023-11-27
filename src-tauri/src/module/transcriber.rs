@@ -12,6 +12,8 @@ impl Transcriber {
             model_type = "small";
         } else if transcription_accuracy.starts_with("medium") {
             model_type = "medium"
+        } else if transcription_accuracy.starts_with("large-distil.en"){
+            model_type = "large-distil.en"
         } else if transcription_accuracy.starts_with("large") {
             model_type = "large"
         }

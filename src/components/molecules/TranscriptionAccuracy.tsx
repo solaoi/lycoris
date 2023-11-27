@@ -26,6 +26,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：中";
             case "large":
                 return "文字起こし：高";
+            case "large-distil.en":
+                return "文字起こし：英";
             case "small-translate-to-en":
                 return "翻訳（英）：低";
             case "medium-translate-to-en":
@@ -33,7 +35,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             case "large-translate-to-en":
                 return "翻訳（英）：高";
             default:
-                throw new Error("unknown modelType");
+                throw new Error("unknown modelType: " + model);
         }
     }
 
@@ -44,6 +46,13 @@ const TranscriptionAccuracy = (): JSX.Element => {
             {downloadedModels?.reduce((a: string[], c) => {
                 if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                     return [...a, c]
+                }
+                if (c === "large-distil.en") {
+                    if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
+                        return [...a, c]
+                    } else {
+                        return a
+                    }
                 }
                 return [...a, c, `${c}-translate-to-en`]
             }, []).map((model, i) => (
