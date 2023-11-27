@@ -26,6 +26,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：中";
             case "large":
                 return "文字起こし：高";
+            case "large-distil-en":
+                return "文字起こし：英";
             case "small-translate-to-en":
                 return "翻訳（英）：低";
             case "medium-translate-to-en":

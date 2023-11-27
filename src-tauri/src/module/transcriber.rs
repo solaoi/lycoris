@@ -14,6 +14,8 @@ impl Transcriber {
             model_type = "medium"
         } else if transcription_accuracy.starts_with("large") {
             model_type = "large"
+        } else if transcription_accuracy.starts_with("large-distil.en"){
+            model_type = "large-distil.en"
         }
         let model_path = app_handle
             .path_resolver()
