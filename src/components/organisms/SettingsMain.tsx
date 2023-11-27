@@ -300,32 +300,32 @@ const SettingsMain = (): JSX.Element => {
                 <div className="px-5 mt-2">
                     <div className="mb-5">
                         <p>通常の文字起こしを追いかける形で、高精度で文字起こしや翻訳を行います。</p>
-                        <p>下記言語パックをダウンロードするか、オンライン設定を行ってください。</p>
+                        <p>下記精度に応じた言語パックをダウンロードするか、オンライン設定を行ってください。</p>
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：低）</p>
+                            <p>言語パック（汎用：低）</p>
                             <ModelDownloadWhisperButton modelType="small" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="small" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：中）</p>
+                            <p>言語パック（汎用：中）</p>
                             <ModelDownloadWhisperButton modelType="medium" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="medium" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：高）</p>
+                            <p>言語パック（汎用：高）</p>
                             <ModelDownloadWhisperButton modelType="large" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（精度：高【英語特化】）</p>
+                            <p>言語パック（英語：高）</p>
                             <ModelDownloadWhisperButton modelType="large-distil.en" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.en" />
