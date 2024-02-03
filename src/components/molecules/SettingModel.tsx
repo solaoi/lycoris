@@ -3,7 +3,7 @@ import { useRecoilState } from 'recoil';
 import { settingKeyState } from "../../store/atoms/settingKeyState";
 
 const SettingModel = (): JSX.Element => {
-    const settingModels = ["gpt-3.5-turbo", "gpt-4"]
+    const settingModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-1106", "gpt-4", "gpt-4-1106-preview", "gpt-4-turbo-preview"]
     const [settingKey, setSettingKey] = useRecoilState(settingKeyState("settingModel"))
 
     const change = (e: ChangeEvent<HTMLSelectElement>) => {

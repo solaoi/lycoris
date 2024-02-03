@@ -1,7 +1,7 @@
 use std::{cmp, thread::available_parallelism};
 
 use tauri::AppHandle;
-use whisper_rs::{FullParams, SamplingStrategy, WhisperContext};
+use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
 pub struct Transcriber {}
 
@@ -12,6 +12,8 @@ impl Transcriber {
             model_type = "small";
         } else if transcription_accuracy.starts_with("medium") {
             model_type = "medium"
+        } else if transcription_accuracy.starts_with("large-distil.en"){
+            model_type = "large-distil.en"
         } else if transcription_accuracy.starts_with("large") {
             model_type = "large"
         }
@@ -22,7 +24,7 @@ impl Transcriber {
             .to_string_lossy()
             .to_string();
 
-        return WhisperContext::new(&model_path).expect("failed to load whisper model");
+        return WhisperContext::new_with_params(&model_path, WhisperContextParameters::default()).expect("failed to load whisper model");
     }
 
     pub fn build_params(
@@ -71,7 +73,7 @@ impl Transcriber {
             "ja"
         };
         let mut params = FullParams::new(SamplingStrategy::BeamSearch {
-            beam_size: 5,
+            beam_size: 2,
             patience: 1.0,
         });
         let hardware_concurrency = cmp::min(
