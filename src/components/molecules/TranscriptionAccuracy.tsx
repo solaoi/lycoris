@@ -5,6 +5,7 @@ import { modelWhisperDownloadedState } from "../../store/atoms/modelWhisperDownl
 import { recordState } from "../../store/atoms/recordState";
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { settingKeyState } from "../../store/atoms/settingKeyState";
+import { settingTranslationLanguagesState } from "../../store/atoms/settingTranslationLanguagesState";
 
 const TranscriptionAccuracy = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelWhisperDownloadedState)
@@ -12,6 +13,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const isRecording = useRecoilValue(recordState)
     const speakerLanguage = useRecoilValue(speakerLanguageState)
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"))
+    const activeLanguages = useRecoilValue(settingTranslationLanguagesState);
 
     const change = (e: ChangeEvent<HTMLSelectElement>) => {
         const transcriptionAccuracy = e.target.value
@@ -34,6 +36,18 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "翻訳（英）：中";
             case "large-translate-to-en":
                 return "翻訳（英）：高";
+            case "small-translate_low-to-ja":
+                return "翻訳（日）：低";
+            case "medium-translate_low-to-ja":
+                return "翻訳（日）：中";
+            case "large-translate_low-to-ja":
+                return "翻訳（日）：高";
+            case "small-translate_high-to-ja":
+                return "高翻訳（日）：低";
+            case "medium-translate_high-to-ja":
+                return "高翻訳（日）：中";
+            case "large-translate_high-to-ja":
+                return "高翻訳（日）：高";
             default:
                 throw new Error("unknown modelType: " + model);
         }
@@ -44,17 +58,24 @@ const TranscriptionAccuracy = (): JSX.Element => {
             <option disabled>追っかけ設定</option>
             <option value="off" selected={transcriptionAccuracy === "off"}>オフ</option>
             {downloadedModels?.reduce((a: string[], c) => {
+                if (c === "distilled-600m") {
+                    return [...a, ...activeLanguages.map(l=>`${l}-low-translate`)]
+                }
+                if (c === "1_3b") {
+                    return [...a, ...activeLanguages.map(l=>`${l}-high-translate`)]
+                }
+                if (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja")) {
+                    return [...a, c, `${c}-translate-to-en`]
+                }
                 if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                     return [...a, c]
                 }
                 if (c === "large-distil.en") {
                     if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                         return [...a, c]
-                    } else {
-                        return a
                     }
                 }
-                return [...a, c, `${c}-translate-to-en`]
+                return [...a, c, `${c}-translate-to-en`, `${c}-translate_low-to-ja`, `${c}-translate_high-to-ja`]
             }, []).map((model, i) => (
                 <option key={"transcription-accuracy" + i} value={model} selected={model === transcriptionAccuracy}>{mapModel(model)}</option>
             ))}

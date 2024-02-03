@@ -12,6 +12,8 @@ const SettingKey = (props: SettingKeyProps): JSX.Element => {
     const placeholder = (() => {
         if (settingName === "settingKeyOpenai") {
             return "xx-XXXXXXXXXXXXXXXXXXXXXXXX"
+        } else if (settingName === "settingKeyDeepl") {
+            return "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxxxx"
         } else {
             return "xxxxxxxxxxxxxxxxxxxxxxxxxxx"
         }
