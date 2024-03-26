@@ -10,7 +10,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-13, macos-14] # macos-13: Intel Mac, macos-14: M1 Mac
+        # os: [macos-13, macos-14] # macos-13: Intel Mac, macos-14: M1 Mac
+        os: [macos-13]
     timeout-minutes: 60
 
     steps:
