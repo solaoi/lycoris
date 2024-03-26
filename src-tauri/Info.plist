@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Request microphone access</string>
+	<string>システム設定の"セキュリティとプライバシー"設定で、このアプリケーションへのアクセスを許可してください。</string>
 </dict>
 </plist>

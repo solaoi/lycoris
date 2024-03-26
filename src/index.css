@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    overflow-y: clip;
+}
+
 @keyframes fadeOutUp {
     from {
         opacity: 1;

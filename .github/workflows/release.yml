@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, self-hosted] # self-hosted means macos-m2-local
+        os: [macos-13, macos-14] # macos-13: Intel Mac, macos-14: M1 Mac
     timeout-minutes: 60
 
     steps:
@@ -47,7 +47,7 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - if: matrix.os == 'macos-latest'
+    - if: matrix.os == 'macos-13'
       uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -65,7 +65,7 @@ jobs:
         prerelease: false
         args: --target x86_64-apple-darwin
 
-    - if: matrix.os == 'self-hosted'
+    - if: matrix.os == 'macos-14'
       uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -22,6 +22,7 @@ import { tracingNoteState } from '../../store/atoms/tracingNoteState'
 const NoteMain = (): JSX.Element => {
     const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState)
     const [partialText, setPartialText] = useState<string | null>(null)
+    const [partialTextDesktop, setPartialTextDesktop] = useState<string | null>(null)
     const [selectedNote, setSelectedNote] = useRecoilState(selectedNoteState)
     const recordingNote = useRecoilValue(recordingNoteState)
     const tracingNote = useRecoilValue(tracingNoteState)
@@ -60,9 +61,16 @@ const NoteMain = (): JSX.Element => {
     }, [histories, recordingNote]);
     useEffect(() => {
         setPartialText(null)
+        setPartialTextDesktop(null)
         const unlistenPartialText = listen('partialTextRecognized', event => {
             if (recordingNote === selectedNote!.note_id) {
-                setPartialText(event.payload as string)
+                const payload = event.payload as { content: string, is_desktop: boolean }
+                console.log(`is_desktop: ${payload.is_desktop}`)
+                if (payload.is_desktop) {
+                    setPartialTextDesktop(payload.content)
+                } else {
+                    setPartialText(payload.content)
+                }
             }
         });
         return () => {
@@ -71,10 +79,15 @@ const NoteMain = (): JSX.Element => {
     }, [selectedNote, recordingNote])
     useEffect(() => {
         const unlistenFinalText = listen('finalTextRecognized', event => {
-            setPartialText(null)
-            const current = event.payload as SpeechHistoryType
+            const { is_desktop, ...current } = event.payload as SpeechHistoryType & { is_desktop: boolean }
+            if (is_desktop) {
+                setPartialTextDesktop(null)
+            } else {
+                setPartialText(null)
+            }
             setHistories(prev => {
-                if (prev.length > 0 && (prev[prev.length - 1].content === current.content)) {
+                if (prev.length > 0 &&
+                    prev[prev.length - 1].content === current.content) {
                     return prev;
                 }
 
@@ -143,9 +156,16 @@ const NoteMain = (): JSX.Element => {
             フィルター：
             <MemoFilterButton />
         </div>
-        <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
+        <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} />
-            <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >{partialText}</div>
+            <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >
+                {partialTextDesktop !== null && partialText !== null && <>
+                    <p>デスクトップ音声：{partialTextDesktop}</p>
+                    <p>マイク音声：{partialText}</p>
+                </>}
+                {partialTextDesktop !== null && partialText === null && <p>{partialTextDesktop}</p>}
+                {partialTextDesktop === null && partialText !== null && <p>{partialText}</p>}
+            </div>
             <NoteFooter titleRef={inputEl} />
         </div>
         <div className={"flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-5 bg-base-200 rounded-lg drop-shadow-lg cursor-pointer hover:bg-base-300" + (!showGotoBottom && " hidden")} onClick={() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }}>

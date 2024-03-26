@@ -6,6 +6,12 @@ use tauri::{AppHandle, Manager};
 use unicode_segmentation::UnicodeSegmentation;
 use vosk::{DecodingState, Model, Recognizer};
 
+#[derive(Clone, serde::Serialize)]
+struct PartialText {
+    content: String,
+    is_desktop: bool,
+}
+
 pub struct MyRecognizer {}
 
 impl MyRecognizer {
@@ -28,6 +34,7 @@ impl MyRecognizer {
         data: &[T],
         channels: ChannelCount,
         notify_decoding_state_is_finalized_tx: SyncSender<String>,
+        is_desktop: bool,
     ) {
         let data: Vec<i16> = data.iter().map(|v| v.to_sample()).collect();
         let data = if channels != 1 {
@@ -45,7 +52,13 @@ impl MyRecognizer {
                     last_partial.insert_str(0, &result.partial);
                     if !result.partial.is_empty() {
                         app_handle
-                            .emit_all("partialTextRecognized", result.partial)
+                            .emit_all(
+                                "partialTextRecognized",
+                                PartialText {
+                                    content: result.partial.to_string(),
+                                    is_desktop,
+                                },
+                            )
                             .unwrap();
                     }
                 }

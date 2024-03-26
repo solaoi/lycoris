@@ -62,6 +62,19 @@ fn list_devices_command() -> Vec<Device> {
 }
 
 #[tauri::command]
+fn has_desktop_record_permission_command() -> bool {
+    module::permission_record_desktop::has_desktop_record_permission()
+}
+
+#[tauri::command]
+fn open_microphone_permission_command() {
+    std::process::Command::new("open")
+        .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")
+        .spawn()
+        .expect("failed to open system preferences");
+}
+
+#[tauri::command]
 fn start_command(
     state: State<'_, RecordState>,
     window: tauri::Window,
@@ -69,19 +82,55 @@ fn start_command(
     speaker_language: String,
     transcription_accuracy: String,
     note_id: u64,
+    device_type: String, // microphone, desktop, both
 ) {
     let mut lock = state.0.lock().unwrap();
     let (stop_record_tx, stop_record_rx) = unbounded();
     *lock = Some(stop_record_tx);
     std::thread::spawn(move || {
-        let record = module::record::Record::new(window.app_handle().clone());
-        record.start(
-            device_label,
-            speaker_language,
-            transcription_accuracy,
-            note_id,
-            stop_record_rx,
-        );
+        if device_type == "microphone" {
+            let record = module::record::Record::new(window.app_handle().clone());
+            record.start(
+                device_label,
+                speaker_language,
+                transcription_accuracy,
+                note_id,
+                stop_record_rx,
+            );
+        } else if device_type == "desktop" {
+            let record_desktop =
+                module::record_desktop::RecordDesktop::new(window.app_handle().clone());
+            record_desktop.start(
+                speaker_language,
+                transcription_accuracy,
+                note_id,
+                stop_record_rx,
+                None,
+            );
+        } else {
+            let record = module::record::Record::new(window.app_handle().clone());
+            let record_desktop =
+                module::record_desktop::RecordDesktop::new(window.app_handle().clone());
+
+            let (stop_record_clone_tx, stop_record_clone_rx) = unbounded();
+            let speaker_language_clone = speaker_language.clone();
+            std::thread::spawn(move || {
+                record_desktop.start(
+                    speaker_language_clone,
+                    transcription_accuracy,
+                    note_id,
+                    stop_record_rx,
+                    Some(stop_record_clone_tx),
+                );
+            });
+            record.start(
+                device_label,
+                speaker_language,
+                "off".to_string(),
+                note_id,
+                stop_record_clone_rx.clone(),
+            );
+        }
     });
 }
 
@@ -209,6 +258,8 @@ fn main() {
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,
+            has_desktop_record_permission_command,
+            open_microphone_permission_command,
             start_command,
             stop_command,
             start_trace_command,
