@@ -325,7 +325,7 @@ const SettingsMain = (): JSX.Element => {
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（英語：高）</p>
+                            <p>言語パック（英語：速度優先）</p>
                             <ModelDownloadWhisperButton modelType="large-distil.en" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.en" />
