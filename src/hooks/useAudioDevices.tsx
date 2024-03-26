@@ -5,11 +5,11 @@ type Device = {
   label: string;
 }
 
-const useAudioDevices = () => {
+const useAudioDevices = (forceReload: boolean = false) => {
   const [devices, setDevices] = useState<Device[]>([]);
   useEffect(() => {
     invoke('list_devices_command').then(devices => setDevices(devices as Device[]))
-  }, []);
+  }, [forceReload]);
 
   return devices;
 };

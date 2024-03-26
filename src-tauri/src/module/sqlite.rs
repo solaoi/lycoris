@@ -17,6 +17,7 @@ pub struct Speech {
     pub model: String,
     pub model_description: String,
     pub note_id: u64,
+    pub is_desktop: bool,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -48,6 +49,7 @@ impl Sqlite {
                     model: row.get_unwrap(5),
                     model_description: row.get_unwrap(6),
                     note_id: row.get_unwrap(7),
+                    is_desktop: false,
                 })
             })
             .unwrap()
@@ -68,7 +70,8 @@ impl Sqlite {
                     wav: row.get_unwrap(4),
                     model: row.get_unwrap(5),
                     model_description: row.get_unwrap(6),
-                    note_id: row.get_unwrap(7)
+                    note_id: row.get_unwrap(7),
+                    is_desktop: false,
                 })
             });
     }
@@ -186,7 +189,7 @@ impl Sqlite {
             "INSERT INTO speeches (speech_type, created_at_unixtime, content, wav, model, model_description, note_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![speech_type, created_at_unixtime, content, wav, model, model_description, note_id],
         ) {
-            Ok(_) => Ok(Speech { id: self.conn.last_insert_rowid() as u16, speech_type, created_at_unixtime, content, wav, model, model_description, note_id }),
+            Ok(_) => Ok(Speech { id: self.conn.last_insert_rowid() as u16, speech_type, created_at_unixtime, content, wav, model, model_description, note_id, is_desktop: false }),
             Err(err) => Err(err),
         }
     }
