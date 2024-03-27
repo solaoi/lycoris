@@ -27,7 +27,7 @@
     "zenn-markdown-html": "^0.1.141"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.2.3",
+    "@tauri-apps/cli": "^1.5.11",
     "@types/markdown-it": "^13.0.7",
     "@types/react": "^18.0.29",
     "@types/react-dom": "^18.0.11",
