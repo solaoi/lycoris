@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         # os: [macos-13, macos-14] # macos-13: Intel Mac, macos-14: M1 Mac
-        os: [macos-13]
+        os: [macos-latest]
     timeout-minutes: 60
 
     steps:
@@ -48,7 +48,7 @@ jobs:
     - name: install app dependencies
       run: yarn install --frozen-lockfile
 
-    - if: matrix.os == 'macos-13'
+    - if: matrix.os == 'macos-latest'
       uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
