@@ -1,11 +1,11 @@
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useAudioDevices } from "../../hooks/useAudioDevices"
-import { useHasPermissionRecordDesktop } from "../../hooks/useHasPermissionRecordDesktop"
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { audioDeviceState } from "../../store/atoms/audioDeviceState";
 import { desktopAudioState } from "../../store/atoms/desktopAudioState";
 import { recordState } from '../../store/atoms/recordState';
-import { useHasPermissionRecord } from "../../hooks/useHasPermissionRecord";
+import { useHasPermissionMicrophone } from "../../hooks/useHasPermissionMicrophone";
+import { useHasPermissionScreenCapture } from "../../hooks/useHasPermissionScreenCapture";
 
 const AudioDevices = (): JSX.Element => {
     const [audioDevice, setAudioDevice] = useRecoilState(audioDeviceState)
@@ -16,38 +16,38 @@ const AudioDevices = (): JSX.Element => {
     const audioDevices = useAudioDevices(showAudioSource)
 
     const [isDesktopAudioToggled, setIsDesktopAudioToggled] = useState<boolean | null>(null)
-    const hasPermissionRecordDesktop = useHasPermissionRecordDesktop(isDesktopAudioToggled)
+    const hasPermissionScreenCapture = useHasPermissionScreenCapture(isDesktopAudioToggled)
     const [isAudioToggled, setIsAudioToggled] = useState<boolean | null>(null)
-    const hasPermissionRecord = useHasPermissionRecord(isAudioToggled)
+    const hasPermissionMicrophone = useHasPermissionMicrophone(isAudioToggled)
 
     const dropdownRef = useRef<HTMLLabelElement>(null);
     const checkboxRecordDesktopRef = useRef<HTMLInputElement>(null);
     const checkboxRecordRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        setHasDesktopAudio(!checkboxRecordDesktopRef.current!.checked && hasPermissionRecordDesktop)
-    }, [hasPermissionRecordDesktop])
+        setHasDesktopAudio(!checkboxRecordDesktopRef.current!.checked && hasPermissionScreenCapture)
+    }, [hasPermissionScreenCapture])
 
     const changeHasDesktopAudio = (e: ChangeEvent<HTMLInputElement>) => {
         dropdownRef.current?.focus();
         setIsDesktopAudioToggled(!isDesktopAudioToggled)
-        if (hasPermissionRecordDesktop) {
+        if (hasPermissionScreenCapture) {
             setHasDesktopAudio(e.target.checked)
         }
     }
 
     useEffect(() => {
         if (checkboxRecordRef.current) {
-            if (!checkboxRecordRef.current.checked && hasPermissionRecord) {
-                setShowAudioSource(!checkboxRecordRef.current.checked && hasPermissionRecord)
+            if (!checkboxRecordRef.current.checked && hasPermissionMicrophone) {
+                setShowAudioSource(!checkboxRecordRef.current.checked && hasPermissionMicrophone)
             }
         }
-    }, [hasPermissionRecord])
+    }, [hasPermissionMicrophone])
 
     const changeAudioSource = (e: ChangeEvent<HTMLInputElement>) => {
         dropdownRef.current?.focus();
         setIsAudioToggled(!isAudioToggled)
-        if (hasPermissionRecord) {
+        if (hasPermissionMicrophone) {
             setShowAudioSource(e.target.checked)
             if (!e.target.checked) {
                 setAudioDevice(null)
@@ -155,7 +155,7 @@ const AudioDevices = (): JSX.Element => {
                                 </label>
                             </div>
                         </li>
-                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll">
+                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll rounded-box" style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
                             {audioDevices.map((device, i) => (
                                 <li key={"audio-device_" + i}>
                                     <label className="label inline-flex active:bg-inherit">

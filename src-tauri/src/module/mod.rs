@@ -4,7 +4,7 @@ pub mod device;
 pub mod downloader;
 pub mod model_type_vosk;
 pub mod model_type_whisper;
-pub mod permission_record_desktop;
+pub mod permissions;
 mod recognizer;
 pub mod record;
 pub mod record_desktop;
