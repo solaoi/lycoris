@@ -2574,12 +2574,16 @@ name = "lycoris"
 version = "0.9.7"
 dependencies = [
  "chrono",
+ "core-graphics 0.23.1",
  "cpal",
  "crossbeam-channel",
  "dasp",
  "futures-util",
  "hound",
  "macos-accessibility-client",
+ "objc",
+ "objc-foundation",
+ "objc_id",
  "once_cell",
  "reqwest",
  "rusqlite",

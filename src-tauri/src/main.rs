@@ -7,17 +7,13 @@ use crossbeam_channel::Sender;
 use module::model_type_vosk::ModelTypeVosk;
 use module::model_type_whisper::ModelTypeWhisper;
 use module::transcription::TraceCompletion;
-use tauri::http::HttpRange;
-use tauri::http::ResponseBuilder;
-use tauri::Manager;
-use tauri::State;
+use tauri::http::{HttpRange, ResponseBuilder};
+use tauri::{Manager, State, Window};
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 use crossbeam_channel::unbounded;
 use std::cmp::min;
-use std::io::Read;
-use std::io::Seek;
-use std::io::SeekFrom;
+use std::io::{Read, Seek, SeekFrom};
 use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
@@ -32,7 +28,7 @@ struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
 const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
 
 #[tauri::command]
-fn delete_note_command(window: tauri::Window, note_id: u64) {
+fn delete_note_command(window: Window, note_id: u64) {
     std::thread::spawn(move || {
         let deleter = module::deleter::NoteDeleter::new(window.app_handle().clone());
         deleter.delete(note_id)
@@ -40,7 +36,7 @@ fn delete_note_command(window: tauri::Window, note_id: u64) {
 }
 
 #[tauri::command]
-fn download_whisper_model_command(window: tauri::Window, model: String) {
+fn download_whisper_model_command(window: Window, model: String) {
     std::thread::spawn(move || {
         let dl =
             module::downloader::whisper::WhisperModelDownloader::new(window.app_handle().clone());
@@ -49,7 +45,7 @@ fn download_whisper_model_command(window: tauri::Window, model: String) {
 }
 
 #[tauri::command]
-fn download_vosk_model_command(window: tauri::Window, model: String) {
+fn download_vosk_model_command(window: Window, model: String) {
     std::thread::spawn(move || {
         let dl = module::downloader::vosk::VoskModelDownloader::new(window.app_handle().clone());
         dl.download(ModelTypeVosk::from_str(&model).unwrap())
@@ -62,16 +58,18 @@ fn list_devices_command() -> Vec<Device> {
 }
 
 #[tauri::command]
-fn has_desktop_record_permission_command() -> bool {
-    module::permission_record_desktop::has_desktop_record_permission()
+fn has_accessibility_permission_command() -> bool {
+    module::permissions::has_accessibility_permission()
 }
 
 #[tauri::command]
-fn open_microphone_permission_command() {
-    std::process::Command::new("open")
-        .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone")
-        .spawn()
-        .expect("failed to open system preferences");
+fn has_screen_capture_permission_command(window: Window) -> bool {
+    module::permissions::has_screen_capture_permission(window)
+}
+
+#[tauri::command]
+fn has_microphone_permission_command(window: Window) -> bool {
+    module::permissions::has_microphone_permission(window)
 }
 
 #[tauri::command]
@@ -258,8 +256,9 @@ fn main() {
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,
-            has_desktop_record_permission_command,
-            open_microphone_permission_command,
+            has_accessibility_permission_command,
+            has_screen_capture_permission_command,
+            has_microphone_permission_command,
             start_command,
             stop_command,
             start_trace_command,

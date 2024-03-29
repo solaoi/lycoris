@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 
-const useHasPermissionRecordDesktop = (forceReload: boolean | null = null) => {
+// Lycoris not yet use this hook
+const useHasPermissionAccessibility = (forceReload: boolean | null = null) => {
   const [hasPermission, setPermission] = useState(false);
   useEffect(() => {
     if (forceReload !== null && !hasPermission) {
-      invoke('has_desktop_record_permission_command').then(trusted => setPermission(trusted as boolean))
+      invoke('has_accessibility_permission_command').then(trusted => setPermission(trusted as boolean))
     }
   }, [forceReload]);
 
   return hasPermission;
 };
 
-export { useHasPermissionRecordDesktop };
+export { useHasPermissionAccessibility };

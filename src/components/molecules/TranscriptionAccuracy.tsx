@@ -81,55 +81,57 @@ const TranscriptionAccuracy = (): JSX.Element => {
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-52"
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
-                <li key="transcription-accuracy_off">
-                    <label className="label inline-flex active:bg-inherit">
-                        <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={transcriptionAccuracy === "off"} />
-                        <a className="grow">オフ</a>
-                    </label>
-                </li>
-                {downloadedModels.length > 0 && <ul className="max-h-56 overflow-y-scroll">
-                    {downloadedModels?.reduce((a: string[], c) => {
-                        if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
-                            return [...a, c]
-                        }
-                        if (c === "large-distil.en") {
+                <ul className="max-h-56 overflow-y-scroll rounded-box">
+                    <li key="transcription-accuracy_off">
+                        <label className="label inline-flex active:bg-inherit">
+                            <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={transcriptionAccuracy === "off"} />
+                            <a className="grow">オフ</a>
+                        </label>
+                    </li>
+                    {downloadedModels.length > 0 && <>
+                        {downloadedModels?.reduce((a: string[], c) => {
                             if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                                 return [...a, c]
-                            } else {
-                                return a
                             }
-                        }
-                        return [...a, c, `${c}-translate-to-en`]
-                    }, []).map((model, i) => (
-                        <li key={"transcription-accuracy_" + i}>
+                            if (c === "large-distil.en") {
+                                if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
+                                    return [...a, c]
+                                } else {
+                                    return a
+                                }
+                            }
+                            return [...a, c, `${c}-translate-to-en`]
+                        }, []).map((model, i) => (
+                            <li key={"transcription-accuracy_" + i}>
+                                <label className="label inline-flex active:bg-inherit">
+                                    <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
+                                    <a className="grow">{mapModel(model)}</a>
+                                </label>
+                            </li>
+                        ))}
+                    </>}
+                    {settingKeyOpenai && <>
+                        <li key="transcription-accuracy_online-transcript">
                             <label className="label inline-flex active:bg-inherit">
-                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
-                                <a className="grow">{mapModel(model)}</a>
+                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-transcript" checked={"online-transcript" === transcriptionAccuracy} />
+                                <a className="grow">文字起こし：オンライン</a>
                             </label>
                         </li>
-                    ))}
-                </ul>}
-                {settingKeyOpenai && <>
-                    <li key="transcription-accuracy_online-transcript">
-                        <label className="label inline-flex active:bg-inherit">
-                            <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-transcript" checked={"online-transcript" === transcriptionAccuracy} />
-                            <a className="grow">文字起こし：オンライン</a>
-                        </label>
-                    </li>
-                    <li key="transcription-accuracy_online-chat">
-                        <label className="label inline-flex active:bg-inherit">
-                            <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-chat" === transcriptionAccuracy} />
-                            <a className="grow">AI：オンライン</a>
-                        </label>
-                    </li>
-                    {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (
-                        <li key="online-translate-to-en">
+                        <li key="transcription-accuracy_online-chat">
                             <label className="label inline-flex active:bg-inherit">
-                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-translate-to-en" === transcriptionAccuracy} />
-                                <a className="grow">翻訳（英）：オンライン</a>
+                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-chat" === transcriptionAccuracy} />
+                                <a className="grow">AI：オンライン</a>
                             </label>
                         </li>
-                    )}</>}
+                        {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (
+                            <li key="online-translate-to-en">
+                                <label className="label inline-flex active:bg-inherit">
+                                    <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-translate-to-en" === transcriptionAccuracy} />
+                                    <a className="grow">翻訳（英）：オンライン</a>
+                                </label>
+                            </li>
+                        )}</>}
+                </ul>
             </ul>
         </div>
     )
