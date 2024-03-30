@@ -94,6 +94,7 @@ fn start_command(
                 transcription_accuracy,
                 note_id,
                 stop_record_rx,
+                Arc::new(Mutex::new(false)),
             );
         } else if device_type == "desktop" {
             let record_desktop =
@@ -104,6 +105,7 @@ fn start_command(
                 note_id,
                 stop_record_rx,
                 None,
+                Arc::new(Mutex::new(false)),
             );
         } else {
             let record = module::record::Record::new(window.app_handle().clone());
@@ -112,21 +114,29 @@ fn start_command(
 
             let (stop_record_clone_tx, stop_record_clone_rx) = unbounded();
             let speaker_language_clone = speaker_language.clone();
+            let transcription_accuracy_clone = transcription_accuracy.clone();
+
+            let should_stop_other_transcription = Arc::new(Mutex::new(false));
+            let should_stop_other_transcription_clone =
+                Arc::clone(&should_stop_other_transcription);
+
             std::thread::spawn(move || {
                 record_desktop.start(
                     speaker_language_clone,
-                    transcription_accuracy,
+                    transcription_accuracy_clone,
                     note_id,
                     stop_record_rx,
                     Some(stop_record_clone_tx),
+                    should_stop_other_transcription_clone,
                 );
             });
             record.start(
                 device_label,
                 speaker_language,
-                "off".to_string(),
+                transcription_accuracy,
                 note_id,
                 stop_record_clone_rx.clone(),
+                should_stop_other_transcription,
             );
         }
     });

@@ -43,7 +43,16 @@ impl Record {
         transcription_accuracy: String,
         note_id: u64,
         stop_record_rx: Receiver<()>,
+        should_stop_other_transcription: Arc<Mutex<bool>>,
     ) {
+        let should_stop_other_transcription_on_record =
+            *should_stop_other_transcription.lock().unwrap();
+        if !should_stop_other_transcription_on_record {
+            let mut lock = should_stop_other_transcription.lock().unwrap();
+            *lock = true;
+            drop(lock);
+        }
+
         let host = cpal::default_host();
         let device = host
             .input_devices()
@@ -175,12 +184,16 @@ impl Record {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
-                    if !is_no_transcription && !*is_converting.lock().unwrap() {
+                    if !is_no_transcription
+                        && !*is_converting.lock().unwrap()
+                        && !should_stop_other_transcription_on_record
+                    {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
                         let stop_convert_rx_clone = stop_convert_rx.clone();
                         let transcription_accuracy_clone = transcription_accuracy.clone();
                         let speaker_language_clone = speaker_language.clone();
+
                         std::thread::spawn(move || {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
