@@ -81,7 +81,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-52"
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
-                <ul className="max-h-56 overflow-y-scroll rounded-box">
+                <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
                     <li key="transcription-accuracy_off">
                         <label className="label inline-flex active:bg-inherit">
                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={transcriptionAccuracy === "off"} />

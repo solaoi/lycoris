@@ -120,7 +120,7 @@ const SpeakerLanguage = (): JSX.Element => {
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-52"
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
-                {downloadedModels.length > 0 && <ul className="max-h-56 overflow-y-scroll rounded-box">
+                {downloadedModels.length > 0 && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
                     {downloadedModels.map((model, i) => (
                         <li key={"speaker-language_" + i}>
                             <label className="label inline-flex active:bg-inherit">

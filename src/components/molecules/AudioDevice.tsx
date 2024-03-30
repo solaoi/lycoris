@@ -103,7 +103,7 @@ const AudioDevices = (): JSX.Element => {
                 </div>
                 <div className="opacity-0 w-24 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute ">利用する音源
+                        group-hover:visible opacity-100 absolute">利用する音源
                 </div>
             </label> : <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
@@ -155,7 +155,8 @@ const AudioDevices = (): JSX.Element => {
                                 </label>
                             </div>
                         </li>
-                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll rounded-box" style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent"
+                            style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
                             {audioDevices.map((device, i) => (
                                 <li key={"audio-device_" + i}>
                                     <label className="label inline-flex active:bg-inherit">

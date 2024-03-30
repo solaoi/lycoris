@@ -31,3 +31,7 @@ body {
         opacity: 1;
     }
 }
+
+.scrollbar-transparent::-webkit-scrollbar {
+    display: none;
+}
