@@ -29,13 +29,13 @@ impl MyRecognizer {
 
     pub fn recognize<T: Sample + ToSample<i16>>(
         app_handle: AppHandle,
-        last_partial: &mut String,
         recognizer: &mut Recognizer,
         data: &[T],
         channels: ChannelCount,
         notify_decoding_state_is_finalized_tx: SyncSender<String>,
         is_desktop: bool,
     ) {
+        let mut last_partial = String::new();
         let data: Vec<i16> = data.iter().map(|v| v.to_sample()).collect();
         let data = if channels != 1 {
             Self::stereo_to_mono(&data)

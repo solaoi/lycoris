@@ -2,10 +2,11 @@ extern crate objc;
 extern crate objc_foundation;
 extern crate objc_id;
 
-use objc::msg_send;
-use objc::runtime::{Class, Object};
-use objc::sel;
-use objc::sel_impl;
+use objc::{
+    msg_send,
+    runtime::{Class, Object},
+    sel, sel_impl,
+};
 use objc_id::Id;
 
 use core_graphics::access::ScreenCaptureAccess;
@@ -42,7 +43,7 @@ pub fn has_microphone_permission(window: Window) -> bool {
 
 pub fn has_screen_capture_permission(window: Window) -> bool {
     let access = ScreenCaptureAccess::default();
-    let trusted = access.request();
+    let trusted = access.preflight();
     if !trusted {
         let func = |ok: bool| {
             if ok {
