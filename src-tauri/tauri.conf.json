@@ -56,10 +56,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "width": 1024,
+        "height": 768,
         "resizable": true,
-        "title": "Lycoris",
-        "width": 800
+        "title": "Lycoris"
       }
     ]
   }

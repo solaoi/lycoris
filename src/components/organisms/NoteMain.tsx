@@ -56,7 +56,13 @@ const NoteMain = (): JSX.Element => {
     }, [selectedNote]);
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            const rect = bottomRef.current?.getBoundingClientRect();
+            if (rect) {
+                const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 144;  // 144(24px * 6 lines) is the margin of long note
+                if (isInViewport) {
+                    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
         }
     }, [histories, recordingNote]);
     useEffect(() => {
@@ -65,7 +71,6 @@ const NoteMain = (): JSX.Element => {
         const unlistenPartialText = listen('partialTextRecognized', event => {
             if (recordingNote === selectedNote!.note_id) {
                 const payload = event.payload as { content: string, is_desktop: boolean }
-                console.log(`is_desktop: ${payload.is_desktop}`)
                 if (payload.is_desktop) {
                     setPartialTextDesktop(payload.content)
                 } else {
