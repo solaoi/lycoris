@@ -12,9 +12,13 @@ pub fn list_devices() -> Vec<Device> {
         .input_devices()
         .unwrap()
         .filter_map(|device| {
-            Some(Device {
-                label: device.name().unwrap(),
-            })
+            if device.name().is_ok() && device.name().unwrap().contains("ZoomAudioDevice") {
+                None
+            } else {
+                Some(Device {
+                    label: device.name().unwrap(),
+                })
+            }
         })
         .collect();
 }

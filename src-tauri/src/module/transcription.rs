@@ -1,9 +1,9 @@
 use super::{sqlite::Sqlite, transcriber::Transcriber};
 
 use crossbeam_channel::Receiver;
-
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use whisper_rs::WhisperContext;
 
@@ -27,7 +27,7 @@ impl Transcription {
         note_id: u64,
     ) -> Self {
         let app_handle_clone = app_handle.clone();
-        Self {
+        Transcription {
             app_handle,
             sqlite: Sqlite::new(),
             ctx: Transcriber::build(app_handle_clone, transcription_accuracy.clone()),
@@ -130,10 +130,10 @@ impl Transcription {
                     .expect("failed to get number of segments");
                 let mut converted: Vec<String> = vec!["".to_string()];
                 for i in 0..num_segments {
-                    let segment = state
-                        .full_get_segment_text(i)
-                        .expect("failed to get segment");
-                    converted.push(segment.to_string());
+                    let segment = state.full_get_segment_text(i);
+                    if segment.is_ok() {
+                        converted.push(segment.unwrap().to_string());
+                    };
                 }
 
                 let updated = self
@@ -154,4 +154,28 @@ impl Transcription {
             Ok(())
         });
     }
+}
+
+pub static SINGLETON_INSTANCE: Mutex<Option<Transcription>> = Mutex::new(None);
+
+pub fn initialize_transcription(
+    app_handle: AppHandle,
+    transcription_accuracy: String,
+    speaker_language: String,
+    note_id: u64,
+) {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    if singleton.is_none() {
+        *singleton = Some(Transcription::new(
+            app_handle,
+            transcription_accuracy,
+            speaker_language,
+            note_id,
+        ));
+    }
+}
+
+pub fn drop_transcription() {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    *singleton = None;
 }

@@ -5,11 +5,13 @@ import { modelWhisperDownloadedState } from "../../store/atoms/modelWhisperDownl
 import { recordState } from "../../store/atoms/recordState";
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { settingKeyState } from "../../store/atoms/settingKeyState";
+import { tracingState } from "../../store/atoms/tracingState";
 
 const TranscriptionAccuracy = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelWhisperDownloadedState)
     const [transcriptionAccuracy, setTranscriptionAccuracy] = useRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
+    const isTracing = useRecoilValue(tracingState);
     const speakerLanguage = useRecoilValue(speakerLanguageState)
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"))
 
@@ -54,7 +56,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
 
     return (
         <div className="dropdown">
-            {(isRecording || downloadedModels.length === 0) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+            {((isRecording || isTracing) || downloadedModels.length === 0) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法を選択" : mapModel(transcriptionAccuracy)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">

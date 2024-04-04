@@ -3,25 +3,37 @@
     windows_subsystem = "windows"
 )]
 
-use crossbeam_channel::Sender;
-use module::model_type_vosk::ModelTypeVosk;
-use module::model_type_whisper::ModelTypeWhisper;
-use module::transcription::TraceCompletion;
-use tauri::http::{HttpRange, ResponseBuilder};
-use tauri::{Manager, State, Window};
+use tauri::{
+    http::{HttpRange, ResponseBuilder},
+    Manager, State, Window,
+};
 use tauri_plugin_sql::{Migration, MigrationKind};
 
-use crossbeam_channel::unbounded;
-use std::cmp::min;
-use std::io::{Read, Seek, SeekFrom};
-use std::path::PathBuf;
-use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::{
+    cmp::min,
+    io::{Read, Seek, SeekFrom},
+    path::PathBuf,
+    str::FromStr,
+    sync::{Arc, Mutex},
+};
 
+use crossbeam_channel::{unbounded, Sender};
 use urlencoding::decode;
 
 mod module;
-use module::device::Device;
+use module::{
+    chat_online::ChatOnline,
+    deleter::NoteDeleter,
+    device::{self, Device},
+    downloader::{vosk::VoskModelDownloader, whisper::WhisperModelDownloader},
+    model_type_vosk::ModelTypeVosk,
+    model_type_whisper::ModelTypeWhisper,
+    permissions,
+    record::Record,
+    record_desktop::RecordDesktop,
+    transcription::{TraceCompletion, Transcription},
+    transcription_online::TranscriptionOnline,
+};
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
 
@@ -30,7 +42,7 @@ const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
 #[tauri::command]
 fn delete_note_command(window: Window, note_id: u64) {
     std::thread::spawn(move || {
-        let deleter = module::deleter::NoteDeleter::new(window.app_handle().clone());
+        let deleter = NoteDeleter::new(window.app_handle().clone());
         deleter.delete(note_id)
     });
 }
@@ -38,8 +50,7 @@ fn delete_note_command(window: Window, note_id: u64) {
 #[tauri::command]
 fn download_whisper_model_command(window: Window, model: String) {
     std::thread::spawn(move || {
-        let dl =
-            module::downloader::whisper::WhisperModelDownloader::new(window.app_handle().clone());
+        let dl = WhisperModelDownloader::new(window.app_handle().clone());
         dl.download(ModelTypeWhisper::from_str(&model).unwrap())
     });
 }
@@ -47,29 +58,29 @@ fn download_whisper_model_command(window: Window, model: String) {
 #[tauri::command]
 fn download_vosk_model_command(window: Window, model: String) {
     std::thread::spawn(move || {
-        let dl = module::downloader::vosk::VoskModelDownloader::new(window.app_handle().clone());
+        let dl = VoskModelDownloader::new(window.app_handle().clone());
         dl.download(ModelTypeVosk::from_str(&model).unwrap())
     });
 }
 
 #[tauri::command]
 fn list_devices_command() -> Vec<Device> {
-    module::device::list_devices()
+    device::list_devices()
 }
 
 #[tauri::command]
 fn has_accessibility_permission_command() -> bool {
-    module::permissions::has_accessibility_permission()
+    permissions::has_accessibility_permission()
 }
 
 #[tauri::command]
 fn has_screen_capture_permission_command(window: Window) -> bool {
-    module::permissions::has_screen_capture_permission(window)
+    permissions::has_screen_capture_permission(window)
 }
 
 #[tauri::command]
 fn has_microphone_permission_command(window: Window) -> bool {
-    module::permissions::has_microphone_permission(window)
+    permissions::has_microphone_permission(window)
 }
 
 #[tauri::command]
@@ -87,38 +98,30 @@ fn start_command(
     *lock = Some(stop_record_tx);
     std::thread::spawn(move || {
         if device_type == "microphone" {
-            let record = module::record::Record::new(window.app_handle().clone());
+            let record = Record::new(window.app_handle().clone());
             record.start(
                 device_label,
                 speaker_language,
                 transcription_accuracy,
                 note_id,
                 stop_record_rx,
-                Arc::new(Mutex::new(false)),
             );
         } else if device_type == "desktop" {
-            let record_desktop =
-                module::record_desktop::RecordDesktop::new(window.app_handle().clone());
+            let record_desktop = RecordDesktop::new(window.app_handle().clone());
             record_desktop.start(
                 speaker_language,
                 transcription_accuracy,
                 note_id,
                 stop_record_rx,
                 None,
-                Arc::new(Mutex::new(false)),
             );
         } else {
-            let record = module::record::Record::new(window.app_handle().clone());
-            let record_desktop =
-                module::record_desktop::RecordDesktop::new(window.app_handle().clone());
+            let record = Record::new(window.app_handle().clone());
+            let record_desktop = RecordDesktop::new(window.app_handle().clone());
 
             let (stop_record_clone_tx, stop_record_clone_rx) = unbounded();
             let speaker_language_clone = speaker_language.clone();
             let transcription_accuracy_clone = transcription_accuracy.clone();
-
-            let should_stop_other_transcription = Arc::new(Mutex::new(false));
-            let should_stop_other_transcription_clone =
-                Arc::clone(&should_stop_other_transcription);
 
             std::thread::spawn(move || {
                 record_desktop.start(
@@ -127,7 +130,6 @@ fn start_command(
                     note_id,
                     stop_record_rx,
                     Some(stop_record_clone_tx),
-                    should_stop_other_transcription_clone,
                 );
             });
             record.start(
@@ -136,7 +138,6 @@ fn start_command(
                 transcription_accuracy,
                 note_id,
                 stop_record_clone_rx.clone(),
-                should_stop_other_transcription,
             );
         }
     });
@@ -164,7 +165,7 @@ fn start_trace_command(
 
     std::thread::spawn(move || {
         if transcription_accuracy.starts_with("online-transcript") {
-            let mut transcription_online = module::transcription_online::TranscriptionOnline::new(
+            let mut transcription_online = TranscriptionOnline::new(
                 window.app_handle(),
                 transcription_accuracy,
                 speaker_language,
@@ -172,14 +173,10 @@ fn start_trace_command(
             );
             transcription_online.start(stop_convert_rx, true);
         } else if transcription_accuracy.starts_with("online-chat") {
-            let mut chat_online = module::chat_online::ChatOnline::new(
-                window.app_handle(),
-                speaker_language,
-                note_id,
-            );
+            let mut chat_online = ChatOnline::new(window.app_handle(), speaker_language, note_id);
             chat_online.start(stop_convert_rx, true);
         } else {
-            let mut transcription = module::transcription::Transcription::new(
+            let mut transcription = Transcription::new(
                 window.app_handle(),
                 transcription_accuracy,
                 speaker_language,

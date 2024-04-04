@@ -3,11 +3,13 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { modelVoskDownloadedState } from "../../store/atoms/modelVoskDownloadedState";
 import { recordState } from "../../store/atoms/recordState";
+import { tracingState } from "../../store/atoms/tracingState";
 
 const SpeakerLanguage = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelVoskDownloadedState)
     const [speakerLanguage, setSpeakerLanguage] = useRecoilState(speakerLanguageState)
     const isRecording = useRecoilValue(recordState)
+    const isTracing = useRecoilValue(tracingState);
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
     const change = (e: ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +95,7 @@ const SpeakerLanguage = (): JSX.Element => {
 
     return (
         <div className="dropdown">
-            {(isRecording || downloadedModels.length === 0) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+            {(isRecording || isTracing || downloadedModels.length === 0) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{speakerLanguage === null ? "話し手の言語を選択" : mapModel(speakerLanguage)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">

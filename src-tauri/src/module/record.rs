@@ -23,8 +23,8 @@ use crossbeam_channel::{unbounded, Receiver};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
 use super::{
-    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite,
-    transcription::Transcription, transcription_online::TranscriptionOnline, writer::Writer,
+    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite, transcription,
+    transcription_online::TranscriptionOnline, writer::Writer,
 };
 
 pub struct Record {
@@ -43,16 +43,7 @@ impl Record {
         transcription_accuracy: String,
         note_id: u64,
         stop_record_rx: Receiver<()>,
-        should_stop_other_transcription: Arc<Mutex<bool>>,
     ) {
-        let should_stop_other_transcription_on_record =
-            *should_stop_other_transcription.lock().unwrap();
-        if !should_stop_other_transcription_on_record {
-            let mut lock = should_stop_other_transcription.lock().unwrap();
-            *lock = true;
-            drop(lock);
-        }
-
         let host = cpal::default_host();
         let device = host
             .input_devices()
@@ -75,7 +66,6 @@ impl Record {
         );
         let recognizer = Arc::new(Mutex::new(recognizer));
         let recognizer_clone = recognizer.clone();
-        let mut last_partial = String::new();
 
         let spec = Writer::wav_spec_from_config(&config);
         let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
@@ -97,7 +87,6 @@ impl Record {
                 move |data: &[f32], _| {
                     MyRecognizer::recognize(
                         app_handle.clone(),
-                        &mut last_partial,
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
@@ -113,7 +102,6 @@ impl Record {
                 move |data: &[u16], _| {
                     MyRecognizer::recognize(
                         app_handle.clone(),
-                        &mut last_partial,
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
@@ -129,7 +117,6 @@ impl Record {
                 move |data: &[i16], _| {
                     MyRecognizer::recognize(
                         app_handle.clone(),
-                        &mut last_partial,
                         &mut recognizer_clone.lock().unwrap(),
                         data,
                         channels,
@@ -184,10 +171,7 @@ impl Record {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
-                    if !is_no_transcription
-                        && !*is_converting.lock().unwrap()
-                        && !should_stop_other_transcription_on_record
-                    {
+                    if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
                         let stop_convert_rx_clone = stop_convert_rx.clone();
@@ -214,13 +198,16 @@ impl Record {
                                 );
                                 chat_online.start(stop_convert_rx_clone, false);
                             } else {
-                                let mut transcription = Transcription::new(
+                                transcription::initialize_transcription(
                                     app_handle_clone,
                                     transcription_accuracy_clone,
                                     speaker_language_clone,
                                     note_id,
                                 );
-                                transcription.start(stop_convert_rx_clone, false);
+                                let mut lock = transcription::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             }
 
                             let mut lock = is_converting_clone.lock().unwrap();
@@ -245,6 +232,7 @@ impl Record {
         stop_writer_tx.send(()).unwrap();
         if !is_no_transcription {
             stop_convert_tx.send(()).unwrap();
+            transcription::drop_transcription();
         } else {
             drop(stop_convert_tx)
         }
