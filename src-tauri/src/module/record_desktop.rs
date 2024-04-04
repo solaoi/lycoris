@@ -8,11 +8,14 @@
 use crate::BUNDLE_IDENTIFIER;
 
 use std::{
-    fs::remove_file,
+    fs::{remove_file, File},
+    io::BufWriter,
+    option::Option,
     path::PathBuf,
+    string::String,
     sync::{
         mpsc::{sync_channel, SyncSender},
-        Arc, Mutex,
+        Arc, Mutex, Weak,
     },
     thread,
 };
@@ -22,18 +25,21 @@ use crossbeam_channel::{unbounded, Receiver, Sender};
 use hound::{WavSpec, WavWriter};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
-use screencapturekit::cm_sample_buffer::CMSampleBuffer;
-use screencapturekit::sc_content_filter::{InitParams, SCContentFilter};
-use screencapturekit::sc_error_handler::StreamErrorHandler;
-use screencapturekit::sc_output_handler::{SCStreamOutputType, StreamOutput};
-use screencapturekit::sc_shareable_content::SCShareableContent;
-use screencapturekit::sc_stream::SCStream;
-use screencapturekit::sc_stream_configuration::SCStreamConfiguration;
+use screencapturekit::{
+    cm_sample_buffer::CMSampleBuffer,
+    sc_content_filter::{InitParams, SCContentFilter},
+    sc_error_handler::StreamErrorHandler,
+    sc_output_handler::{SCStreamOutputType, StreamOutput},
+    sc_shareable_content::SCShareableContent,
+    sc_stream::SCStream,
+    sc_stream_configuration::SCStreamConfiguration,
+};
+
 use vosk::Recognizer;
 
 use super::{
-    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite,
-    transcription::Transcription, transcription_online::TranscriptionOnline, writer::Writer,
+    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite, transcription,
+    transcription_online::TranscriptionOnline, writer::Writer,
 };
 
 pub struct RecordDesktop {
@@ -48,18 +54,10 @@ impl StreamErrorHandler for ErrorHandler {
 }
 
 struct StoreAudioHandler {
-    last_partial: Arc<Mutex<String>>,
     app_handle: AppHandle,
-    recognizer_clone: Arc<Mutex<Recognizer>>,
+    recognizer: Weak<Mutex<Recognizer>>,
     notify_decoding_state_is_finalized_tx: SyncSender<String>,
-    writer_clone: Arc<
-        std::sync::Mutex<
-            std::option::Option<(
-                WavWriter<std::io::BufWriter<std::fs::File>>,
-                std::string::String,
-            )>,
-        >,
-    >,
+    writer_clone: Arc<Mutex<Option<(WavWriter<BufWriter<File>>, String)>>>,
     channels: u16,
 }
 
@@ -77,15 +75,16 @@ impl StreamOutput for StoreAudioHandler {
             .map(|chunk| f32::from_le_bytes(chunk.try_into().unwrap()))
             .collect();
 
-        MyRecognizer::recognize(
-            self.app_handle.clone(),
-            &mut self.last_partial.lock().unwrap(),
-            &mut self.recognizer_clone.lock().unwrap(),
-            &samples,
-            self.channels,
-            self.notify_decoding_state_is_finalized_tx.clone(),
-            true,
-        );
+        if let Some(recognizer) = self.recognizer.upgrade() {
+            MyRecognizer::recognize(
+                self.app_handle.clone(),
+                &mut recognizer.lock().unwrap(),
+                &samples,
+                self.channels,
+                self.notify_decoding_state_is_finalized_tx.clone(),
+                true,
+            );
+        }
 
         Writer::write_input_data::<f32, f32>(&samples, &self.writer_clone);
     }
@@ -103,16 +102,7 @@ impl RecordDesktop {
         note_id: u64,
         stop_record_rx: Receiver<()>,
         stop_record_clone_tx: Option<Sender<()>>,
-        should_stop_other_transcription: Arc<Mutex<bool>>,
     ) {
-        let should_stop_other_transcription_on_record_desktop =
-            *should_stop_other_transcription.lock().unwrap();
-        if !should_stop_other_transcription_on_record_desktop {
-            let mut lock = should_stop_other_transcription.lock().unwrap();
-            *lock = true;
-            drop(lock);
-        }
-
         let mut current = SCShareableContent::current();
         let display = current.displays.pop().unwrap();
 
@@ -134,9 +124,9 @@ impl RecordDesktop {
             speaker_language.clone(),
             config.sample_rate as f32,
         );
-        let recognizer = Arc::new(Mutex::new(recognizer));
-        let recognizer_clone = recognizer.clone();
-        let last_partial = Arc::new(Mutex::new(String::new()));
+        let recognizer_arc = Arc::new(Mutex::new(recognizer));
+        let recognizer_weak = Arc::downgrade(&recognizer_arc);
+
         let spec = WavSpec {
             channels,
             sample_rate,
@@ -160,9 +150,8 @@ impl RecordDesktop {
         let mut stream = SCStream::new(filter, config, ErrorHandler);
         stream.add_output(
             StoreAudioHandler {
-                last_partial,
                 app_handle,
-                recognizer_clone,
+                recognizer: recognizer_weak,
                 notify_decoding_state_is_finalized_tx,
                 writer_clone,
                 channels,
@@ -215,10 +204,7 @@ impl RecordDesktop {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
-                    if !is_no_transcription
-                        && !*is_converting.lock().unwrap()
-                        && !should_stop_other_transcription_on_record_desktop
-                    {
+                    if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
                         let stop_convert_rx_clone = stop_convert_rx.clone();
@@ -245,13 +231,16 @@ impl RecordDesktop {
                                 );
                                 chat_online.start(stop_convert_rx_clone, false);
                             } else {
-                                let mut transcription = Transcription::new(
+                                transcription::initialize_transcription(
                                     app_handle_clone,
                                     transcription_accuracy_clone,
                                     speaker_language_clone,
                                     note_id,
                                 );
-                                transcription.start(stop_convert_rx_clone, false);
+                                let mut lock = transcription::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             }
 
                             let mut lock = is_converting_clone.lock().unwrap();
@@ -280,6 +269,7 @@ impl RecordDesktop {
         stop_writer_tx.send(()).unwrap();
         if !is_no_transcription {
             stop_convert_tx.send(()).unwrap();
+            transcription::drop_transcription();
         } else {
             drop(stop_convert_tx)
         }
