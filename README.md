@@ -44,8 +44,8 @@ unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri
 rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
 
 # whisper
-curl -LO https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-large.bin
-mv ggml-large.bin ./src-tauri/resources
+curl -LO https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin
+mv ggml-large-v1.bin ./src-tauri/resources/ggml-large.bin
 ```
 
 ### voskのライブラリ更新
