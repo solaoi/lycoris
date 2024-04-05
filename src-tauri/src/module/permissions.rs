@@ -12,6 +12,8 @@ use objc_id::Id;
 use core_graphics::access::ScreenCaptureAccess;
 use tauri::{api::dialog::confirm, Window};
 
+use super::sqlite::Sqlite;
+
 pub fn has_accessibility_permission() -> bool {
     let trusted = macos_accessibility_client::accessibility::application_is_trusted_with_prompt();
     return trusted;
@@ -42,20 +44,31 @@ pub fn has_microphone_permission(window: Window) -> bool {
 }
 
 pub fn has_screen_capture_permission(window: Window) -> bool {
+    let sqlite = Sqlite::new();
+    let has_accessed_screen_capture_permission = sqlite
+        .select_has_accessed_screen_capture_permission()
+        .unwrap();
     let access = ScreenCaptureAccess::default();
-    let trusted = access.preflight();
-    if !trusted {
-        let func = |ok: bool| {
-            if ok {
-                std::process::Command::new("open")
-                .arg(
-                    "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
-                )
-                .spawn()
-                .expect("failed to open system preferences");
-            }
-        };
-        confirm(Some(&window),"システム設定の\"セキュリティとプライバシー\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"から画面収録にアクセスしようとしています。",func);
+    if has_accessed_screen_capture_permission == "has_accessed" {
+        let trusted = access.preflight();
+        if !trusted {
+            let func = |ok: bool| {
+                if ok {
+                    std::process::Command::new("open")
+                    .arg(
+                        "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
+                    )
+                    .spawn()
+                    .expect("failed to open system preferences");
+                }
+            };
+            confirm(Some(&window),"システム設定の\"セキュリティとプライバシー\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"から画面収録にアクセスしようとしています。",func);
+        }
+        return trusted;
+    } else {
+        sqlite
+            .update_has_accessed_screen_capture_permission()
+            .unwrap();
+        return access.request();
     }
-    return trusted;
 }

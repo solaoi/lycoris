@@ -140,6 +140,21 @@ impl Sqlite {
         );
     }
 
+    pub fn select_has_accessed_screen_capture_permission(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingHasAccessedScreenCapturePermission\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
+    pub fn update_has_accessed_screen_capture_permission(&self) -> Result<usize, rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE settings SET setting_status = \"has_accessed\" WHERE setting_name = \"settingHasAccessedScreenCapturePermission\"",
+            params![],
+        )
+    }
+
     pub fn update_model_vosk_to_whisper(
         &self,
         id: u16,
