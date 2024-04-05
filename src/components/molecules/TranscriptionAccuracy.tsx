@@ -43,6 +43,10 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：高";
             case "large-distil.en":
                 return "文字起こし：英";
+            case "online-transcript":
+                return "文字起こし：オンライン";
+            case "online-chat":
+                return "AI：オンライン";
             case "small-translate-to-en":
                 return "翻訳（英）：低";
             case "medium-translate-to-en":
