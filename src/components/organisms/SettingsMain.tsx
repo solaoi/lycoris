@@ -330,6 +330,13 @@ const SettingsMain = (): JSX.Element => {
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.en" />
                     </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <p>言語パック（日本語：速度優先）</p>
+                            <ModelDownloadWhisperButton modelType="large-distil.ja" />
+                        </div>
+                        <ModelDownloadWhisperProgress modelType="large-distil.ja" />
+                    </div>
                 </div>
             </div>
             <div className="px-5">

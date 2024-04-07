@@ -43,6 +43,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：高";
             case "large-distil.en":
                 return "文字起こし：英";
+            case "large-distil.ja":
+                return "文字起こし：日";
             case "online-transcript":
                 return "文字起こし：オンライン";
             case "online-chat":
@@ -101,6 +103,13 @@ const TranscriptionAccuracy = (): JSX.Element => {
                             }
                             if (c === "large-distil.en") {
                                 if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
+                                    return [...a, c]
+                                } else {
+                                    return a
+                                }
+                            }
+                            if (c === "large-distil.ja") {
+                                if (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja")) {
                                     return [...a, c]
                                 } else {
                                     return a
