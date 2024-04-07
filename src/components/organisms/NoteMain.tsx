@@ -18,6 +18,7 @@ import { TraceStartButton } from '../molecules/TraceStartButton'
 import { TraceStopButton } from '../molecules/TraceStopButton'
 import { tracingState } from '../../store/atoms/tracingState'
 import { tracingNoteState } from '../../store/atoms/tracingNoteState'
+import { RecordPreparingButton } from '../molecules/RecordPreparingButton'
 
 const NoteMain = (): JSX.Element => {
     const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState)
@@ -42,6 +43,7 @@ const NoteMain = (): JSX.Element => {
             setShowGotoBottom(true);
         }
     }, []);
+    const [isReadyToRecognize, setIsReadyToRecognize] = useState(false);
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
@@ -121,6 +123,19 @@ const NoteMain = (): JSX.Element => {
         }
     }, [recordingNote, isTracing])
 
+    useEffect(() => {
+        if (isRecording) {
+            const unlistenReadyToRecognize = listen('readyToRecognize', () => {
+                setIsReadyToRecognize(true);
+            });
+            return () => {
+                unlistenReadyToRecognize.then(f => f());
+            }
+        } else {
+            setIsReadyToRecognize(false);
+        }
+    }, [isRecording])
+
     return (<>
         <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
             <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
@@ -152,7 +167,7 @@ const NoteMain = (): JSX.Element => {
                     <TraceStartButton />}
             </div>
             <div className="flex-none">
-                {(isRecording && recordingNote === selectedNote?.note_id) ? <RecordStopButton /> : <RecordStartButton />}
+                {(isRecording && recordingNote === selectedNote?.note_id) ? isReadyToRecognize ? <RecordStopButton /> : <RecordPreparingButton /> : <RecordStartButton />}
             </div>
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
