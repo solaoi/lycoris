@@ -12,8 +12,10 @@ impl Transcriber {
             model_type = "small";
         } else if transcription_accuracy.starts_with("medium") {
             model_type = "medium"
-        } else if transcription_accuracy.starts_with("large-distil.en"){
+        } else if transcription_accuracy.starts_with("large-distil.en") {
             model_type = "large-distil.en"
+        } else if transcription_accuracy.starts_with("large-distil.ja") {
+            model_type = "large-distil.ja"
         } else if transcription_accuracy.starts_with("large") {
             model_type = "large"
         }
@@ -24,7 +26,8 @@ impl Transcriber {
             .to_string_lossy()
             .to_string();
 
-        return WhisperContext::new_with_params(&model_path, WhisperContextParameters::default()).expect("failed to load whisper model");
+        return WhisperContext::new_with_params(&model_path, WhisperContextParameters::default())
+            .expect("failed to load whisper model");
     }
 
     pub fn build_params(
