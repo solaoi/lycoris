@@ -77,3 +77,8 @@ yarn tauri dev
 ```
 yarn tauri build
 ```
+
+## Contributors
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
