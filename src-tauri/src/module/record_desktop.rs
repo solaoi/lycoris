@@ -160,6 +160,9 @@ impl RecordDesktop {
         );
         stream.start_capture().ok();
 
+        let app_handle = self.app_handle.clone();
+        app_handle.clone().emit_all("readyToRecognize", "").unwrap();
+
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
         let is_converting = Arc::new(Mutex::new(false));
         let (stop_convert_tx, stop_convert_rx) = unbounded();
