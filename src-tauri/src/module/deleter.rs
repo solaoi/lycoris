@@ -22,7 +22,9 @@ impl NoteDeleter {
         let speeches = sqlite.select_all_speeches_by(note_id).unwrap();
         let _ = speeches.iter().for_each(|speech| {
             if speech.wav != "" {
-                remove_file(&speech.wav).expect("File delete failed");
+                if let Err(e) = remove_file(&speech.wav) {
+                    eprintln!("Failed to delete file {}: {}", &speech.wav, e);
+                }
             }
         });
 
