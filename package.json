@@ -17,25 +17,25 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.2.0",
-    "dayjs": "^1.11.7",
+    "dayjs": "^1.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-h5-audio-player": "^3.8.6",
+    "react-h5-audio-player": "^3.9.1",
     "recoil": "^0.7.7",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release",
-    "zenn-content-css": "^0.1.141",
-    "zenn-markdown-html": "^0.1.141"
+    "zenn-content-css": "^0.1.153",
+    "zenn-markdown-html": "^0.1.153"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.11",
-    "@types/markdown-it": "^13.0.7",
+    "@types/markdown-it": "^14.0.0",
     "@types/react": "^18.0.29",
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",
-    "autoprefixer": "^10.4.14",
-    "daisyui": "^2.52.0",
-    "postcss": "^8.4.31",
-    "tailwindcss": "^3.2.7",
+    "autoprefixer": "^10.4.19",
+    "daisyui": "^3.9.4",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
     "typescript": "^5.0.2",
     "vite": "^4.2.3"
   }

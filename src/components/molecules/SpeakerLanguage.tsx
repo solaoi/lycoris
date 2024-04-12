@@ -125,7 +125,7 @@ const SpeakerLanguage = (): JSX.Element => {
                 {downloadedModels.length > 0 && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
                     {downloadedModels.map((model, i) => (
                         <li key={"speaker-language_" + i}>
-                            <label className="label inline-flex active:bg-inherit">
+                            <label className="label inline-flex active:!bg-inherit">
                                 <input type="radio" name="language-option" className="radio radio-accent" onChange={change} value={model} checked={model === speakerLanguage} />
                                 <a className="grow">{mapModel(model)}</a>
                             </label>
