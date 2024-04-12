@@ -16,7 +16,7 @@ const NoteDeleteButton = (props: NoteDeleteProps): JSX.Element => {
     }, []);
 
     return (
-        <button className={(hidden ? "" : "hidden ") + "btn gap-2 glass text-secondary animate-spread hover:bg-white"} onClick={(e => {
+        <button className={(hidden ? "" : "hidden ") + "btn gap-2 glass border border-solid border-neutral-300 text-secondary animate-spread hover:bg-white"} onClick={(e => {
             animateAction();
             const id = setTimeout(() => {
                 deleteAction(e);

@@ -91,7 +91,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             >
                 <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
                     <li key="transcription-accuracy_off">
-                        <label className="label inline-flex active:bg-inherit">
+                        <label className="label inline-flex active:!bg-inherit">
                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={transcriptionAccuracy === "off"} />
                             <a className="grow">オフ</a>
                         </label>
@@ -118,7 +118,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                             return [...a, c, `${c}-translate-to-en`]
                         }, []).map((model, i) => (
                             <li key={"transcription-accuracy_" + i}>
-                                <label className="label inline-flex active:bg-inherit">
+                                <label className="label inline-flex active:!bg-inherit">
                                     <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                     <a className="grow">{mapModel(model)}</a>
                                 </label>
@@ -127,20 +127,20 @@ const TranscriptionAccuracy = (): JSX.Element => {
                     </>}
                     {settingKeyOpenai && <>
                         <li key="transcription-accuracy_online-transcript">
-                            <label className="label inline-flex active:bg-inherit">
+                            <label className="label inline-flex active:!bg-inherit">
                                 <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-transcript" checked={"online-transcript" === transcriptionAccuracy} />
                                 <a className="grow">文字起こし：オンライン</a>
                             </label>
                         </li>
                         <li key="transcription-accuracy_online-chat">
-                            <label className="label inline-flex active:bg-inherit">
+                            <label className="label inline-flex active:!bg-inherit">
                                 <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-chat" === transcriptionAccuracy} />
                                 <a className="grow">AI：オンライン</a>
                             </label>
                         </li>
                         {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (
                             <li key="online-translate-to-en">
-                                <label className="label inline-flex active:bg-inherit">
+                                <label className="label inline-flex active:!bg-inherit">
                                     <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-translate-to-en" === transcriptionAccuracy} />
                                     <a className="grow">翻訳（英）：オンライン</a>
                                 </label>
