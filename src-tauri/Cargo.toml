@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.9"
+version = "0.9.10"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -44,9 +44,9 @@ objc-foundation = "0.1"
 objc_id = "0.1"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
-whisper-rs = { version = "0.10.0" }
+whisper-rs = { version = "0.11.1", features = ["metal"] }
 [target.'cfg(target_arch = "aarch64")'.dependencies]
-whisper-rs = { version = "0.10.0", features = ["coreml"] }
+whisper-rs = { version = "0.11.1", features = ["metal", "coreml"] }
 
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/plugins-workspace"

@@ -2169,7 +2169,7 @@ dependencies = [
  "httpdate",
  "itoa 1.0.10",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.6",
  "tokio",
  "tower-service",
  "tracing",
@@ -2571,7 +2571,7 @@ dependencies = [
 
 [[package]]
 name = "lycoris"
-version = "0.9.9"
+version = "0.9.10"
 dependencies = [
  "chrono",
  "core-graphics 0.23.1",
@@ -5924,18 +5924,18 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.10.0"
+version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38e19ccc66e3746fc15cc9b8cbc67be61d7326f0dd313c3d5dce53e706365e23"
+checksum = "ed7a191078e189d96d029244ab1dff159775adec71dc89a222e9bb9d21a7d161"
 dependencies = [
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e91adc462e9bc7b3fce6116eeafe76f9bc46c20c2b4f5fe0da00fd1196fa92f1"
+checksum = "2834f4ca6472b02748c6c282a60cea538f962428f79e685c3205a08efd711336"
 dependencies = [
  "bindgen",
  "cfg-if",

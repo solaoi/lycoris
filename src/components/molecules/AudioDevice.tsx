@@ -122,7 +122,7 @@ const AudioDevices = (): JSX.Element => {
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
                 <li>
-                    <div className="bg-inherit">
+                    <div className="!bg-inherit">
                         <label className="cursor-pointer label">
                             <span className="label-text inline-flex">
                                 <span className="mr-2">
@@ -140,7 +140,7 @@ const AudioDevices = (): JSX.Element => {
                     <>
                         <hr />
                         <li>
-                            <div className="bg-inherit">
+                            <div className="!bg-inherit">
                                 <label className="cursor-pointer label">
                                     <span className="label-text inline-flex">
                                         <span className="mr-2">
@@ -159,7 +159,7 @@ const AudioDevices = (): JSX.Element => {
                             style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
                             {audioDevices.map((device, i) => (
                                 <li key={"audio-device_" + i}>
-                                    <label className="label inline-flex active:bg-inherit">
+                                    <label className="label inline-flex active:!bg-inherit">
                                         <input type="radio" name="device-option" className="radio radio-accent" onChange={change} value={device.label} defaultChecked={audioDevice === device.label} />
                                         <a className="grow">{device.label}</a>
                                     </label>

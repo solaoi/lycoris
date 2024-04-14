@@ -1,19 +1,30 @@
 import { useSetRecoilState } from "recoil"
+import { getVersion } from '@tauri-apps/api/app';
 import { featureState } from "../store/atoms/featureState"
 import { selectedNoteState } from "../store/atoms/selectedNoteState"
 import { AudioDevices } from "./molecules/AudioDevice"
 import { SpeakerLanguage } from "./molecules/SpeakerLanguage"
 import { TranscriptionAccuracy } from "./molecules/TranscriptionAccuracy"
+import { useEffect, useState } from "react";
 
 const Header = (): JSX.Element => {
     const setFeature = useSetRecoilState(featureState)
     const setSelectedNote = useSetRecoilState(selectedNoteState);
+    const [appVersion, setAppVersion] = useState<string | null>(null);
+    useEffect(() => {
+        const fetchVersion = async () => {
+            const version = await getVersion();
+            setAppVersion(version);
+        };
+        fetchVersion();
+    }, []);
 
     return (
         <header className="sticky top-0 z-10" style={{ minWidth: "770px", height: "64px" }}>
             <div className="navbar bg-base-200">
-                <div className="flex-1">
-                    <a className="ml-2 font-bold text-xl text-primary select-none" href="https://github.com/solaoi/lycoris" target="_blank">Lycoris</a>
+                <div className="flex flex-1 items-baseline select-none">
+                    <a className="ml-2 font-bold text-xl text-primary mr-1" href="https://github.com/solaoi/lycoris" target="_blank">Lycoris</a>
+                    <p className="text-xs text-slate-500">v{appVersion}</p>
                 </div>
                 <div className="flex-none mr-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -38,7 +49,7 @@ const Header = (): JSX.Element => {
                         <path d="M5.5 9.643a.75.75 0 00-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 000 1.5h4.5a.75.75 0 000-1.5h-1.5v-1.546A6.001 6.001 0 0016 10v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 01-9 0v-.357z" />
                     </svg>
                 </div>
-                <div className="flex-none mr-2">
+                <div className="flex-none mr-4">
                     <AudioDevices />
                 </div>
                 <div className="group cursor-pointer select-none flex-none mr-2" onClick={() => { setFeature("settings"); setSelectedNote(null); }}>
