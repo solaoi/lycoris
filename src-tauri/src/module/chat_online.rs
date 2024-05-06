@@ -9,6 +9,7 @@ use reqwest::{
     multipart, Client,
 };
 use serde_json::{json, Value};
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -402,4 +403,18 @@ impl ChatOnline {
             Ok(())
         });
     }
+}
+
+pub static SINGLETON_INSTANCE: Mutex<Option<ChatOnline>> = Mutex::new(None);
+
+pub fn initialize_chat_online(app_handle: AppHandle, speaker_language: String, note_id: u64) {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    if singleton.is_none() {
+        *singleton = Some(ChatOnline::new(app_handle, speaker_language, note_id));
+    }
+}
+
+pub fn drop_chat_online() {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    *singleton = None;
 }

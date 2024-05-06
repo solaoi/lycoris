@@ -7,7 +7,7 @@ import { NoteDeleteButton } from "../molecules/NoteDeleteButton";
 
 type SideMenuColumnProps = {
     note: NoteType
-    deleteAction: (e: any) => void
+    deleteAction: () => void
     isAdded: boolean
     setAdded: (flag: boolean) => void
 }
@@ -42,7 +42,7 @@ const SideMenuColumn = (props: SideMenuColumnProps): JSX.Element => {
             onMouseLeave={() => setHover(false)}
         >
             <p>{note.note_title}</p>
-            <NoteDeleteButton hidden={isHover} deleteAction={deleteAction} animateAction={animateAction} />
+            <NoteDeleteButton noteTitle={note.note_title} hidden={isHover} deleteAction={deleteAction} animateAction={animateAction} />
         </div>
     )
 }

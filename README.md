@@ -16,7 +16,7 @@
 
 ## 対応環境
 
-- MacOS
+- macOS 13 Ventura以降
 
 ## インストール
 

@@ -11,6 +11,7 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 use std::{
     cmp::min,
+    env,
     io::{Read, Seek, SeekFrom},
     path::PathBuf,
     str::FromStr,
@@ -31,6 +32,7 @@ use module::{
     permissions,
     record::Record,
     record_desktop::RecordDesktop,
+    screenshot::{self, AppWindow},
     transcription::{TraceCompletion, Transcription},
     transcription_online::TranscriptionOnline,
 };
@@ -69,6 +71,21 @@ fn list_devices_command() -> Vec<Device> {
 }
 
 #[tauri::command]
+fn list_apps_command() -> Vec<String> {
+    screenshot::list_apps()
+}
+
+#[tauri::command]
+fn list_app_windows_command(app_name: String) -> Vec<AppWindow> {
+    screenshot::list_app_windows(app_name)
+}
+
+#[tauri::command]
+fn screenshot_command(window: Window, window_id: u32, note_id: u64) -> bool {
+    screenshot::screenshot(window_id, note_id, window.app_handle().clone())
+}
+
+#[tauri::command]
 fn has_accessibility_permission_command() -> bool {
     permissions::has_accessibility_permission()
 }
@@ -86,7 +103,7 @@ fn has_microphone_permission_command(window: Window) -> bool {
 #[tauri::command]
 fn start_command(
     state: State<'_, RecordState>,
-    window: tauri::Window,
+    window: Window,
     device_label: String,
     speaker_language: String,
     transcription_accuracy: String,
@@ -200,7 +217,28 @@ fn stop_trace_command(state: State<'_, RecordState>, window: tauri::Window) {
     }
 }
 
+fn set_whisper_metal_lib_path(relative_path: &str) {
+    if let Ok(exe_path) = env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let absolute_path = exe_dir.join(relative_path);
+            if let Some(absolute_path_str) = absolute_path.to_str() {
+                println!("Setting GGML_METAL_PATH_RESOURCES to {}", absolute_path_str);
+                env::set_var("GGML_METAL_PATH_RESOURCES", absolute_path_str);
+            }
+        } else {
+            eprintln!("GGML_METAL_PATH_RESOURCES cloud not be set: Failed to get the executable directory.");
+        }
+    } else {
+        eprintln!("GGML_METAL_PATH_RESOURCES cloud not be set: Failed to get the executable path.");
+    }
+}
+
 fn main() {
+    #[cfg(not(debug_assertions))]
+    set_whisper_metal_lib_path("../Resources/resources/whisper");
+    #[cfg(debug_assertions)]
+    set_whisper_metal_lib_path("../../resources/whisper");
+
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
             let raw_path = request.uri().replace("stream://localhost", "");
@@ -263,6 +301,9 @@ fn main() {
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,
+            list_apps_command,
+            list_app_windows_command,
+            screenshot_command,
             has_accessibility_permission_command,
             has_screen_capture_permission_command,
             has_microphone_permission_command,

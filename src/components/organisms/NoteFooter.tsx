@@ -2,6 +2,7 @@ import { useRef, KeyboardEvent, useEffect } from 'react'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 import { speechHistoryState } from '../../store/atoms/speechHistoryState'
+import { AppWindow } from '../molecules/ScreenshotSet'
 
 type NoteFooterProps = {
     titleRef: React.RefObject<HTMLInputElement>
@@ -9,17 +10,14 @@ type NoteFooterProps = {
 
 const NoteFooter = (props: NoteFooterProps): JSX.Element => {
     const { titleRef } = props;
-    const inputEl = useRef<HTMLInputElement>(null)
+    const inputEl = useRef<HTMLTextAreaElement>(null)
     const selectedNote = useRecoilValue(selectedNoteState)
     const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
-    const enter = async (e: KeyboardEvent<HTMLInputElement>) => {
-        if (!(e.key === "Enter" && e.keyCode === 13)) {
-            return
-        }
+    const update = () => {
         setHistories(prev =>
             [...prev, {
                 speech_type: "memo",
-                created_at_unixtime: new Date().getTime(),
+                created_at_unixtime: Math.floor(new Date().getTime() / 1000),
                 content: inputEl.current?.value || "",
                 wav: "",
                 model: "manual",
@@ -31,6 +29,19 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
         if (inputEl.current) {
             inputEl.current.value = ""
         }
+    };
+    const clear = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.shiftKey && e.key === 'Enter' && e.currentTarget.value === "\n") {
+            if (inputEl.current) {
+                inputEl.current.value = ""
+            }
+        }
+    }
+    const enter = async (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (!(e.shiftKey && e.key === 'Enter')) {
+            return
+        }
+        update();
     }
     useEffect(() => {
         if (inputEl.current && (document.activeElement !== titleRef.current)) {
@@ -39,16 +50,17 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
     }, [selectedNote]);
 
     return (
-        <div className="fixed bottom-0 py-3 px-4 sm:px-6 lg:px-8 flex justify-center" style={{ width: `calc(100vw - 320px)` }}>
-            <div className="form-control w-4/5">
-                <div className="input-group">
-                    <button className="btn btn-square flex-none btn-outline bg-base-200 border-base-300 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                        </svg>
-                    </button>
-                    <input ref={inputEl} type="text" placeholder="メモ…" className="input input-bordered bg-white focus:outline-none flex-1" onKeyDown={e => enter(e)} />
-                </div>
+        <div className="ml-[-1.25rem] fixed bottom-0 right-0 mb-3 py-2 px-2 mr-16 flex items-center glass rounded-2xl w-1/2">
+            <div className="flex-1 flex flex-col mr-2 relative">
+                <textarea rows={3} ref={inputEl} placeholder="メモ…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter(e)} onKeyUp={e => clear(e)} />
+                <button className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn glass border border-solid border-neutral-300 text-primary" onClick={update}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                        <path fillRule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clipRule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div className='flex flex-col items-center'>
+                <AppWindow />
             </div>
         </div>
     )

@@ -38,8 +38,8 @@ use screencapturekit::{
 use vosk::Recognizer;
 
 use super::{
-    chat_online::ChatOnline, recognizer::MyRecognizer, sqlite::Sqlite, transcription,
-    transcription_online::TranscriptionOnline, writer::Writer,
+    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_online,
+    writer::Writer,
 };
 
 pub struct RecordDesktop {
@@ -219,20 +219,27 @@ impl RecordDesktop {
                             *lock = true;
                             drop(lock);
                             if transcription_accuracy_clone.starts_with("online-transcript") {
-                                let mut transcription_online = TranscriptionOnline::new(
+                                transcription_online::initialize_transcription_online(
                                     app_handle_clone,
                                     transcription_accuracy_clone,
                                     speaker_language_clone,
                                     note_id,
                                 );
-                                transcription_online.start(stop_convert_rx_clone, false);
+                                let mut lock =
+                                    transcription_online::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             } else if transcription_accuracy_clone.starts_with("online-chat") {
-                                let mut chat_online = ChatOnline::new(
+                                chat_online::initialize_chat_online(
                                     app_handle_clone,
                                     speaker_language_clone,
                                     note_id,
                                 );
-                                chat_online.start(stop_convert_rx_clone, false);
+                                let mut lock = chat_online::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             } else {
                                 transcription::initialize_transcription(
                                     app_handle_clone,
@@ -273,6 +280,8 @@ impl RecordDesktop {
         if !is_no_transcription {
             stop_convert_tx.send(()).unwrap();
             transcription::drop_transcription();
+            transcription_online::drop_transcription_online();
+            chat_online::drop_chat_online();
         } else {
             drop(stop_convert_tx)
         }
