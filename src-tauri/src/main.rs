@@ -11,6 +11,7 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 use std::{
     cmp::min,
+    env,
     io::{Read, Seek, SeekFrom},
     path::PathBuf,
     str::FromStr,
@@ -216,7 +217,28 @@ fn stop_trace_command(state: State<'_, RecordState>, window: tauri::Window) {
     }
 }
 
+fn set_whisper_metal_lib_path(relative_path: &str) {
+    if let Ok(exe_path) = env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            let absolute_path = exe_dir.join(relative_path);
+            if let Some(absolute_path_str) = absolute_path.to_str() {
+                println!("Setting GGML_METAL_PATH_RESOURCES to {}", absolute_path_str);
+                env::set_var("GGML_METAL_PATH_RESOURCES", absolute_path_str);
+            }
+        } else {
+            eprintln!("GGML_METAL_PATH_RESOURCES cloud not be set: Failed to get the executable directory.");
+        }
+    } else {
+        eprintln!("GGML_METAL_PATH_RESOURCES cloud not be set: Failed to get the executable path.");
+    }
+}
+
 fn main() {
+    #[cfg(not(debug_assertions))]
+    set_whisper_metal_lib_path("../Resources/resources/whisper");
+    #[cfg(debug_assertions)]
+    set_whisper_metal_lib_path("../../resources/whisper");
+
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
             let raw_path = request.uri().replace("stream://localhost", "");

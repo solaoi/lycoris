@@ -36,7 +36,7 @@ urlencoding = "2.1.0"
 # screencapturekit = "0.2.7"
 # fix thread crash
 screencapturekit = { git = "https://github.com/solaoi/screencapturekit-rs" }
-xcap = "0.0.8"
+xcap = "0.0.9"
 # permission
 macos-accessibility-client = "0.0.1"
 core-graphics = "0.23.1"
