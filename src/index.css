@@ -35,3 +35,11 @@ body {
 .scrollbar-transparent::-webkit-scrollbar {
     display: none;
 }
+
+.znc ul {
+    margin: 0;
+}
+
+.collapse,.collapse-content {
+    visibility: inherit!important;
+}

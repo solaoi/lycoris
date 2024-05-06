@@ -1,10 +1,11 @@
 import { useRecoilValue } from 'recoil'
 import dayjs from '../../lib/dayjs'
-import { memoFilterState } from '../../store/atoms/memoFilterState'
+import { speechFilterState } from '../../store/atoms/speechFilterState'
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
 import { Speech } from './Speech'
 import { markdownToSimpleHtml } from 'zenn-markdown-html';
 import 'zenn-content-css';
+import { Screenshot } from './Screenshot'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -12,12 +13,20 @@ type SpeechHistoryProps = {
 
 const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
     const { histories = [] } = props
-    const filterd = useRecoilValue(memoFilterState)
+    const filterTarget = useRecoilValue(speechFilterState)
 
     return (
         <div>
             {histories.filter(
-                h => { if (filterd) { return h.speech_type === "memo" } else { return true } }
+                h => {
+                    if (filterTarget === "memo") {
+                        return h.speech_type === "memo"
+                    } else if (filterTarget === "screenshot") {
+                        return h.speech_type === "screenshot"
+                    } else {
+                        return true
+                    }
+                }
             ).map((h, i) => {
                 if (h.speech_type === "memo") {
                     return (
@@ -42,7 +51,9 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                 }
                 return (<div key={"history_" + i}>
                     {cal && <div className={(i > 0 ? 'mt-6 ' : '') + 'mb-2'}>[{cal}]</div>}
-                    <Speech model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />
+                    {h.speech_type === "screenshot"
+                        ? <div><Screenshot content={h.content} date={date} /></div>
+                        : <Speech model={h.model} model_description={h.model_description} date={date} content={h.content} wav={h.wav} />}
                 </div>)
             }
             )}

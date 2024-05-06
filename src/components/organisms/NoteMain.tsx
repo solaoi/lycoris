@@ -19,6 +19,7 @@ import { TraceStopButton } from '../molecules/TraceStopButton'
 import { tracingState } from '../../store/atoms/tracingState'
 import { tracingNoteState } from '../../store/atoms/tracingNoteState'
 import { RecordPreparingButton } from '../molecules/RecordPreparingButton'
+import { ScreenshotFilterButton } from '../molecules/ScreenshotFilterButton'
 
 const NoteMain = (): JSX.Element => {
     const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState)
@@ -36,22 +37,25 @@ const NoteMain = (): JSX.Element => {
     const inputEl = useRef<HTMLInputElement>(null);
     const [showGotoBottom, setShowGotoBottom] = useState(true);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const scroll = useCallback(() => {
-        if (scrollContainerRef.current?.scrollTop !== 0 || scrollContainerRef.current?.scrollHeight === scrollContainerRef.current?.clientHeight) {
-            setShowGotoBottom(false);
-        } else {
-            setShowGotoBottom(true);
+    const showGotoBottomButton = () => {
+        const rect = bottomRef.current?.getBoundingClientRect();
+        if (rect) {
+            const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 144;  // 144(24px * 6 lines) is the margin of long note
+            if (!isInViewport) {
+                setShowGotoBottom(true);
+            } else {
+                setShowGotoBottom(false);
+            }
         }
+    }
+    const scroll = useCallback(() => {
+        showGotoBottomButton();
     }, []);
     const [isReadyToRecognize, setIsReadyToRecognize] = useState(false);
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
-            if (scrollContainer.scrollHeight <= scrollContainer.clientHeight) {
-                setShowGotoBottom(false);
-            } else {
-                setShowGotoBottom(true);
-            }
+            showGotoBottomButton();
             scrollContainer.addEventListener('scroll', scroll);
             return () => scrollContainer.removeEventListener('scroll', scroll);
         }
@@ -124,6 +128,19 @@ const NoteMain = (): JSX.Element => {
     }, [recordingNote, isTracing])
 
     useEffect(() => {
+        const unlistenScreenshotTaken = listen('screenshotTaken', event => {
+            const current = event.payload as SpeechHistoryType
+            setHistories(prev => {
+                return [...prev, current]
+            })
+        });
+        return () => {
+            unlistenScreenshotTaken.then(f => f());
+        }
+    }, [selectedNote])
+
+
+    useEffect(() => {
         if (isRecording) {
             const unlistenReadyToRecognize = listen('readyToRecognize', () => {
                 setIsReadyToRecognize(true);
@@ -172,9 +189,11 @@ const NoteMain = (): JSX.Element => {
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
         </div>
-        <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center border-t" style={{ height: "32px" }}>
+        <div className="bg-white max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 flex items-center border-y" style={{ height: "32px" }}>
             フィルター：
             <MemoFilterButton />
+            <div className='mr-1'></div>
+            <ScreenshotFilterButton />
         </div>
         <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} />
@@ -188,7 +207,7 @@ const NoteMain = (): JSX.Element => {
             </div>
             <NoteFooter titleRef={inputEl} />
         </div>
-        <div className="flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-5 bg-base-200 rounded-lg drop-shadow-lg cursor-pointer hover:bg-base-300"
+        <div className="flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-[1.4rem] bg-base-200 rounded-lg drop-shadow-lg cursor-pointer hover:bg-base-300"
             style={!showGotoBottom ? { display: "none" } : {}}
             onClick={() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={"w-6 h-6"}>

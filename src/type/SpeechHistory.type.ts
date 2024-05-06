@@ -1,6 +1,6 @@
 export type SpeechHistoryType = {
     id? : number;
-    speech_type: "speech" | "memo";
+    speech_type: "speech" | "memo" | "screenshot";
     created_at_unixtime: number;
     content: string;
     wav: string;

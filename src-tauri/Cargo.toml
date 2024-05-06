@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.10"
+version = "0.9.11"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -36,6 +36,7 @@ urlencoding = "2.1.0"
 # screencapturekit = "0.2.7"
 # fix thread crash
 screencapturekit = { git = "https://github.com/solaoi/screencapturekit-rs" }
+xcap = "0.0.8"
 # permission
 macos-accessibility-client = "0.0.1"
 core-graphics = "0.23.1"

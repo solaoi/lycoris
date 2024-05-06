@@ -31,6 +31,7 @@ use module::{
     permissions,
     record::Record,
     record_desktop::RecordDesktop,
+    screenshot::{self, AppWindow},
     transcription::{TraceCompletion, Transcription},
     transcription_online::TranscriptionOnline,
 };
@@ -69,6 +70,21 @@ fn list_devices_command() -> Vec<Device> {
 }
 
 #[tauri::command]
+fn list_apps_command() -> Vec<String> {
+    screenshot::list_apps()
+}
+
+#[tauri::command]
+fn list_app_windows_command(app_name: String) -> Vec<AppWindow> {
+    screenshot::list_app_windows(app_name)
+}
+
+#[tauri::command]
+fn screenshot_command(window: Window, window_id: u32, note_id: u64) -> bool {
+    screenshot::screenshot(window_id, note_id, window.app_handle().clone())
+}
+
+#[tauri::command]
 fn has_accessibility_permission_command() -> bool {
     permissions::has_accessibility_permission()
 }
@@ -86,7 +102,7 @@ fn has_microphone_permission_command(window: Window) -> bool {
 #[tauri::command]
 fn start_command(
     state: State<'_, RecordState>,
-    window: tauri::Window,
+    window: Window,
     device_label: String,
     speaker_language: String,
     transcription_accuracy: String,
@@ -263,6 +279,9 @@ fn main() {
             download_whisper_model_command,
             download_vosk_model_command,
             list_devices_command,
+            list_apps_command,
+            list_app_windows_command,
+            screenshot_command,
             has_accessibility_permission_command,
             has_screen_capture_permission_command,
             has_microphone_permission_command,
