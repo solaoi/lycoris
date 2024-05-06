@@ -217,7 +217,7 @@ fn stop_trace_command(state: State<'_, RecordState>, window: tauri::Window) {
     }
 }
 
-fn set_whiper_metal_lib_path(relative_path: &str) {
+fn set_whisper_metal_lib_path(relative_path: &str) {
     if let Ok(exe_path) = env::current_exe() {
         if let Some(exe_dir) = exe_path.parent() {
             let absolute_path = exe_dir.join(relative_path);
@@ -235,9 +235,9 @@ fn set_whiper_metal_lib_path(relative_path: &str) {
 
 fn main() {
     #[cfg(not(debug_assertions))]
-    set_whiper_metal_lib_path("../Resources/resources/whisper");
+    set_whisper_metal_lib_path("../Resources/resources/whisper");
     #[cfg(debug_assertions)]
-    set_whiper_metal_lib_path("../../resources/whisper");
+    set_whisper_metal_lib_path("../../resources/whisper");
 
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
