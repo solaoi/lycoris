@@ -64,7 +64,7 @@ export default class DB {
   }
 
   public async saveNote(note_title: string): Promise<NoteType> {
-    const created_at_unixtime = new Date().getTime();
+    const created_at_unixtime = Math.floor(new Date().getTime()/1000);
     const { lastInsertId } = await this.db.execute(
       'INSERT INTO notes(note_title, created_at_unixtime) VALUES($1, $2)',
       [note_title, created_at_unixtime]

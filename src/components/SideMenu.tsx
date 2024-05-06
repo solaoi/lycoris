@@ -44,7 +44,7 @@ const SideMenu = (): JSX.Element => {
             unlisten.then(f => f());
         }
     }, [selectedNote])
-    const deleteAction = (note_id: number) => (e: any) => {
+    const deleteAction = (note_id: number) => () => {
         setAdded(false);
         invoke('delete_note_command', { noteId: note_id });
     }

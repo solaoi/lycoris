@@ -13,3 +13,4 @@ mod transcriber;
 pub mod transcription;
 pub mod transcription_online;
 mod writer;
+pub mod screenshot;
