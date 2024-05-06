@@ -28,7 +28,7 @@ const TraceStartButton = (): JSX.Element => {
     }
 
     useEffect(() => {
-        const unlistenTraceUnCompletion = listen('traceUnCompletion', event => {
+        const unlistenTraceUnCompletion = listen('traceUnCompletion', () => {
             setTracable(true)
         })
         const unlistenTraceCompletion = listen('traceCompletion', () => {

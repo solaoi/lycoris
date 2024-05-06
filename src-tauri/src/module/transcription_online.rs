@@ -9,6 +9,7 @@ use reqwest::{
     multipart, Client,
 };
 use serde_json::Value;
+use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -200,4 +201,28 @@ impl TranscriptionOnline {
             Ok(())
         });
     }
+}
+
+pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionOnline>> = Mutex::new(None);
+
+pub fn initialize_transcription_online(
+    app_handle: AppHandle,
+    transcription_accuracy: String,
+    speaker_language: String,
+    note_id: u64,
+) {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    if singleton.is_none() {
+        *singleton = Some(TranscriptionOnline::new(
+            app_handle,
+            transcription_accuracy,
+            speaker_language,
+            note_id,
+        ));
+    }
+}
+
+pub fn drop_transcription_online() {
+    let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
+    *singleton = None;
 }
