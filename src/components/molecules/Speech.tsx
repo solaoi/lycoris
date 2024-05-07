@@ -51,7 +51,8 @@ const Speech = (props: SpeechProps): JSX.Element => {
                         position: "absolute",
                         top: bottom,
                         left: getElementProperty("left") + width / 10,
-                        width: width * 4 / 5
+                        width: width * 4 / 5,
+                        zIndex: 1
                     }}
                 />}
         </div>
