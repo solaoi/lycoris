@@ -39,7 +39,7 @@ use vosk::Recognizer;
 
 use super::{
     chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_online,
-    writer::Writer,
+    translation_ja, writer::Writer,
 };
 
 pub struct RecordDesktop {
@@ -237,6 +237,17 @@ impl RecordDesktop {
                                     note_id,
                                 );
                                 let mut lock = chat_online::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
+                            } else if transcription_accuracy_clone.starts_with("translataion-ja") {
+                                translation_ja::initialize_translation_ja(
+                                    app_handle_clone,
+                                    transcription_accuracy_clone,
+                                    speaker_language_clone,
+                                    note_id,
+                                );
+                                let mut lock = translation_ja::SINGLETON_INSTANCE.lock().unwrap();
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }

@@ -35,6 +35,7 @@ use module::{
     screenshot::{self, AppWindow},
     transcription::{TraceCompletion, Transcription},
     transcription_online::TranscriptionOnline,
+    translation_ja::TranslationJa,
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -192,6 +193,14 @@ fn start_trace_command(
         } else if transcription_accuracy.starts_with("online-chat") {
             let mut chat_online = ChatOnline::new(window.app_handle(), speaker_language, note_id);
             chat_online.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("translataion-ja") {
+            let mut translation_ja = TranslationJa::new(
+                window.app_handle(),
+                transcription_accuracy,
+                speaker_language,
+                note_id,
+            );
+            translation_ja.start(stop_convert_rx, true);
         } else {
             let mut transcription = Transcription::new(
                 window.app_handle(),
