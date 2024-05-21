@@ -14,6 +14,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const isTracing = useRecoilValue(tracingState);
     const speakerLanguage = useRecoilValue(speakerLanguageState)
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"))
+    const settingKeyAmivoice = useRecoilValue(settingKeyState("settingKeyAmivoice"))
 
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
@@ -47,6 +48,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：日";
             case "online-transcript":
                 return "文字起こし：オンライン";
+            case "online-amivoice":
+                return "文字起こし：AmiVoice";
             case "online-chat":
                 return "AI：オンライン";
             case "small-translate-to-en":
@@ -62,7 +65,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
 
     return (
         <div className="dropdown">
-            {((isRecording || isTracing) || downloadedModels.length === 0) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+            {((isRecording || isTracing) || (downloadedModels.length === 0 && settingKeyOpenai === "" && settingKeyAmivoice === "")) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法を選択" : mapModel(transcriptionAccuracy)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -146,6 +149,13 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                 </label>
                             </li>
                         )}</>}
+                    {settingKeyAmivoice && <>
+                        <li key="transcription-accuracy_online-amivoice">
+                            <label className="label inline-flex active:!bg-inherit">
+                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-amivoice" checked={"online-amivoice" === transcriptionAccuracy} />
+                                <a className="grow">文字起こし：AmiVoice</a>
+                            </label>
+                        </li></>}
                 </ul>
             </ul>
         </div>

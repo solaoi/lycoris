@@ -44,6 +44,8 @@ VALUES("settingResource", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingModel", "gpt-3.5-turbo");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingAmiVoiceModel", "general");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAILanguage", "None");
 INSERT INTO settings(setting_name, setting_status)
 VALUES(
