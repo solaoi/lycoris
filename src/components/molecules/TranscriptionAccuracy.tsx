@@ -48,12 +48,12 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "文字起こし：日";
             case "online-transcript":
                 return "文字起こし：WhisperAPI";
+            case "online-transcript-to-en":
+                return "翻訳（英）：WhisperAPI";
             case "online-amivoice":
                 return "文字起こし：AmiVoiceAPI";
             case "online-chat":
                 return "AI：ChatGPT";
-            case "online-translate-to-en":
-                return "翻訳（英）：WhisperAPI";
             case "small-translate-to-en":
                 return "翻訳（英）：低";
             case "medium-translate-to-en":
@@ -144,9 +144,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
                             </label>
                         </li>
                         {(!speakerLanguage?.startsWith("en-us") && !speakerLanguage?.startsWith("small-en-us")) && (
-                            <li key="online-translate-to-en">
+                            <li key="online-transcript-to-en">
                                 <label className="label inline-flex active:!bg-inherit">
-                                    <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-translate-to-en" checked={"online-translate-to-en" === transcriptionAccuracy} />
+                                    <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-transcript-to-en" checked={"online-transcript-to-en" === transcriptionAccuracy} />
                                     <a className="grow">翻訳（英）：WhisperAPI</a>
                                 </label>
                             </li>
