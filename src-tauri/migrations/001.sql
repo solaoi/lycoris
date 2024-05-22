@@ -30,6 +30,8 @@ VALUES("transcriptionAccuracy", "off");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingKeyOpenai", "");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingKeyAmivoice", "");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingTemplate", "");
@@ -43,6 +45,8 @@ INSERT INTO settings(setting_name, setting_status)
 VALUES("settingResource", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingModel", "gpt-3.5-turbo");
+INSERT INTO settings(setting_name, setting_status)
+VALUES("settingAmiVoiceModel", "general");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAILanguage", "None");
 INSERT INTO settings(setting_name, setting_status)

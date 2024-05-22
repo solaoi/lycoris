@@ -13,6 +13,7 @@ import { SettingHook } from "../molecules/SettingHook"
 import { SettingResource } from "../molecules/SettingResource"
 import { SettingModel } from "../molecules/SettingModel"
 import { SettingAILanguage } from "../molecules/SettingAILanguage"
+import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -346,6 +347,25 @@ const SettingsMain = (): JSX.Element => {
                     </svg>
                     オンライン設定
                 </h2>
+                <div className="px-5 mt-2 mb-12">
+                    <div className="mb-4">
+                        <h3 className="text-lg mb-2">
+                            <p>AmiVoice</p>
+                        </h3>
+                        <hr />
+                    </div>
+                    <div className="px-3">
+                        <div className="mb-4">
+                            <p>AmiVoice社のAPIを利用することで、</p>
+                            <p>特定の業界に特化した文字起こしが選択可能となります。</p>
+                            <p>（APIの利用に関しては、AmiVoice社の利用規約を参照ください。）</p>
+                        </div>
+                        <div className="mb-8">
+                            <SettingKey settingName="settingKeyAmivoice" />
+                        </div>
+                        <SettingAmiVoiceModel />
+                    </div>
+                </div>
                 <div className="px-5 mt-2">
                     <div className="mb-4">
                         <h3 className="text-lg mb-2">
