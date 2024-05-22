@@ -1,13 +1,15 @@
 import { ChangeEvent, useRef, useState } from "react";
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { modelVoskDownloadedState } from "../../store/atoms/modelVoskDownloadedState";
 import { recordState } from "../../store/atoms/recordState";
 import { tracingState } from "../../store/atoms/tracingState";
+import { transcriptionAccuracyState } from "../../store/atoms/transcriptionAccuracyState";
 
 const SpeakerLanguage = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelVoskDownloadedState)
     const [speakerLanguage, setSpeakerLanguage] = useRecoilState(speakerLanguageState)
+    const setTranscriptionAccuracy = useSetRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
     const isTracing = useRecoilValue(tracingState);
     const dropdownRef = useRef<HTMLLabelElement>(null)
@@ -17,6 +19,7 @@ const SpeakerLanguage = (): JSX.Element => {
         if (e.target.checked) {
             const speakerLanguage = e.target.value
             setSpeakerLanguage(speakerLanguage)
+            setTranscriptionAccuracy("off")
         }
     }
 
