@@ -35,6 +35,7 @@ use module::{
     screenshot::{self, AppWindow},
     transcription::{TraceCompletion, Transcription},
     transcription_online::TranscriptionOnline,
+    transcription_amivoice::TranscriptionAmivoice,
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -189,6 +190,12 @@ fn start_trace_command(
                 note_id,
             );
             transcription_online.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("online-amivoice") {
+            let mut transcription_amivoice = TranscriptionAmivoice::new(
+                window.app_handle(),
+                note_id,
+            );
+            transcription_amivoice.start(stop_convert_rx, true);
         } else if transcription_accuracy.starts_with("online-chat") {
             let mut chat_online = ChatOnline::new(window.app_handle(), speaker_language, note_id);
             chat_online.start(stop_convert_rx, true);

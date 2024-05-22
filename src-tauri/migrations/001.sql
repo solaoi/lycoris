@@ -30,6 +30,8 @@ VALUES("transcriptionAccuracy", "off");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingKeyOpenai", "");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingKeyAmivoice", "");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingTemplate", "");
