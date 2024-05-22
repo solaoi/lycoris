@@ -144,7 +144,6 @@ impl TranscriptionAmivoice {
         let response_text = json_response["results"][0]["text"]
             .as_str()
             .unwrap_or("text field not found");
-        println!("Response text: {}", response_text);
 
         Ok(response_text.to_string())
     }
