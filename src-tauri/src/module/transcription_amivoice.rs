@@ -82,8 +82,8 @@ impl TranscriptionAmivoice {
         let cursor = Cursor::new(buffer);
         let mut reader = WavReader::new(cursor)?;
         let spec = WavSpec {
-            channels: 1,
-            sample_rate: 48000,
+            channels: reader.spec().channels,
+            sample_rate: reader.spec().sample_rate,
             bits_per_sample: 16,
             sample_format: SampleFormat::Int,
         };
