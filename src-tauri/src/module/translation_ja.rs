@@ -17,21 +17,19 @@ pub struct TranslationJa {
     ctx: WhisperContext,
     translator: Translator<Tokenizer>,
     speaker_language: String,
-    transcription_accuracy: String, // suffix should be "en" on transcriber translatoin process
     note_id: u64,
 }
 
 impl TranslationJa {
     pub fn new(
         app_handle: AppHandle,
-        transcription_accuracy: String,
         speaker_language: String,
         note_id: u64,
     ) -> Self {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
             .path_resolver()
-            .resolve_resource(format!("resources/fugumt/fugumt-en-ja"))
+            .resolve_resource(format!("resources/fugumt-en-ja"))
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -39,14 +37,13 @@ impl TranslationJa {
         TranslationJa {
             app_handle,
             sqlite: Sqlite::new(),
-            ctx: Transcriber::build(app_handle_clone, transcription_accuracy.clone()),
+            ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
             translator: Translator::new(
                 &model_path,
                 Tokenizer::new(&model_path).unwrap(),
                 &Config::default(),
             ).unwrap(),
             speaker_language,
-            transcription_accuracy,
             note_id,
         }
     }
@@ -134,7 +131,7 @@ impl TranslationJa {
             let result = state.full(
                 Transcriber::build_params(
                     self.speaker_language.clone(),
-                    self.transcription_accuracy.clone(),
+                    "large-translate-to-en".to_string(),
                 ),
                 &audio_data[..],
             );
@@ -152,13 +149,13 @@ impl TranslationJa {
 
                 let result_on_whisper = converted.join("");
                 let sources: Vec<String> = result_on_whisper.lines().map(String::from).collect();
-                let res = self.translator.translate_batch(
+                let res: Vec<(String, Option<f32>)> = self.translator.translate_batch(
                     &sources,
                     &TranslationOptions {
                         beam_size: 5,
                         ..Default::default()
                     },
-                )?;
+                ).unwrap();
                 let mut translated: Vec<String> = vec!["".to_string()];
                 for (r, _) in res {
                     translated.push(r);
@@ -188,7 +185,6 @@ pub static SINGLETON_INSTANCE: Mutex<Option<TranslationJa>> = Mutex::new(None);
 
 pub fn initialize_translation_ja(
     app_handle: AppHandle,
-    transcription_accuracy: String,
     speaker_language: String,
     note_id: u64,
 ) {
@@ -196,7 +192,6 @@ pub fn initialize_translation_ja(
     if singleton.is_none() {
         *singleton = Some(TranslationJa::new(
             app_handle,
-            transcription_accuracy,
             speaker_language,
             note_id,
         ));

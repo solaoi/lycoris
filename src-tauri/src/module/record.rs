@@ -218,10 +218,9 @@ impl Record {
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }
-                            } else if transcription_accuracy_clone.starts_with("translataion-ja") {
+                            } else if transcription_accuracy_clone.starts_with("fugumt-en-ja") {
                                 translation_ja::initialize_translation_ja(
                                     app_handle_clone,
-                                    transcription_accuracy_clone,
                                     speaker_language_clone,
                                     note_id,
                                 );
