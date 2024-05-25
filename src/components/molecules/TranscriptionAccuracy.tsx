@@ -6,9 +6,11 @@ import { recordState } from "../../store/atoms/recordState";
 import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { settingKeyState } from "../../store/atoms/settingKeyState";
 import { tracingState } from "../../store/atoms/tracingState";
+import { modelFugumtDownloadedState } from "../../store/atoms/modelFugumtDownloadedState";
 
 const TranscriptionAccuracy = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelWhisperDownloadedState)
+    const downloadedModelsFugumt = useRecoilValue(modelFugumtDownloadedState)
     const [transcriptionAccuracy, setTranscriptionAccuracy] = useRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
     const isTracing = useRecoilValue(tracingState);
@@ -43,9 +45,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
             case "large":
                 return "文字起こし：高";
             case "large-distil.en":
-                return "文字起こし：英";
             case "large-distil.ja":
-                return "文字起こし：日";
+                return "文字起こし：速度優先";
             case "online-transcript":
                 return "文字起こし：WhisperAPI";
             case "online-transcript-to-en":
@@ -60,6 +61,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "翻訳（英）：中";
             case "large-translate-to-en":
                 return "翻訳（英）：高";
+            case "fugumt-en-ja":
+                return "翻訳（日）：速度優先";
             default:
                 throw new Error("unknown modelType: " + model);
         }
@@ -67,7 +70,16 @@ const TranscriptionAccuracy = (): JSX.Element => {
 
     return (
         <div className="dropdown">
-            {((isRecording || isTracing) || (downloadedModels.length === 0 && settingKeyOpenai === "" && !(settingKeyAmivoice !== "" && (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))))) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+            {((isRecording || isTracing) ||
+                // 追っかけが無効となるケースを列挙
+                // 1. ローカルにWhisperモデルがダウンロードされていない場合
+                (downloadedModels.length === 0 &&
+                    // 2. WhisperのAPIキーが設定されていない場合
+                    settingKeyOpenai === "" &&
+                    // 3. ローカルにWhisperLargeモデルがダウンロードされていない場合 or ローカルにFugumtモデルがダウンロードされていない場合 or ダウンロードされていても、話し手の言語が日本語の場合
+                    !(downloadedModels.includes("large") && downloadedModelsFugumt.length !== 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))) &&
+                    // 4. AmiVoiceのAPIキーが設定されていない場合 or 設定されていても、話し手の言語が日本語以外の場合
+                    !(settingKeyAmivoice !== "" && (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))))) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法を選択" : mapModel(transcriptionAccuracy)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -103,9 +115,6 @@ const TranscriptionAccuracy = (): JSX.Element => {
                     </li>
                     {downloadedModels.length > 0 && <>
                         {downloadedModels?.reduce((a: string[], c) => {
-                            if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
-                                return [...a, c]
-                            }
                             if (c === "large-distil.en") {
                                 if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
                                     return [...a, c]
@@ -120,6 +129,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                     return a
                                 }
                             }
+                            if (speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) {
+                                return [...a, c]
+                            }
                             return [...a, c, `${c}-translate-to-en`]
                         }, []).map((model, i) => (
                             <li key={"transcription-accuracy_" + i}>
@@ -129,6 +141,14 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                 </label>
                             </li>
                         ))}
+                    </>}
+                    {downloadedModels.includes("large") && downloadedModelsFugumt.length > 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja")) && <>
+                        <li key="transcription-accuracy_fugumt-en-ja">
+                            <label className="label inline-flex active:!bg-inherit">
+                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="fugumt-en-ja" checked={"fugumt-en-ja" === transcriptionAccuracy} />
+                                <a className="grow">翻訳（日）：速度優先</a>
+                            </label>
+                        </li>
                     </>}
                     {settingKeyOpenai && <>
                         <li key="transcription-accuracy_online-transcript">

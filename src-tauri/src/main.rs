@@ -26,7 +26,9 @@ use module::{
     chat_online::ChatOnline,
     deleter::NoteDeleter,
     device::{self, Device},
-    downloader::{vosk::VoskModelDownloader, whisper::WhisperModelDownloader},
+    downloader::{
+        fugumt::FugumtModelDownloader, vosk::VoskModelDownloader, whisper::WhisperModelDownloader,
+    },
     model_type_vosk::ModelTypeVosk,
     model_type_whisper::ModelTypeWhisper,
     permissions,
@@ -34,8 +36,9 @@ use module::{
     record_desktop::RecordDesktop,
     screenshot::{self, AppWindow},
     transcription::{TraceCompletion, Transcription},
-    transcription_online::TranscriptionOnline,
     transcription_amivoice::TranscriptionAmivoice,
+    transcription_online::TranscriptionOnline,
+    translation_ja::TranslationJa,
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -63,6 +66,14 @@ fn download_vosk_model_command(window: Window, model: String) {
     std::thread::spawn(move || {
         let dl = VoskModelDownloader::new(window.app_handle().clone());
         dl.download(ModelTypeVosk::from_str(&model).unwrap())
+    });
+}
+
+#[tauri::command]
+fn download_fugumt_model_command(window: Window) {
+    std::thread::spawn(move || {
+        let dl = FugumtModelDownloader::new(window.app_handle().clone());
+        dl.download()
     });
 }
 
@@ -191,14 +202,19 @@ fn start_trace_command(
             );
             transcription_online.start(stop_convert_rx, true);
         } else if transcription_accuracy.starts_with("online-amivoice") {
-            let mut transcription_amivoice = TranscriptionAmivoice::new(
-                window.app_handle(),
-                note_id,
-            );
+            let mut transcription_amivoice =
+                TranscriptionAmivoice::new(window.app_handle(), note_id);
             transcription_amivoice.start(stop_convert_rx, true);
         } else if transcription_accuracy.starts_with("online-chat") {
             let mut chat_online = ChatOnline::new(window.app_handle(), speaker_language, note_id);
             chat_online.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("fugumt-en-ja") {
+            let mut translation_ja = TranslationJa::new(
+                window.app_handle(),
+                speaker_language,
+                note_id,
+            );
+            translation_ja.start(stop_convert_rx, true);
         } else {
             let mut transcription = Transcription::new(
                 window.app_handle(),
@@ -307,6 +323,7 @@ fn main() {
             delete_note_command,
             download_whisper_model_command,
             download_vosk_model_command,
+            download_fugumt_model_command,
             list_devices_command,
             list_apps_command,
             list_app_windows_command,
