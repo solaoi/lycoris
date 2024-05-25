@@ -14,6 +14,8 @@ import { SettingResource } from "../molecules/SettingResource"
 import { SettingModel } from "../molecules/SettingModel"
 import { SettingAILanguage } from "../molecules/SettingAILanguage"
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
+import { ModelDownloadFugumtButton } from "../molecules/ModelDownloadFugumtButton"
+import { ModelDownloadFugumtProgress } from "../molecules/ModelDownloadFugumtProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -337,6 +339,16 @@ const SettingsMain = (): JSX.Element => {
                             <ModelDownloadWhisperButton modelType="large-distil.ja" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.ja" />
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div>
+                                <p>翻訳パック（日本語：速度優先）</p>
+                                <p className="text-sm">※ 翻訳パックを有効にするには、言語パック（汎用：高）も必要です。</p>
+                            </div>
+                            <ModelDownloadFugumtButton />
+                        </div>
+                        <ModelDownloadFugumtProgress />
                     </div>
                 </div>
             </div>

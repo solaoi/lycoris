@@ -13,5 +13,6 @@ mod transcriber;
 pub mod transcription;
 pub mod transcription_amivoice;
 pub mod transcription_online;
+pub mod translation_ja;
 mod writer;
 pub mod screenshot;

@@ -1,25 +1,21 @@
 import { useRecoilState, useSetRecoilState } from 'recoil'
-import { modelWhisperDownloadingState } from '../../store/atoms/modelWhisperDownloadingState'
+import { modelFugumtDownloadingState } from '../../store/atoms/modelFugumtDownloadingState'
 import { listen } from '@tauri-apps/api/event'
 import { useEffect, useState } from 'react'
 import { ProgressType } from '../../type/progress.type'
-import { modelWhisperDownloadedState } from '../../store/atoms/modelWhisperDownloadedState'
+import { modelFugumtDownloadedState } from '../../store/atoms/modelFugumtDownloadedState'
 
-type Props = {
-    modelType: string
-}
-
-const ModelDownloadWhisperProgress = (props: Props): JSX.Element => {
-    const { modelType } = props
-    const setDownloadedModel = useSetRecoilState(modelWhisperDownloadedState)
-    const [downloadingModels, setDownloadingModels] = useRecoilState(modelWhisperDownloadingState)
+const ModelDownloadFugumtProgress = (): JSX.Element => {
+    const modelType = "fugumt-en-ja"
+    const setDownloadedModel = useSetRecoilState(modelFugumtDownloadedState)
+    const [downloadingModels, setDownloadingModels] = useRecoilState(modelFugumtDownloadingState)
     const [progress, setProgress] = useState<ProgressType>({
         model_type: modelType,
         rate: 0,
         is_progress: false
     })
     useEffect(() => {
-        const unlisten = listen('downloadWhisperProgress', event => {
+        const unlisten = listen('downloadFugumtProgress', event => {
             const p = event.payload as ProgressType
             if (p.model_type === modelType) {
                 setProgress(p)
@@ -43,4 +39,4 @@ const ModelDownloadWhisperProgress = (props: Props): JSX.Element => {
     return (<></>)
 }
 
-export { ModelDownloadWhisperProgress }
+export { ModelDownloadFugumtProgress }

@@ -39,7 +39,7 @@ use vosk::Recognizer;
 
 use super::{
     chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
-    transcription_online, writer::Writer,
+    transcription_online, translation_ja, writer::Writer,
 };
 
 pub struct RecordDesktop {
@@ -250,6 +250,16 @@ impl RecordDesktop {
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }
+                            } else if transcription_accuracy_clone.starts_with("fugumt-en-ja") {
+                                translation_ja::initialize_translation_ja(
+                                    app_handle_clone,
+                                    speaker_language_clone,
+                                    note_id,
+                                );
+                                let mut lock = translation_ja::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             } else {
                                 transcription::initialize_transcription(
                                     app_handle_clone,
@@ -290,6 +300,7 @@ impl RecordDesktop {
         if !is_no_transcription {
             stop_convert_tx.send(()).unwrap();
             transcription::drop_transcription();
+            translation_ja::drop_translation_ja();
             transcription_online::drop_transcription_online();
             transcription_amivoice::drop_transcription_amivoice();
             chat_online::drop_chat_online();
