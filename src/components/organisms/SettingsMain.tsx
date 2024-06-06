@@ -16,6 +16,8 @@ import { SettingAILanguage } from "../molecules/SettingAILanguage"
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
 import { ModelDownloadFugumtButton } from "../molecules/ModelDownloadFugumtButton"
 import { ModelDownloadFugumtProgress } from "../molecules/ModelDownloadFugumtProgress"
+import { ModelDownloadHonyaku13BButton } from "../molecules/ModelDownloadHonyaku13BButton"
+import { ModelDownloadHonyaku13BProgress } from "../molecules/ModelDownloadHonyaku13BProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -349,6 +351,16 @@ const SettingsMain = (): JSX.Element => {
                             <ModelDownloadFugumtButton />
                         </div>
                         <ModelDownloadFugumtProgress />
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div>
+                                <p>翻訳パック（日本語）</p>
+                                <p className="text-sm">※ 翻訳パックを有効にするには、言語パック（汎用：高）も必要です。</p>
+                            </div>
+                            <ModelDownloadHonyaku13BButton />
+                        </div>
+                        <ModelDownloadHonyaku13BProgress />
                     </div>
                 </div>
             </div>
