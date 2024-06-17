@@ -1,7 +1,7 @@
 {
   "name": "lycoris",
   "private": true,
-  "version": "0.9.17",
+  "version": "0.9.18",
   "type": "module",
   "license": "MIT",
   "engines": {

@@ -14,5 +14,6 @@ pub mod transcription;
 pub mod transcription_amivoice;
 pub mod transcription_online;
 pub mod translation_ja;
+pub mod translation_ja_high;
 mod writer;
 pub mod screenshot;

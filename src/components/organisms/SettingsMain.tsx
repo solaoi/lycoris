@@ -16,6 +16,8 @@ import { SettingAILanguage } from "../molecules/SettingAILanguage"
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
 import { ModelDownloadFugumtButton } from "../molecules/ModelDownloadFugumtButton"
 import { ModelDownloadFugumtProgress } from "../molecules/ModelDownloadFugumtProgress"
+import { ModelDownloadHonyaku13BButton } from "../molecules/ModelDownloadHonyaku13BButton"
+import { ModelDownloadHonyaku13BProgress } from "../molecules/ModelDownloadHonyaku13BProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -307,35 +309,60 @@ const SettingsMain = (): JSX.Element => {
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（汎用：低）</p>
+                            <div>
+                                <p>言語パック（汎用：低）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">whisper-small</div>
+                                </div>
+                            </div>
                             <ModelDownloadWhisperButton modelType="small" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="small" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（汎用：中）</p>
+                            <div>
+                                <p>言語パック（汎用：中）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">whisper-medium</div>
+                                </div>
+                            </div>
                             <ModelDownloadWhisperButton modelType="medium" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="medium" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（汎用：高）</p>
+                            <div>
+                                <p>言語パック（汎用：高）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">whisper-large-v3</div>
+                                </div>
+                            </div>
                             <ModelDownloadWhisperButton modelType="large" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（英語：速度優先）</p>
+                            <div>
+                                <p>言語パック（英語：速度優先）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">distil-whisper/distil-large-v3</div>
+                                </div>
+                            </div>
                             <ModelDownloadWhisperButton modelType="large-distil.en" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.en" />
                     </div>
                     <div style={{ height: "86px" }}>
                         <div className="flex items-center justify-between mb-2">
-                            <p>言語パック（日本語：速度優先）</p>
+                            <div>
+                                <p>言語パック（日本語：速度優先）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">Kotoba-Whisper-v1.1</div>
+                                </div>
+                            </div>
                             <ModelDownloadWhisperButton modelType="large-distil.ja" />
                         </div>
                         <ModelDownloadWhisperProgress modelType="large-distil.ja" />
@@ -344,11 +371,31 @@ const SettingsMain = (): JSX.Element => {
                         <div className="flex items-center justify-between mb-2">
                             <div>
                                 <p>翻訳パック（日本語：速度優先）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">staka/fugumt-en-ja</div>
+                                </div>
                                 <p className="text-sm">※ 翻訳パックを有効にするには、言語パック（汎用：高）も必要です。</p>
                             </div>
                             <ModelDownloadFugumtButton />
                         </div>
                         <ModelDownloadFugumtProgress />
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div>
+                                <p>翻訳パック（日本語：精度優先）</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">aixsatoshi/Honyaku-13b</div>
+                                </div>
+                                <p className="text-sm">
+                                    ※ 翻訳パックを有効にするには、言語パック（汎用：高）も必要です。
+                                    <br />
+                                    &nbsp;&nbsp;&nbsp;非常に処理が重いため、リアルタイムでの利用は推奨しません。
+                                </p>
+                            </div>
+                            <ModelDownloadHonyaku13BButton />
+                        </div>
+                        <ModelDownloadHonyaku13BProgress />
                     </div>
                 </div>
             </div>
