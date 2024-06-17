@@ -66,7 +66,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             case "fugumt-en-ja":
                 return "翻訳（日）：速度優先";
             case "honyaku13b-q4-0":
-                return "翻訳（日）";
+                return "翻訳（日）：精度優先";
             default:
                 throw new Error("unknown modelType: " + model);
         }
@@ -160,7 +160,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                         <li key="transcription-accuracy_honyaku13b-q4-0">
                             <label className="label inline-flex active:!bg-inherit">
                                 <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="honyaku13b-q4-0" checked={"honyaku13b-q4-0" === transcriptionAccuracy} />
-                                <a className="grow">翻訳（日）</a>
+                                <a className="grow">翻訳（日）：精度優先</a>
                             </label>
                         </li>
                     </>}

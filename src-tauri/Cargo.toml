@@ -44,7 +44,7 @@ objc = "0.2"
 objc-foundation = "0.1"
 objc_id = "0.1"
 ct2rs = { version = "0.7.3", features = ["accelerate"] }
-mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.1.13", features = [
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.1.18", features = [
     "metal",
 ] }
 

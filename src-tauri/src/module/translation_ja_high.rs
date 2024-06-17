@@ -3,7 +3,7 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, Device, DeviceMapMetadata, GGUFLoaderBuilder, GGUFSpecificConfig, MistralRs,
+    Constraint, ModelDType, Device, DeviceMapMetadata, GGUFLoaderBuilder, GGUFSpecificConfig, MistralRs,
     MistralRsBuilder, NormalRequest, Request, RequestMessage, Response, SamplingParams,
     SchedulerMethod, TokenSource,
 };
@@ -47,7 +47,7 @@ impl TranslationJaHigh {
             loader.load_model_from_hf(
                 None,
                 TokenSource::None,
-                None,
+                &ModelDType::Auto,
                 &Device::new_metal(0).unwrap(),
                 false,
                 DeviceMapMetadata::dummy(),
@@ -191,10 +191,11 @@ impl TranslationJaHigh {
                 let mut translated;
                 let response = rx.blocking_recv().unwrap();
                 match response {
-                    Response::CompletionDone(c) => translated = c.choices[0].text,
+                    Response::CompletionDone(c) => translated = c.choices[0].text.clone(),
                     _ => unreachable!(),
                 }
-                let parts: Vec<&str> = translated.split("</NL>").collect();
+                print!("translated: {}", translated);
+                let parts: Vec<&str> = translated.split("<NL>").collect();
                 if let Some(first_part) = parts.get(0) {
                     translated = first_part.to_string();
                 }
