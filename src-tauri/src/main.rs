@@ -27,7 +27,8 @@ use module::{
     deleter::NoteDeleter,
     device::{self, Device},
     downloader::{
-        fugumt::FugumtModelDownloader, vosk::VoskModelDownloader, whisper::WhisperModelDownloader,
+        fugumt::FugumtModelDownloader, honyaku13b::Honyaku13BModelDownloader,
+        vosk::VoskModelDownloader, whisper::WhisperModelDownloader,
     },
     model_type_vosk::ModelTypeVosk,
     model_type_whisper::ModelTypeWhisper,
@@ -39,6 +40,7 @@ use module::{
     transcription_amivoice::TranscriptionAmivoice,
     transcription_online::TranscriptionOnline,
     translation_ja::TranslationJa,
+    translation_ja_high::TranslationJaHigh,
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -73,6 +75,14 @@ fn download_vosk_model_command(window: Window, model: String) {
 fn download_fugumt_model_command(window: Window) {
     std::thread::spawn(move || {
         let dl = FugumtModelDownloader::new(window.app_handle().clone());
+        dl.download()
+    });
+}
+
+#[tauri::command]
+fn download_honyaku13b_model_command(window: Window) {
+    std::thread::spawn(move || {
+        let dl = Honyaku13BModelDownloader::new(window.app_handle().clone());
         dl.download()
     });
 }
@@ -209,12 +219,13 @@ fn start_trace_command(
             let mut chat_online = ChatOnline::new(window.app_handle(), speaker_language, note_id);
             chat_online.start(stop_convert_rx, true);
         } else if transcription_accuracy.starts_with("fugumt-en-ja") {
-            let mut translation_ja = TranslationJa::new(
-                window.app_handle(),
-                speaker_language,
-                note_id,
-            );
+            let mut translation_ja =
+                TranslationJa::new(window.app_handle(), speaker_language, note_id);
             translation_ja.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("honyaku13b-q4-0") {
+            let mut translation_ja_high =
+                TranslationJaHigh::new(window.app_handle(), speaker_language, note_id);
+            translation_ja_high.start(stop_convert_rx, true);
         } else {
             let mut transcription = Transcription::new(
                 window.app_handle(),
@@ -324,6 +335,7 @@ fn main() {
             download_whisper_model_command,
             download_vosk_model_command,
             download_fugumt_model_command,
+            download_honyaku13b_model_command,
             list_devices_command,
             list_apps_command,
             list_app_windows_command,

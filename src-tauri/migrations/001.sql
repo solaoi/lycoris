@@ -144,3 +144,5 @@ INSERT INTO models(model_name, model_type)
 VALUES("small-pl-0.22", "vosk");
 INSERT INTO models(model_name, model_type)
 VALUES("fugumt-en-ja", "fugumt");
+INSERT INTO models(model_name, model_type)
+VALUES("honyaku13b-q4-0", "honyaku13b");
