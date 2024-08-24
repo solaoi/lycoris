@@ -7,10 +7,12 @@ import { speakerLanguageState } from "../../store/atoms/speakerLanguageState";
 import { settingKeyState } from "../../store/atoms/settingKeyState";
 import { tracingState } from "../../store/atoms/tracingState";
 import { modelFugumtDownloadedState } from "../../store/atoms/modelFugumtDownloadedState";
+import { modelHonyaku13BDownloadedState } from "../../store/atoms/modelHonyaku13BDownloadedState";
 
 const TranscriptionAccuracy = (): JSX.Element => {
     const downloadedModels = useRecoilValue(modelWhisperDownloadedState)
     const downloadedModelsFugumt = useRecoilValue(modelFugumtDownloadedState)
+    const downloadedModelsHonyaku13B = useRecoilValue(modelHonyaku13BDownloadedState)
     const [transcriptionAccuracy, setTranscriptionAccuracy] = useRecoilState(transcriptionAccuracyState)
     const isRecording = useRecoilValue(recordState)
     const isTracing = useRecoilValue(tracingState);
@@ -63,6 +65,8 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 return "翻訳（英）：高";
             case "fugumt-en-ja":
                 return "翻訳（日）：速度優先";
+            case "honyaku13b-q4-0":
+                return "翻訳（日）：精度優先";
             default:
                 throw new Error("unknown modelType: " + model);
         }
@@ -78,7 +82,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
                     settingKeyOpenai === "" &&
                     // 3. ローカルにWhisperLargeモデルがダウンロードされていない場合 or ローカルにFugumtモデルがダウンロードされていない場合 or ダウンロードされていても、話し手の言語が日本語の場合
                     !(downloadedModels.includes("large") && downloadedModelsFugumt.length !== 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))) &&
-                    // 4. AmiVoiceのAPIキーが設定されていない場合 or 設定されていても、話し手の言語が日本語以外の場合
+                    // 4. ローカルにWhisperLargeモデルがダウンロードされていない場合 or ローカルにHonyaku13Bモデルがダウンロードされていない場合 or ダウンロードされていても、話し手の言語が日本語の場合
+                    !(downloadedModels.includes("large") && downloadedModelsHonyaku13B.length !== 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))) &&
+                    // 5. AmiVoiceのAPIキーが設定されていない場合 or 設定されていても、話し手の言語が日本語以外の場合
                     !(settingKeyAmivoice !== "" && (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))))) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法を選択" : mapModel(transcriptionAccuracy)}</div>
                 <div>
@@ -147,6 +153,14 @@ const TranscriptionAccuracy = (): JSX.Element => {
                             <label className="label inline-flex active:!bg-inherit">
                                 <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="fugumt-en-ja" checked={"fugumt-en-ja" === transcriptionAccuracy} />
                                 <a className="grow">翻訳（日）：速度優先</a>
+                            </label>
+                        </li>
+                    </>}
+                    {downloadedModels.includes("large") && downloadedModelsHonyaku13B.length > 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja")) && <>
+                        <li key="transcription-accuracy_honyaku13b-q4-0">
+                            <label className="label inline-flex active:!bg-inherit">
+                                <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="honyaku13b-q4-0" checked={"honyaku13b-q4-0" === transcriptionAccuracy} />
+                                <a className="grow">翻訳（日）：精度優先</a>
                             </label>
                         </li>
                     </>}
