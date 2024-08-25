@@ -16,29 +16,29 @@
     "debug:rs": "RUST_BACKTRACE=1 tauri dev --verbose"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.5.3",
-    "dayjs": "^1.11.10",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-h5-audio-player": "^3.9.1",
-    "react-medium-image-zoom": "^5.2.0",
+    "@tauri-apps/api": "^1.6.0",
+    "dayjs": "^1.11.13",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-h5-audio-player": "^3.9.3",
+    "react-medium-image-zoom": "^5.2.8",
     "react-toastify": "^10.0.5",
     "recoil": "^0.7.7",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release",
-    "zenn-content-css": "^0.1.153",
-    "zenn-markdown-html": "^0.1.153"
+    "zenn-content-css": "^0.1.155",
+    "zenn-markdown-html": "^0.1.155"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.5.11",
-    "@types/markdown-it": "^14.0.0",
-    "@types/react": "^18.2.77",
-    "@types/react-dom": "^18.2.25",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.19",
+    "@tauri-apps/cli": "^1.6.1",
+    "@types/markdown-it": "^14.1.2",
+    "@types/react": "^18.3.4",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
     "daisyui": "^3.9.4",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.8"
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
   }
 }
