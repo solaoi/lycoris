@@ -36,6 +36,8 @@ VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingProcess", "文字起こし");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingOnline", "OpenAI");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingTemplate", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingFCfunctions", "");
@@ -46,7 +48,7 @@ VALUES("settingHook", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingResource", "");
 INSERT INTO settings(setting_name, setting_status)
-VALUES("settingModel", "gpt-3.5-turbo");
+VALUES("settingModel", "gpt-4o-mini");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAmiVoiceModel", "general");
 INSERT INTO settings(setting_name, setting_status)

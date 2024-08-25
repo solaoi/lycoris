@@ -1,6 +1,7 @@
 import { useRecoilValue } from "recoil"
 import { settingLanguageState } from "../../store/atoms/settingLanguageState"
 import { settingProcessState } from "../../store/atoms/settingProcessState"
+import { settingOnlineState } from "../../store/atoms/settingOnlineState"
 import { ModelDownloadVoskButton } from "../molecules/ModelDownloadVoskButton"
 import { ModelDownloadVoskProgress } from "../molecules/ModelDownloadVoskProgress"
 import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperButton"
@@ -20,10 +21,12 @@ import { ModelDownloadFugumtProgress } from "../molecules/ModelDownloadFugumtPro
 import { ModelDownloadHonyaku13BButton } from "../molecules/ModelDownloadHonyaku13BButton"
 import { ModelDownloadHonyaku13BProgress } from "../molecules/ModelDownloadHonyaku13BProgress"
 import { SettingProcesses } from "../molecules/SettingProcesses"
+import { SettingOnlines } from "../molecules/SettingOnlines"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
     const settingProcess = useRecoilValue(settingProcessState);
+    const settingOnline = useRecoilValue(settingOnlineState);
     return (
         <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 64px)` }}>
             <h1 className="text-3xl flex items-center select-none cursor-default">
@@ -565,44 +568,26 @@ const SettingsMain = (): JSX.Element => {
                     </>}
                 </div>
             </div>
-            <div className="px-5">
-                <h2 className="text-xl mt-5 flex items-center">
+            <div className="px-5 select-none cursor-default">
+                <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
                     </svg>
                     オンライン設定
                 </h2>
-                <div className="px-5 mt-2 mb-12">
-                    <div className="mb-4">
-                        <h3 className="text-lg mb-2">
-                            <p>AmiVoice</p>
-                        </h3>
-                        <hr />
+                <div className="px-5">
+                    <div className="mb-8">
+                        <p>各利用したいAPIとの疎通設定を行ってください。</p>
                     </div>
-                    <div className="px-3">
-                        <div className="mb-4">
-                            <p>AmiVoice社のAPIを利用することで、</p>
-                            <p>特定の業界に特化した文字起こしが選択可能となります。</p>
-                            <p>（APIの利用に関しては、AmiVoice社の利用規約を参照ください。）</p>
-                        </div>
-                        <div className="mb-8">
-                            <SettingKey settingName="settingKeyAmivoice" />
-                        </div>
-                        <SettingAmiVoiceModel />
+                    <div className="mb-4 border-b">
+                        <SettingOnlines />
                     </div>
                 </div>
-                <div className="px-5 mt-2">
-                    <div className="mb-4">
-                        <h3 className="text-lg mb-2">
-                            <p>OpenAI</p>
-                        </h3>
-                        <hr />
-                    </div>
-                    <div className="px-3">
-                        <div className="mb-4">
+                <div className="pl-5">
+                    {settingOnline === "OpenAI" && <>
+                        <div className="mb-4 text-sm">
                             <p>OpenAI社のAPIを利用することで、</p>
                             <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
-                            <p>（APIの利用に関しては、OpenAI社の利用規約を参照ください。）</p>
                         </div>
                         <div className="mb-8">
                             <SettingKey settingName="settingKeyOpenai" />
@@ -628,9 +613,20 @@ const SettingsMain = (): JSX.Element => {
                             <SettingFCfunctionCall />
                         </div>
                         <SettingHook />
-                    </div>
+                    </>}
+                    {settingOnline === "AmiVoice" && <>
+                        <div className="mb-4 text-sm">
+                            <p>AmiVoice社のAPIを利用することで、</p>
+                            <p>特定の業界に特化した文字起こしが選択可能となります。</p>
+                        </div>
+                        <div className="mb-8">
+                            <SettingKey settingName="settingKeyAmivoice" />
+                        </div>
+                        <SettingAmiVoiceModel />
+                    </>}
                 </div>
             </div>
+            <div className="h-48"></div>
         </div>
     )
 }
