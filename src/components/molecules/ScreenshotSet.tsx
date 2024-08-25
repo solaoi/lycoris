@@ -48,7 +48,7 @@ const AppWindow = (): JSX.Element => {
         }>
             <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
-                <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{targetWindow === null ? "撮影する画面を選択" : `${targetApp} / ${targetWindow.title}`}</div>
+                <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{(targetApp === null || targetWindow === null) ? "撮影する画面を選択" : `${targetApp} / ${targetWindow.title}`}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                         <path fillRule="evenodd" d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z" clipRule="evenodd" />
@@ -65,7 +65,6 @@ const AppWindow = (): JSX.Element => {
                 <div className="max-h-80 overflow-y-scroll rounded-box scrollbar-transparent w-full">
                     {apps.map((app, i) => (
                         <div key={"app_" + i} className={"collapse collapse-arrow join-item" + (app === targetApp ? " bg-base-200" : "")}>
-                            {app === targetApp}
                             <input className="w-full" type="radio" name={"app-window_" + i} checked={app === targetApp} value={app} onChange={() => click(app)} />
                             <div className="collapse-title font-medium w-[15.5rem]" style={{ overflowWrap: "anywhere" }}>
                                 {app}

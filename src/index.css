@@ -50,3 +50,12 @@ body {
 .collapse,.collapse-content {
     visibility: inherit!important;
 }
+
+.tab-lifted {
+    &::before {
+        background-image: none!important;
+    }
+    &::after {
+        background-image: none!important;
+    }
+}
