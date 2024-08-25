@@ -34,6 +34,8 @@ VALUES("settingKeyAmivoice", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingProcess", "文字起こし");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingTemplate", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingFCfunctions", "");
