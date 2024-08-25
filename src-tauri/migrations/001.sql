@@ -52,6 +52,8 @@ VALUES("settingModel", "gpt-4o-mini");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAmiVoiceModel", "general");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingAmiVoiceLogging", "off");
+INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAILanguage", "None");
 INSERT INTO settings(setting_name, setting_status)
 VALUES(

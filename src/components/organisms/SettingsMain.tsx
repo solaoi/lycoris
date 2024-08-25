@@ -22,6 +22,7 @@ import { ModelDownloadHonyaku13BButton } from "../molecules/ModelDownloadHonyaku
 import { ModelDownloadHonyaku13BProgress } from "../molecules/ModelDownloadHonyaku13BProgress"
 import { SettingProcesses } from "../molecules/SettingProcesses"
 import { SettingOnlines } from "../molecules/SettingOnlines"
+import { SettingAmiVoiceLogging } from "../molecules/SettingAmiVoiceLogging"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -622,7 +623,10 @@ const SettingsMain = (): JSX.Element => {
                         <div className="mb-8">
                             <SettingKey settingName="settingKeyAmivoice" />
                         </div>
-                        <SettingAmiVoiceModel />
+                        <div className="mb-8">
+                            <SettingAmiVoiceModel />
+                        </div>
+                        <SettingAmiVoiceLogging />
                     </>}
                 </div>
             </div>
