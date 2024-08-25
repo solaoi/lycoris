@@ -3671,7 +3671,7 @@ dependencies = [
 
 [[package]]
 name = "lycoris"
-version = "0.9.18"
+version = "0.9.19"
 dependencies = [
  "chrono",
  "core-graphics 0.24.0",
