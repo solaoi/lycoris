@@ -116,6 +116,14 @@ impl Sqlite {
         );
     }
 
+    pub fn select_amivoice_logging(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingAmiVoiceLogging\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
     pub fn select_ai_resource(&self) -> Result<String, rusqlite::Error> {
         return self.conn.query_row(
             "SELECT setting_status FROM settings WHERE setting_name = \"settingResource\"",

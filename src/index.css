@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     overflow-y: clip;
 }
@@ -42,4 +49,13 @@ body {
 
 .collapse,.collapse-content {
     visibility: inherit!important;
+}
+
+.tab-lifted {
+    &::before {
+        background-image: none!important;
+    }
+    &::after {
+        background-image: none!important;
+    }
 }

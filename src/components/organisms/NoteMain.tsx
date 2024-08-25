@@ -4,7 +4,6 @@ import { SpeechHistory } from '../molecules/SpeechHistory'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import { speechHistoryState } from '../../store/atoms/speechHistoryState'
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
-import { MemoFilterButton } from '../molecules/MemoFilterButton'
 import { RecordStopButton } from '../molecules/RecordStopButton'
 import { RecordStartButton } from '../molecules/RecordStartButton'
 import { useRecoilValue } from "recoil"
@@ -19,9 +18,14 @@ import { TraceStopButton } from '../molecules/TraceStopButton'
 import { tracingState } from '../../store/atoms/tracingState'
 import { tracingNoteState } from '../../store/atoms/tracingNoteState'
 import { RecordPreparingButton } from '../molecules/RecordPreparingButton'
-import { ScreenshotFilterButton } from '../molecules/ScreenshotFilterButton'
+import { FilterTabs } from '../molecules/FilterTabs'
+import { save } from "@tauri-apps/api/dialog";
+import { writeTextFile } from "@tauri-apps/api/fs";
+import dayjs from '../../lib/dayjs'
+import { speechFilterState } from '../../store/atoms/speechFilterState'
 
 const NoteMain = (): JSX.Element => {
+    const filterTarget = useRecoilValue(speechFilterState);
     const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState)
     const [partialText, setPartialText] = useState<string | null>(null)
     const [partialTextDesktop, setPartialTextDesktop] = useState<string | null>(null)
@@ -189,11 +193,64 @@ const NoteMain = (): JSX.Element => {
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
             <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
         </div>
-        <div className="bg-white max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 flex items-center border-y" style={{ height: "32px" }}>
-            フィルター：
-            <MemoFilterButton />
-            <div className='mr-1'></div>
-            <ScreenshotFilterButton />
+        <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between" style={{ height: "32px" }}>
+            <FilterTabs />
+            <div className="group mr-4">
+                <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
+                    const typeMapper = (speech_type: string) => {
+                        switch (speech_type) {
+                            case "speech":
+                                return "発言";
+                            case "memo":
+                                return "メモ";
+                            case "screenshot":
+                                return "スクリーンショット";
+                            default:
+                                return "不明";
+                        }
+                    }
+                    const filterHistory = (speech_type: string) => {
+                        if (filterTarget === "memo") {
+                            if (speech_type === "memo") {
+                                return true;
+                            }
+                            return false;
+                        } else if (filterTarget === "screenshot") {
+                            if (speech_type === "screenshot") {
+                                return true;
+                            }
+                            return false;
+                        }
+                        return true;
+                    }
+                    const csvSuffix = (() => {
+                        switch (filterTarget) {
+                            case null:
+                                return "all";
+                            case "memo":
+                                return "memo";
+                            case "screenshot":
+                                return "screenshot";
+                            default:
+                                return "unknown";
+                        }
+                    })();
+                    const csvData = "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                    const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
+                    if (path) {
+                        await writeTextFile(path, csvData);
+                    }
+                }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+                        <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                        <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+                    </svg>
+                </button>
+                <div className="opacity-0 w-20 invisible rounded text-[12px] 
+                        font-bold text-white py-1 bg-slate-600 top-[154px] right-4
+                        group-hover:visible opacity-100 absolute text-center">ダウンロード
+                </div>
+            </div>
         </div>
         <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} />

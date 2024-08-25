@@ -321,7 +321,7 @@ impl ChatOnline {
                 let model = if result.is_ok() {
                     result.unwrap()
                 } else {
-                    "gpt-3.5-turbo".to_string()
+                    "gpt-4o-mini".to_string()
                 };
                 let result = self.sqlite.select_fc_functions();
                 let functions = if result.is_ok() {

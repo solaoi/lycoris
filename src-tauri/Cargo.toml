@@ -1,45 +1,45 @@
 [package]
 name = "lycoris"
-version = "0.9.18"
+version = "0.9.19"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
 repository = "https://github.com/solaoi/lycoris"
 default-run = "lycoris"
 edition = "2021"
-rust-version = "1.68"
+rust-version = "1.80"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.2.1", features = [] }
+tauri-build = { version = "1.5.4", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.7", features = ["api-all"] }
+tauri = { version = "1.7.2", features = ["api-all"] }
 vosk = "0.1.0"
-cpal = "0.14.0"
+cpal = "0.14.1"
 dasp = "0.11"
-unicode-segmentation = "1.9.0"
-once_cell = "1.13.1"
-crossbeam-channel = "0.5.6"
-chrono = "0.4.22"
+unicode-segmentation = "1.11.0"
+once_cell = "1.19.0"
+crossbeam-channel = "0.5.13"
+chrono = "0.4.38"
 hound = "3.5.1"
 rusqlite = "*"
 samplerate-rs = "0.1.0"
 # download model and openai request
-reqwest = { version = "0.11", features = ["stream", "multipart", "json"] }
+reqwest = { version = "0.12", features = ["stream", "multipart", "json"] }
 tokio = { version = "1", features = ["full"] }
-futures-util = "0.3.26"
+futures-util = "0.3.30"
 # serve audio
-urlencoding = "2.1.0"
+urlencoding = "2.1.3"
 # screencapturekit = "0.2.7"
 # fix thread crash
 screencapturekit = { git = "https://github.com/solaoi/screencapturekit-rs" }
-xcap = "0.0.9"
+xcap = "0.0.12"
 # permission
 macos-accessibility-client = "0.0.1"
-core-graphics = "0.23.1"
+core-graphics = "0.24.0"
 objc = "0.2"
 objc-foundation = "0.1"
 objc_id = "0.1"

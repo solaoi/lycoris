@@ -20,6 +20,7 @@ pub struct TranscriptionAmivoice {
     note_id: u64,
     token: String,
     model: String,
+    logging: String,
 }
 
 impl TranscriptionAmivoice {
@@ -27,12 +28,14 @@ impl TranscriptionAmivoice {
         let sqlite = Sqlite::new();
         let token = sqlite.select_amivoice_token().unwrap();
         let model = sqlite.select_amivoice_model().unwrap();
+        let logging = sqlite.select_amivoice_logging().unwrap();
         Self {
             app_handle,
             sqlite,
             note_id,
             token,
             model,
+            logging,
         }
     }
 
@@ -71,8 +74,13 @@ impl TranscriptionAmivoice {
         file_path: String,
         token: String,
         model: String,
+        logging: String,
     ) -> Result<String, Box<dyn std::error::Error>> {
-        let url = "https://acp-api.amivoice.com/v1/nolog/recognize";
+        let url = if logging == "on" {
+            "https://acp-api.amivoice.com/v1/recognize"
+        } else {
+            "https://acp-api.amivoice.com/v1/nolog/recognize"
+        };
         let client = Client::new();
 
         let mut file = File::open(file_path).await?;
@@ -151,7 +159,12 @@ impl TranscriptionAmivoice {
     fn convert(&mut self) -> Result<(), rusqlite::Error> {
         let vosk_speech = self.sqlite.select_vosk(self.note_id);
         return vosk_speech.and_then(|speech| {
-            let result = Self::request(speech.wav, self.token.clone(), self.model.clone());
+            let result = Self::request(
+                speech.wav,
+                self.token.clone(),
+                self.model.clone(),
+                self.logging.clone(),
+            );
 
             if result.is_ok() {
                 let updated = self
