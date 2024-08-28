@@ -3,9 +3,7 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, ModelDType, Device, DeviceMapMetadata, GGUFLoaderBuilder, GGUFSpecificConfig, MistralRs,
-    MistralRsBuilder, NormalRequest, Request, RequestMessage, Response, SamplingParams,
-    SchedulerMethod, TokenSource,
+    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request, RequestMessage, Response, SamplingParams, SchedulerConfig, TokenSource
 };
 use samplerate_rs::{convert, ConverterType};
 use std::sync::{Arc, Mutex};
@@ -35,12 +33,12 @@ impl TranslationJaHigh {
             .to_string_lossy()
             .to_string();
         let loader = GGUFLoaderBuilder::new(
-            GGUFSpecificConfig { repeat_last_n: 64 },
             Some(format!("{}/chat_templates_llama2.json", model_path)),
             None,
             model_path,
             "aixsatoshi-Honyaku-13b-Q4_0.gguf".to_string(),
             // "aixsatoshi-Honyaku-13b-IQ4_XS.gguf".to_string(),
+            None,
         )
         .build();
         let pipeline = tokio::task::block_in_place(|| {
@@ -52,6 +50,7 @@ impl TranslationJaHigh {
                 false,
                 DeviceMapMetadata::dummy(),
                 None,
+                None,
             )
         })
         .unwrap();
@@ -62,7 +61,9 @@ impl TranslationJaHigh {
             ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
             translator: MistralRsBuilder::new(
                 pipeline,
-                SchedulerMethod::Fixed(5.try_into().unwrap()),
+                SchedulerConfig::DefaultScheduler {
+                    method: DefaultSchedulerMethod::Fixed(5.try_into().unwrap()),
+                },
             )
             .build(),
             speaker_language,
@@ -186,8 +187,10 @@ impl TranslationJaHigh {
                     constraint: Constraint::None,
                     suffix: None,
                     adapters: None,
+                    tools: None,
+                    tool_choice: None,
                 });
-                self.translator.get_sender().blocking_send(request).unwrap();
+                self.translator.get_sender().unwrap().blocking_send(request).unwrap();
                 let mut translated;
                 let response = rx.blocking_recv().unwrap();
                 match response {
