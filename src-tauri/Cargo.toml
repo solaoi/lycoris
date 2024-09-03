@@ -44,7 +44,7 @@ objc = "0.2"
 objc-foundation = "0.1"
 objc_id = "0.1"
 ct2rs = { version = "0.7.3", features = ["accelerate"] }
-mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.2.5", features = [
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.3.0", features = [
     "metal",
 ] }
 # mistralrsの要求がtauriの要求と競合するため、tauriの要求を上書きする

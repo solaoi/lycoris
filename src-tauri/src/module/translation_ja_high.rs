@@ -3,7 +3,7 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request, RequestMessage, Response, SamplingParams, SchedulerConfig, TokenSource
+    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder, GGUFSpecificConfig, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request, RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource
 };
 use samplerate_rs::{convert, ConverterType};
 use std::sync::{Arc, Mutex};
@@ -36,9 +36,12 @@ impl TranslationJaHigh {
             Some(format!("{}/chat_templates_llama2.json", model_path)),
             None,
             model_path,
-            "aixsatoshi-Honyaku-13b-Q4_0.gguf".to_string(),
-            // "aixsatoshi-Honyaku-13b-IQ4_XS.gguf".to_string(),
-            None,
+            vec!["aixsatoshi-Honyaku-13b-Q4_0.gguf".to_string()],
+            // vec!["aixsatoshi-Honyaku-13b-IQ4_XS.gguf".to_string()],
+            GGUFSpecificConfig {
+                prompt_batchsize: None,
+                topology: None,
+            },
         )
         .build();
         let pipeline = tokio::task::block_in_place(|| {
@@ -189,12 +192,13 @@ impl TranslationJaHigh {
                     adapters: None,
                     tools: None,
                     tool_choice: None,
+                    logits_processors: None,
                 });
                 self.translator.get_sender().unwrap().blocking_send(request).unwrap();
                 let mut translated;
-                let response = rx.blocking_recv().unwrap();
+                let response = rx.blocking_recv().unwrap().as_result().unwrap();
                 match response {
-                    Response::CompletionDone(c) => translated = c.choices[0].text.clone(),
+                    ResponseOk::CompletionDone(c) => translated = c.choices[0].text.clone(),
                     _ => unreachable!(),
                 }
                 print!("translated: {}", translated);
