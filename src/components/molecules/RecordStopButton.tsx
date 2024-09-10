@@ -1,15 +1,24 @@
 import { invoke } from '@tauri-apps/api/tauri'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { recordingNoteState } from '../../store/atoms/recordingNoteState'
 import { recordState } from '../../store/atoms/recordState'
+import { transcriptionAccuracyState } from '../../store/atoms/transcriptionAccuracyState'
+import { traceState } from '../../store/atoms/traceState'
+import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 
 const RecordStopButton = (): JSX.Element => {
     const setRecording = useSetRecoilState(recordState)
     const setRecordingNote = useSetRecoilState(recordingNoteState)
+    const selectedNote = useRecoilValue(selectedNoteState);
+    const setTracable = useSetRecoilState(traceState(selectedNote!.note_id));
+    const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState);
     const click = () => {
         setRecording(false)
         setRecordingNote(null)
         invoke('stop_command')
+        if (transcriptionAccuracy === "off") {
+            setTracable(true)
+        }
     }
 
     return (

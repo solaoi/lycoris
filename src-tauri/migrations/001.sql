@@ -7,9 +7,10 @@ CREATE TABLE notes (
 CREATE TABLE speeches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     speech_type TEXT,
-    -- speech|memo|screenshot
+    -- speech|memo|screenshot|action
     created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
     content TEXT,
+    content_2 TEXT,
     wav TEXT,
     model TEXT,
     -- manual|vosk|whisper

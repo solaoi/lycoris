@@ -21,11 +21,7 @@ pub struct TranslationJa {
 }
 
 impl TranslationJa {
-    pub fn new(
-        app_handle: AppHandle,
-        speaker_language: String,
-        note_id: u64,
-    ) -> Self {
+    pub fn new(app_handle: AppHandle, speaker_language: String, note_id: u64) -> Self {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
             .path_resolver()
@@ -42,7 +38,8 @@ impl TranslationJa {
                 &model_path,
                 Tokenizer::new(&model_path).unwrap(),
                 &Config::default(),
-            ).unwrap(),
+            )
+            .unwrap(),
             speaker_language,
             note_id,
         }
@@ -149,13 +146,16 @@ impl TranslationJa {
 
                 let result_on_whisper = converted.join("");
                 let sources: Vec<String> = result_on_whisper.lines().map(String::from).collect();
-                let res: Vec<(String, Option<f32>)> = self.translator.translate_batch(
-                    &sources,
-                    &TranslationOptions {
-                        beam_size: 5,
-                        ..Default::default()
-                    },
-                ).unwrap();
+                let res: Vec<(String, Option<f32>)> = self
+                    .translator
+                    .translate_batch(
+                        &sources,
+                        &TranslationOptions {
+                            beam_size: 5,
+                            ..Default::default()
+                        },
+                    )
+                    .unwrap();
                 let mut translated: Vec<String> = vec!["".to_string()];
                 for (r, _) in res {
                     translated.push(r);
@@ -183,18 +183,10 @@ impl TranslationJa {
 
 pub static SINGLETON_INSTANCE: Mutex<Option<TranslationJa>> = Mutex::new(None);
 
-pub fn initialize_translation_ja(
-    app_handle: AppHandle,
-    speaker_language: String,
-    note_id: u64,
-) {
+pub fn initialize_translation_ja(app_handle: AppHandle, speaker_language: String, note_id: u64) {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     if singleton.is_none() {
-        *singleton = Some(TranslationJa::new(
-            app_handle,
-            speaker_language,
-            note_id,
-        ));
+        *singleton = Some(TranslationJa::new(app_handle, speaker_language, note_id));
     }
 }
 
