@@ -23,6 +23,7 @@ use urlencoding::decode;
 
 mod module;
 use module::{
+    action,
     chat_online::ChatOnline,
     deleter::NoteDeleter,
     device::{self, Device},
@@ -120,6 +121,21 @@ fn has_screen_capture_permission_command(window: Window) -> bool {
 #[tauri::command]
 fn has_microphone_permission_command(window: Window) -> bool {
     permissions::has_microphone_permission(window)
+}
+
+#[tauri::command]
+fn execute_action_command(window: Window, note_id: u64) {
+    std::thread::spawn(move || {
+        if action::initialize_action(window.app_handle().clone(), note_id) {
+            let mut lock = action::SINGLETON_INSTANCE.lock().unwrap();
+            if let Some(singleton) = lock.as_mut() {
+                singleton.execute();
+            }
+        } else {
+            println!("Action is already initialized and executing. Skipping.");
+        }
+        action::drop_action();
+    });
 }
 
 #[tauri::command]
@@ -343,6 +359,7 @@ fn main() {
             has_accessibility_permission_command,
             has_screen_capture_permission_command,
             has_microphone_permission_command,
+            execute_action_command,
             start_command,
             stop_command,
             start_trace_command,

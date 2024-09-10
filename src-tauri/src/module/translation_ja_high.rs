@@ -3,7 +3,9 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder, GGUFSpecificConfig, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request, RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource
+    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder,
+    GGUFSpecificConfig, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request,
+    RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource,
 };
 use samplerate_rs::{convert, ConverterType};
 use std::sync::{Arc, Mutex};
@@ -194,7 +196,11 @@ impl TranslationJaHigh {
                     tool_choice: None,
                     logits_processors: None,
                 });
-                self.translator.get_sender().unwrap().blocking_send(request).unwrap();
+                self.translator
+                    .get_sender()
+                    .unwrap()
+                    .blocking_send(request)
+                    .unwrap();
                 let mut translated;
                 let response = rx.blocking_recv().unwrap().as_result().unwrap();
                 match response {

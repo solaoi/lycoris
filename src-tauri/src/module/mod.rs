@@ -17,3 +17,4 @@ pub mod translation_ja;
 pub mod translation_ja_high;
 mod writer;
 pub mod screenshot;
+pub mod action;

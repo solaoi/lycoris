@@ -26,6 +26,24 @@ pub struct Updated {
     pub content: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct UnexecutedAction {
+    pub id: u16,
+    pub content: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct Content {
+    pub speech_type: String,
+    pub content: String,
+    pub content_2: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct Permission {
+    pub model: String,
+}
+
 impl Sqlite {
     pub fn new() -> Self {
         let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
@@ -170,6 +188,69 @@ impl Sqlite {
             params![],
             |row| Ok(row.get_unwrap(0)),
         );
+    }
+
+    pub fn select_contents_by(
+        &self,
+        note_id: u64,
+        id: u16,
+    ) -> Result<Vec<Content>, rusqlite::Error> {
+        let mut stmt = self.conn.prepare("SELECT speech_type,content,content_2 FROM speeches WHERE note_id = ?1 AND id < ?2 ORDER BY created_at_unixtime ASC").unwrap();
+        let results = stmt
+            .query_map(params![note_id, id], |row| {
+                Ok(Content {
+                    speech_type: row.get_unwrap(0),
+                    content: row.get_unwrap(1),
+                    content_2: row.get(2).unwrap_or_default(),
+                })
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn select_first_unexecuted_action(
+        &self,
+        note_id: u64,
+    ) -> Result<UnexecutedAction, rusqlite::Error> {
+        return self.conn.query_row("SELECT id, content FROM speeches WHERE speech_type = \"action\" AND content_2 IS NULL AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1",
+            params![note_id],
+            |row| Ok(UnexecutedAction{id: row.get_unwrap(0), content: row.get_unwrap(1)}),
+        );
+    }
+
+    pub fn select_has_no_permission_of_execute_action(
+        &self,
+        note_id: u64,
+        id: u16,
+    ) -> Result<Vec<Permission>, rusqlite::Error> {
+        let mut stmt = self.conn.prepare("SELECT model FROM speeches WHERE id = (SELECT MAX(id) FROM speeches WHERE note_id = ?1 AND id < ?2 AND model != \"manual\") OR id = (SELECT MIN(id) FROM speeches WHERE note_id = ?1 AND id > ?2 AND model = \"whisper\")").unwrap();
+        let results = stmt
+            .query_map(params![note_id, id], |row| {
+                Ok(Permission {
+                    model: row.get_unwrap(0),
+                })
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn update_action_content_2(
+        &self,
+        id: u16,
+        content_2: String,
+    ) -> Result<Updated, rusqlite::Error> {
+        match self.conn.execute(
+            "UPDATE speeches SET content_2 = ?1 WHERE id = ?2",
+            params![content_2, id],
+        ) {
+            Ok(_) => Ok(Updated {
+                id,
+                content: content_2,
+            }),
+            Err(err) => Err(err),
+        }
     }
 
     pub fn update_has_accessed_screen_capture_permission(&self) -> Result<usize, rusqlite::Error> {

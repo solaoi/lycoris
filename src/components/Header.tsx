@@ -24,7 +24,7 @@ const Header = (): JSX.Element => {
             <div className="navbar bg-base-200">
                 <div className="flex flex-1 items-baseline select-none">
                     <a className="ml-2 font-bold text-xl text-primary mr-1" href="https://github.com/solaoi/lycoris" target="_blank">Lycoris</a>
-                    <p className="text-xs text-slate-500">v{appVersion}</p>
+                    <p className="text-xs text-slate-500 cursor-default">v{appVersion}</p>
                 </div>
                 <div className="flex-none mr-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
