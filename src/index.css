@@ -43,8 +43,13 @@ body {
     display: none;
 }
 
-.znc ul {
-    margin: 0;
+.znc ul,ol,p+p,blockquote,hr,table,pre,h1,h2,h3,h4,h5,h6 {
+    width: 100%;
+    margin: 0!important;
+}
+
+.znc p {
+    overflow-wrap: anywhere;
 }
 
 .collapse,.collapse-content {
@@ -58,4 +63,8 @@ body {
     &::after {
         background-image: none!important;
     }
+}
+
+.tabs-boxed .tab-active:not(.tab-disabled):not([disabled]) {
+    background-color: hsl(var(--b3) / var(--tw-bg-opacity));
 }

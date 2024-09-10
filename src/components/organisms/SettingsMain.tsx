@@ -37,7 +37,7 @@ const SettingsMain = (): JSX.Element => {
                 </svg>
                 設定
             </h1>
-            <div className="px-5 select-none cursor-default">
+            <div className="px-5 select-none cursor-default mt-8">
                 <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
@@ -461,7 +461,7 @@ const SettingsMain = (): JSX.Element => {
                 </h2>
                 <div className="px-5">
                     <div className="mb-8">
-                        <p>通常の文字起こしを追いかける形で、高精度で文字起こしや翻訳を行います。</p>
+                        <p>通常の文字起こしを追いかける形で、高精度の文字起こしや翻訳を行います。</p>
                         <p>各パックをダウンロードするか、オンライン設定を行ってください。</p>
                     </div>
                     <div className="mb-4 border-b">
@@ -536,11 +536,11 @@ const SettingsMain = (): JSX.Element => {
                         </div>
                     </>}
                     {settingProcess === "翻訳" && <>
-                        <p className="text-sm mt-4 mb-4">有効にするには、言語パック（汎用：高）も必要です。</p>
+                        <p className="text-sm mt-4 mb-4">有効にするには、文字起こしの汎用パック（高精度）が必要です。<br/>英語への翻訳も、文字起こしの汎用パックが担います。</p>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>英日パック（速度優先）</p>
+                                    <p>日本語パック（速度優先）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">staka/fugumt-en-ja</div>
                                         <div className="badge bg-slate-400 text-white ml-1">114 MB</div>
@@ -553,13 +553,13 @@ const SettingsMain = (): JSX.Element => {
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>英日パック（精度優先）</p>
+                                    <p>日本語パック（精度優先）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">aixsatoshi/Honyaku-13b</div>
                                         <div className="badge bg-slate-400 text-white ml-1">7.1 GB</div>
                                     </div>
                                     <p className="text-sm">
-                                        ※ 非常に処理が重いため、リアルタイムでの利用は推奨しません。
+                                        ※ 処理が重いため、リアルタイムでの利用は推奨しません。
                                     </p>
                                 </div>
                                 <ModelDownloadHonyaku13BButton />

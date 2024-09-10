@@ -1,6 +1,7 @@
 import { AtomEffect, atomFamily } from 'recoil'
 import DB from '../../lib/sqlite';
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
+import { invoke } from '@tauri-apps/api';
 
 const sqliteEffect: (note_id:number) => AtomEffect<SpeechHistoryType[]> = 
   (note_id) => {
@@ -25,8 +26,13 @@ const sqliteEffect: (note_id:number) => AtomEffect<SpeechHistoryType[]> =
           const old = oldValue as SpeechHistoryType[];
           if (old.length !== newValue.length) {
             const current = newValue[newValue.length - 1];
-            if (current.speech_type === "memo"){
-              await db.saveSpeech({...current, note_id});
+            if (current.speech_type === "memo" || current.speech_type === "action"){
+              await db.saveSpeech({...current, note_id}).then(async()=>{
+                await loadPersisted();
+                if (current.speech_type === "action") {
+                  invoke('execute_action_command', { noteId: current.note_id })
+                }
+            });
             }
           }
         }

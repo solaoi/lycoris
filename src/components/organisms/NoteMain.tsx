@@ -23,6 +23,8 @@ import { save } from "@tauri-apps/api/dialog";
 import { writeTextFile } from "@tauri-apps/api/fs";
 import dayjs from '../../lib/dayjs'
 import { speechFilterState } from '../../store/atoms/speechFilterState'
+import { invoke } from '@tauri-apps/api'
+import { settingKeyState } from '../../store/atoms/settingKeyState'
 
 const NoteMain = (): JSX.Element => {
     const filterTarget = useRecoilValue(speechFilterState);
@@ -37,6 +39,7 @@ const NoteMain = (): JSX.Element => {
     const isRecording = useRecoilValue(recordState);
     const [editTitle, setEditTitle] = useState(false);
     const isTracing = useRecoilValue(tracingState);
+    const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputEl = useRef<HTMLInputElement>(null);
     const [showGotoBottom, setShowGotoBottom] = useState(true);
@@ -44,7 +47,7 @@ const NoteMain = (): JSX.Element => {
     const showGotoBottomButton = () => {
         const rect = bottomRef.current?.getBoundingClientRect();
         if (rect) {
-            const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 144;  // 144(24px * 6 lines) is the margin of long note
+            const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
             if (!isInViewport) {
                 setShowGotoBottom(true);
             } else {
@@ -68,7 +71,7 @@ const NoteMain = (): JSX.Element => {
         if (recordingNote === selectedNote!.note_id) {
             const rect = bottomRef.current?.getBoundingClientRect();
             if (rect) {
-                const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + 144;  // 144(24px * 6 lines) is the margin of long note
+                const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
                 if (isInViewport) {
                     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -112,6 +115,9 @@ const NoteMain = (): JSX.Element => {
         const unlistenFinalTextConverted = listen('finalTextConverted', event => {
             const { id, content } = event.payload as { id: number, content: string }
             setHistories(prev => {
+                if (settingKeyOpenai !== "" && prev.some(h => h.speech_type === "action" && !h.content_2)) {
+                    invoke('execute_action_command', { noteId: recordingNote || tracingNote });
+                }
                 return prev.map(p => {
                     if (p.id === id) {
                         return {
@@ -129,7 +135,7 @@ const NoteMain = (): JSX.Element => {
             unlistenFinalText.then(f => f());
             unlistenFinalTextConverted.then(f => f());
         }
-    }, [recordingNote, isTracing])
+    }, [recordingNote, isTracing, tracingNote])
 
     useEffect(() => {
         const unlistenScreenshotTaken = listen('screenshotTaken', event => {
@@ -143,6 +149,25 @@ const NoteMain = (): JSX.Element => {
         }
     }, [selectedNote])
 
+    useEffect(() => {
+        const unlistenActionExecuted = listen('actionExecuted', event => {
+            const { id, content } = event.payload as { id: number, content: string }
+            setHistories(prev => {
+                return prev.map(p => {
+                    if (p.id === id) {
+                        return {
+                            ...p,
+                            content_2: content,
+                        }
+                    }
+                    return p;
+                })
+            })
+        });
+        return () => {
+            unlistenActionExecuted.then(f => f());
+        }
+    }, [selectedNote])
 
     useEffect(() => {
         if (isRecording) {
@@ -154,6 +179,8 @@ const NoteMain = (): JSX.Element => {
             }
         } else {
             setIsReadyToRecognize(false);
+            setPartialText(null);
+            setPartialTextDesktop(null);
         }
     }, [isRecording])
 
@@ -205,18 +232,30 @@ const NoteMain = (): JSX.Element => {
                                 return "メモ";
                             case "screenshot":
                                 return "スクリーンショット";
+                            case "action":
+                                return "アクション";
                             default:
                                 return "不明";
                         }
                     }
                     const filterHistory = (speech_type: string) => {
-                        if (filterTarget === "memo") {
+                        if (filterTarget === "speech") {
+                            if (speech_type === "speech") {
+                                return true;
+                            }
+                            return false;
+                        } else if (filterTarget === "memo") {
                             if (speech_type === "memo") {
                                 return true;
                             }
                             return false;
                         } else if (filterTarget === "screenshot") {
                             if (speech_type === "screenshot") {
+                                return true;
+                            }
+                            return false;
+                        } else if (filterTarget === "action") {
+                            if (speech_type === "action") {
                                 return true;
                             }
                             return false;
@@ -227,15 +266,27 @@ const NoteMain = (): JSX.Element => {
                         switch (filterTarget) {
                             case null:
                                 return "all";
+                            case "speech":
+                                return "speech";
                             case "memo":
                                 return "memo";
                             case "screenshot":
                                 return "screenshot";
+                            case "action":
+                                return "action";
                             default:
                                 return "unknown";
                         }
                     })();
-                    const csvData = "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                    const csvData = (() => {
+                        if (settingKeyOpenai !== "") {
+                            return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                        } else if (histories.some(h=>h.speech_type === "action")) {
+                            return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                        } else {
+                            return "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                        }
+                    })()
                     const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
                     if (path) {
                         await writeTextFile(path, csvData);
@@ -254,13 +305,13 @@ const NoteMain = (): JSX.Element => {
         </div>
         <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} />
-            <div className="ml-16 mb-[147px] text-gray-400" ref={bottomRef} >
-                {partialTextDesktop !== null && partialText !== null && <>
-                    <p>デスクトップ音声：{partialTextDesktop}</p>
-                    <p>マイク音声：{partialText}</p>
-                </>}
-                {partialTextDesktop !== null && partialText === null && <p>{partialTextDesktop}</p>}
-                {partialTextDesktop === null && partialText !== null && <p>{partialText}</p>}
+            <div className="ml-[3.75rem] mb-[243px] text-gray-400" ref={bottomRef} >
+                {partialTextDesktop !== null && partialText !== null && <div className='flex flex-col'>
+                    <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>デスクトップ音声：{partialTextDesktop}</p></div>
+                    <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>マイク音声：{partialText}</p></div>
+                </div>}
+                {partialTextDesktop !== null && partialText === null && <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>{partialTextDesktop}</p></div>}
+                {partialTextDesktop === null && partialText !== null && <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>{partialText}</p></div>}
             </div>
             <NoteFooter titleRef={inputEl} />
         </div>
