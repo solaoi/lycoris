@@ -48,7 +48,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             {c.speech_type === "memo"
                                 && <div className='flex py-1' key={"memo_" + i}>
                                     <div className="w-16 pl-2 flex-none">{date}</div>
-                                    <div className="znc w-full flex flex-col items-start ml-5" >
+                                    <div className="flex flex-col items-start ml-5" >
                                         <MyMarkdown content={c.content} />
                                     </div>
                                 </div>}
@@ -61,14 +61,14 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                             <div className="chat chat-start">
                                                 <div className="flex chat-bubble bg-white text-slate-500">
                                                     <p>
-                                                        <div className='znc w-full'><MyMarkdown content={c.content} /></div>
+                                                        <MyMarkdown content={c.content} />
                                                     </p>
                                                 </div>
                                             </div>
                                             <div className="chat chat-end">
                                                 <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full">
                                                     {c.content_2 ?
-                                                        <div className='znc w-full'><MyMarkdown content={c.content_2} /></div>
+                                                        <MyMarkdown content={c.content_2} />
                                                         :
                                                         <span className="loading loading-dots loading-sm"></span>
                                                     }
