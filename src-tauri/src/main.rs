@@ -331,6 +331,7 @@ fn main() {
             }
             response.mimetype("audio/wav").status(status_code).body(buf)
         })
+        .plugin(tauri_plugin_clipboard::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(
             tauri_plugin_sql::Builder::default()

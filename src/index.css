@@ -66,6 +66,11 @@ body {
     background-color: initial;
 }
 
+.szh-menu-container ul {
+    padding-left: 0;
+    width: max-content;
+}
+
 .collapse,.collapse-content {
     visibility: inherit!important;
 }
