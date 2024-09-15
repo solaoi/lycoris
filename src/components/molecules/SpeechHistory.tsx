@@ -69,10 +69,9 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                                 <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full">
                                                     {c.content_2 ?
                                                         <div className='znc w-full'><MyMarkdown content={c.content_2} /></div>
-                                                        : <>
-                                                            <p>発言の追っかけを待っています</p>
-                                                            <span className="loading loading-dots loading-sm"></span>
-                                                        </>}
+                                                        :
+                                                        <span className="loading loading-dots loading-sm"></span>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>
