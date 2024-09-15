@@ -61,7 +61,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                             <div className="chat chat-start">
                                                 <div className="flex chat-bubble bg-white text-slate-500">
                                                     <p>
-                                                        {c.content}
+                                                        <div className='znc w-full'><MyMarkdown content={c.content} /></div>
                                                     </p>
                                                 </div>
                                             </div>
