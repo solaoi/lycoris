@@ -586,9 +586,10 @@ const SettingsMain = (): JSX.Element => {
                 </div>
                 <div className="pl-5">
                     {settingOnline === "OpenAI" && <>
-                        <div className="mb-4 text-sm">
-                            <p>OpenAI社のAPIを利用することで、</p>
-                            <p>高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
+                        <div className="mb-6 text-sm">
+                            <p>OpenAI社のAPIを利用することで、高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
+                            <p className="pb-2">あなたのアカウントのTierに応じて、利用可能なモデルが異なります。</p>
+                            <a className="text-[#0f83fd]" href="https://platform.openai.com/settings/organization/limits" target="_blank">https://platform.openai.com/settings/organization/limits</a>
                         </div>
                         <div className="mb-8">
                             <SettingKey settingName="settingKeyOpenai" />

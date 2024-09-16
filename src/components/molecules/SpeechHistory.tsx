@@ -6,6 +6,7 @@ import { Speech } from './Speech'
 import { Screenshot } from './Screenshot'
 import { MyMarkdown } from './MyMarkdown'
 import 'zenn-content-css';
+import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -29,6 +30,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
             }
         }
     );
+    const selectedNote = useRecoilValue(selectedNoteState)
 
     return (
         <div>
@@ -48,8 +50,8 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             {c.speech_type === "memo"
                                 && <div className='flex py-1' key={"memo_" + i}>
                                     <div className="w-16 pl-2 flex-none">{date}</div>
-                                    <div className="znc w-full flex flex-col items-start ml-5" >
-                                        <MyMarkdown content={c.content} />
+                                    <div className="flex flex-col items-start ml-5" >
+                                        <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
                                     </div>
                                 </div>}
                             {
@@ -60,19 +62,16 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                         <div className="card-body">
                                             <div className="chat chat-start">
                                                 <div className="flex chat-bubble bg-white text-slate-500">
-                                                    <p>
-                                                        {c.content}
-                                                    </p>
+                                                    <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
                                                 </div>
                                             </div>
                                             <div className="chat chat-end">
                                                 <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full">
                                                     {c.content_2 ?
-                                                        <div className='znc w-full'><MyMarkdown content={c.content_2} /></div>
-                                                        : <>
-                                                            <p>発言の追っかけを待っています</p>
-                                                            <span className="loading loading-dots loading-sm"></span>
-                                                        </>}
+                                                        <MyMarkdown content={c.content_2} title={`${selectedNote?.note_title.trim()}_action-end_${i}`} />
+                                                        :
+                                                        <span className="loading loading-dots loading-sm"></span>
+                                                    }
                                                 </div>
                                             </div>
                                         </div>

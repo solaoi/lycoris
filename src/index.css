@@ -43,13 +43,32 @@ body {
     display: none;
 }
 
-.znc ul,ol,p+p,blockquote,hr,table,pre,h1,h2,h3,h4,h5,h6 {
+.znc ul,ol,p+p,blockquote,table,h1,h2,h3,h4,h5,h6 {
     width: 100%;
     margin: 0!important;
 }
 
+.znc hr {
+    width: 100%;
+    margin: 1.5rem 0!important;
+}
+
 .znc p {
     overflow-wrap: anywhere;
+}
+
+.znc pre {
+    width: 100%;
+    margin: 1.5rem 0!important;
+}
+
+.znc pre:has(.lang-mermaid) {
+    background-color: initial;
+}
+
+.szh-menu-container ul {
+    padding-left: 0;
+    width: max-content;
 }
 
 .collapse,.collapse-content {

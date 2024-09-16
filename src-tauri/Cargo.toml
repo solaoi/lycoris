@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.20"
+version = "0.9.21"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -49,6 +49,7 @@ mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.
 ] }
 # mistralrsの要求がtauriの要求と競合するため、tauriの要求を上書きする
 uuid = "=1.10.0"
+tauri-plugin-clipboard = "1.1.4"
 
 [target.'cfg(target_arch = "x86_64")'.dependencies]
 whisper-rs = { version = "0.11.1", features = ["metal"] }
