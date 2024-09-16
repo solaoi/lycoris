@@ -62,9 +62,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                         <div className="card-body">
                                             <div className="chat chat-start">
                                                 <div className="flex chat-bubble bg-white text-slate-500">
-                                                    <p>
-                                                        <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
-                                                    </p>
+                                                    <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
                                                 </div>
                                             </div>
                                             <div className="chat chat-end">
