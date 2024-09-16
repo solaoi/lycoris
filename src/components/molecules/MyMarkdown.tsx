@@ -9,8 +9,6 @@ import { ControlledMenu, MenuItem } from '@szhsin/react-menu';
 import clipboard from "tauri-plugin-clipboard-api";
 import { PaperClip } from '../atoms/PaperClip';
 import { Download } from '../atoms/Download';
-import { selectedNoteState } from '../../store/atoms/selectedNoteState';
-import { useRecoilValue } from 'recoil';
 
 type MyMarkdownProps = {
     content: string
@@ -27,6 +25,26 @@ const MyMarkdown = (props: MyMarkdownProps) => {
 
     const [contents, setContents] = useState<string[]>([]);
 
+    const [isTextSelected, setIsTextSelected] = useState(false);
+    const [textSelected, setTextSelected] = useState("");
+    const handleMouseDown = (e: MouseEvent) => {
+        if (e.button === 2) {
+            const selection = window.getSelection();
+            setTextSelected(selection?.toString() || "");
+            const isWithinSelectableArea = rootRef.current?.contains(selection?.anchorNode || null);
+            setIsTextSelected((selection?.toString() || "").length > 0 && !!isWithinSelectableArea);
+        }
+    };
+    useEffect(() => {
+        document.addEventListener("mousedown", handleMouseDown);
+        return () => {
+            document.removeEventListener("mousedown", handleMouseDown);
+        }
+    }, [handleMouseDown]);
+
+    const handlePartialText = () => {
+        clipboard.writeText(textSelected);
+    }
     const handleText = () => {
         clipboard.writeText(contents[elementId]);
     }
@@ -62,6 +80,8 @@ const MyMarkdown = (props: MyMarkdownProps) => {
 
     useEffect(() => {
         mermaid.initialize({ startOnLoad: false });
+        const listeners = new Map();
+
         rootRef.current?.querySelectorAll('pre code').forEach(async (block, index) => {
             setContents(prev => [...prev, block.textContent! as string]);
 
@@ -71,13 +91,23 @@ const MyMarkdown = (props: MyMarkdownProps) => {
             } else {
                 hljs.highlightBlock(block as HTMLElement);
             }
-            (block as HTMLElement).addEventListener('contextmenu', (e) => {
+
+            const handleContextMenu = (e: MouseEvent) => {
                 e.preventDefault();
                 setAnchorPoint({ x: e.clientX, y: e.clientY });
                 setElementId(index);
                 setOpen(true);
-            });
+            };
+
+            (block as HTMLElement).addEventListener('contextmenu', handleContextMenu);
+            listeners.set(block, ['contextmenu', handleContextMenu]);
         });
+
+        return () => {
+            listeners.forEach(([event, listener], block) => {
+                (block as HTMLElement).removeEventListener(event, listener);
+            });
+        };
     }, [content]);
 
     return (
@@ -98,18 +128,27 @@ const MyMarkdown = (props: MyMarkdownProps) => {
                 direction="right"
                 onClose={() => setOpen(false)}
             >
-                <MenuItem onClick={handleText}>
-                    <PaperClip />
-                    <p className='pl-2'>コピー</p>
-                </MenuItem>
-                <MenuItem onClick={() => handleImage("copy")}>
-                    <PaperClip />
-                    <p className='pl-2'>画像としてコピー</p>
-                </MenuItem>
-                <MenuItem onClick={() => handleImage("download")}>
-                    <Download />
-                    <p className='pl-2'>画像としてダウンロード</p>
-                </MenuItem>
+                {isTextSelected ?
+                    <>
+                        <MenuItem onClick={handlePartialText}>
+                            <PaperClip />
+                            <p className='pl-2'>コピー</p>
+                        </MenuItem>
+                    </> :
+                    <>
+                        <MenuItem onClick={handleText}>
+                            <PaperClip />
+                            <p className='pl-2'>全体をコピー</p>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleImage("copy")}>
+                            <PaperClip />
+                            <p className='pl-2'>画像としてコピー</p>
+                        </MenuItem>
+                        <MenuItem onClick={() => handleImage("download")}>
+                            <Download />
+                            <p className='pl-2'>画像としてダウンロード</p>
+                        </MenuItem>
+                    </>}
             </ControlledMenu>
         </div>
     )
