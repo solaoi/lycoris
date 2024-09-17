@@ -461,7 +461,7 @@ const SettingsMain = (): JSX.Element => {
                 </h2>
                 <div className="px-5">
                     <div className="mb-8">
-                        <p>通常の文字起こしを追いかける形で、高精度の文字起こしや翻訳を行います。</p>
+                        <p>通常の文字起こしを追いかける形式で、高精度の文字起こしや翻訳を行います。</p>
                         <p>各パックをダウンロードするか、オンライン設定を行ってください。</p>
                     </div>
                     <div className="mb-4 border-b">
@@ -536,7 +536,7 @@ const SettingsMain = (): JSX.Element => {
                         </div>
                     </>}
                     {settingProcess === "翻訳" && <>
-                        <p className="text-sm mt-4 mb-4">有効にするには、文字起こしの汎用パック（高精度）が必要です。<br/>英語への翻訳も、文字起こしの汎用パックが担います。</p>
+                        <p className="text-sm mt-4 mb-4">有効にするには、文字起こしの汎用パック（高精度）が必要です。<br/>なお英語への翻訳は、文字起こしの汎用パック単体で可能です。</p>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
@@ -550,7 +550,7 @@ const SettingsMain = (): JSX.Element => {
                             </div>
                             <ModelDownloadFugumtProgress />
                         </div>
-                        <div style={{ height: "86px" }}>
+                        <div style={{ height: "106px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
                                     <p>日本語パック（精度優先）</p>
