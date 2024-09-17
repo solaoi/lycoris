@@ -12,7 +12,7 @@ pub fn list_devices() -> Vec<Device> {
         .input_devices()
         .unwrap()
         .filter_map(|device| {
-            if device.name().is_ok() && device.name().unwrap().contains("ZoomAudioDevice") {
+            if device.name().is_ok() && (device.name().unwrap().contains("ZoomAudioDevice") || device.name().unwrap().contains("Microsoft Teams Audio")) {
                 None
             } else {
                 Some(Device {
