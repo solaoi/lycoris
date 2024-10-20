@@ -26,7 +26,5 @@ fn main() {
     } else {
         println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/../../lib");
     }
-    // // for sbv2_core
-    // println!("cargo:rustc-link-arg=-fapple-link-rtlib");
     tauri_build::build()
 }

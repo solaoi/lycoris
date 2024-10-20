@@ -6,7 +6,6 @@ import { AppWindow } from '../molecules/AppWindow'
 import { ActionSet } from '../molecules/ActionSet'
 import { settingKeyState } from '../../store/atoms/settingKeyState'
 import { actionState } from '../../store/atoms/actionState'
-import { invoke } from '@tauri-apps/api'
 
 type NoteFooterProps = {
     titleRef: React.RefObject<HTMLInputElement>
@@ -23,20 +22,6 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
     const selectedNote = useRecoilValue(selectedNoteState)
     const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
     const targetAction = useRecoilValue(actionState)
-    // const [audio, setAudio] = useState<string | null>(null)
-    // const synthesizeClick = async (text: string) => {
-    //     if (audio) {
-    //         URL.revokeObjectURL(audio);
-    //     }
-    //     if (!text.length) {
-    //         return;
-    //     }
-    //     invoke('synthesize_command', { text })
-    //         .then(buffer => {
-    //             const res = new Blob([new Uint8Array(buffer as ArrayBufferLike)], { type: "audio/wav" });
-    //             setAudio(URL.createObjectURL(res));
-    //         })
-    // };
     const update = (type: "memo" | "action", action_type?: "chat" | "suggest") => {
         if (type === "memo") {
             if (inputValue === "") {
@@ -133,10 +118,6 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
                             <path fillRule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clipRule="evenodd" />
                         </svg>
                     </button>
-                    {/* <button onClick={()=>invoke('synthesize_init_command')}>init</button>
-                    <button onClick={()=>invoke('synthesize_finalize_command')}>finalize</button>
-                    <button onClick={async()=>await synthesizeClick(inputValue)}>実行</button>
-                    {audio && <audio controls src={audio} autoPlay></audio>} */}
                 </div>
                 <div className={"flex flex-col items-center"}>
                     <AppWindow />
