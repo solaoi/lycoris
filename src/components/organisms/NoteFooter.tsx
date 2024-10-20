@@ -155,8 +155,8 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             {!isMemo && targetAction === "発話サジェスト" &&
                 <div className={"flex-1 flex flex-col mr-2 relative h-[5.5rem]"}>
                     <div className="rounded-2xl flex-1 w-full bg-base-200 pt-2 pl-3 cursor-default">
-                        <p className='font-medium text-sm'>アシスタントが最適な発言をサジェスト</p>
-                        <p className='text-xs'>ボタン1つで状況に応じた3つの発言を提案</p>
+                        <p className='font-medium text-sm'>アシスタントが最適な発話をサジェスト</p>
+                        <p className='text-xs'>ボタン1つで状況に応じた3つの発話を提案</p>
                         <div className='flex mt-2 text-sm'>
                             <div className='flex items-center bg-gray-100 rounded-lg py-1 px-2 mr-2'>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
