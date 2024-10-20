@@ -73,7 +73,7 @@ const NoteMain = (): JSX.Element => {
             const rect = bottomRef.current?.getBoundingClientRect();
             if (rect) {
                 const isInViewport = rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
-                if (isInViewport) {
+                if (isInViewport || histories.at(-1)?.speech_type === "screenshot") {
                     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }
             }
@@ -186,123 +186,125 @@ const NoteMain = (): JSX.Element => {
     }, [isRecording])
 
     return (<>
-        <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
-            <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
-                onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
-                {editTitle ?
-                    <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
-                        onKeyDown={e => {
-                            if (e.key === "Enter" && e.keyCode === 13) {
-                                setEditTitle(false)
-                            }
-                        }}
-                        onBlur={() => { setEditTitle(false) }}
-                        onChange={(e) => {
-                            const target = e.target.value
-                            setSelectedNote(prev => { return { ...prev!, note_title: target } });
-                            setNotes(prev => prev.map(note => {
-                                if (note.id === selectedNote!.note_id) {
-                                    return { ...note, note_title: target }
-                                } else {
-                                    return note;
+        <div className='bg-white'>
+            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
+                <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
+                    onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
+                    {editTitle ?
+                        <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" && e.keyCode === 13) {
+                                    setEditTitle(false)
                                 }
-                            }))
-                        }} />
-                    : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
-            </h1>
-            <div className="flex-none mr-2">
-                {isTracing && tracingNote === selectedNote?.note_id ?
-                    <TraceStopButton /> :
-                    <TraceStartButton />}
+                            }}
+                            onBlur={() => { setEditTitle(false) }}
+                            onChange={(e) => {
+                                const target = e.target.value
+                                setSelectedNote(prev => { return { ...prev!, note_title: target } });
+                                setNotes(prev => prev.map(note => {
+                                    if (note.id === selectedNote!.note_id) {
+                                        return { ...note, note_title: target }
+                                    } else {
+                                        return note;
+                                    }
+                                }))
+                            }} />
+                        : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
+                </h1>
+                <div className="flex-none mr-2">
+                    {isTracing && tracingNote === selectedNote?.note_id ?
+                        <TraceStopButton /> :
+                        <TraceStartButton />}
+                </div>
+                <div className="flex-none">
+                    {(isRecording && recordingNote === selectedNote?.note_id) ? isReadyToRecognize ? <RecordStopButton /> : <RecordPreparingButton /> : <RecordStartButton />}
+                </div>
+                <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
+                <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
             </div>
-            <div className="flex-none">
-                {(isRecording && recordingNote === selectedNote?.note_id) ? isReadyToRecognize ? <RecordStopButton /> : <RecordPreparingButton /> : <RecordStartButton />}
-            </div>
-            <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
-            <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
-        </div>
-        <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between" style={{ height: "32px" }}>
-            <FilterTabs />
-            <div className="group mr-4">
-                <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
-                    const typeMapper = (speech_type: string) => {
-                        switch (speech_type) {
-                            case "speech":
-                                return "発言";
-                            case "memo":
-                                return "メモ";
-                            case "screenshot":
-                                return "スクリーンショット";
-                            case "action":
-                                return "アクション";
-                            default:
-                                return "不明";
-                        }
-                    }
-                    const filterHistory = (speech_type: string) => {
-                        if (filterTarget === "speech") {
-                            if (speech_type === "speech") {
-                                return true;
+            <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between" style={{ height: "32px" }}>
+                <FilterTabs />
+                <div className="group mr-4">
+                    <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
+                        const typeMapper = (speech_type: string) => {
+                            switch (speech_type) {
+                                case "speech":
+                                    return "発言";
+                                case "memo":
+                                    return "メモ";
+                                case "screenshot":
+                                    return "スクリーンショット";
+                                case "action":
+                                    return "アクション";
+                                default:
+                                    return "不明";
                             }
-                            return false;
-                        } else if (filterTarget === "memo") {
-                            if (speech_type === "memo") {
-                                return true;
-                            }
-                            return false;
-                        } else if (filterTarget === "screenshot") {
-                            if (speech_type === "screenshot") {
-                                return true;
-                            }
-                            return false;
-                        } else if (filterTarget === "action") {
-                            if (speech_type === "action") {
-                                return true;
-                            }
-                            return false;
                         }
-                        return true;
-                    }
-                    const csvSuffix = (() => {
-                        switch (filterTarget) {
-                            case null:
-                                return "all";
-                            case "speech":
-                                return "speech";
-                            case "memo":
-                                return "memo";
-                            case "screenshot":
-                                return "screenshot";
-                            case "action":
-                                return "action";
-                            default:
-                                return "unknown";
+                        const filterHistory = (speech_type: string) => {
+                            if (filterTarget === "speech") {
+                                if (speech_type === "speech") {
+                                    return true;
+                                }
+                                return false;
+                            } else if (filterTarget === "memo") {
+                                if (speech_type === "memo") {
+                                    return true;
+                                }
+                                return false;
+                            } else if (filterTarget === "screenshot") {
+                                if (speech_type === "screenshot") {
+                                    return true;
+                                }
+                                return false;
+                            } else if (filterTarget === "action") {
+                                if (speech_type === "action") {
+                                    return true;
+                                }
+                                return false;
+                            }
+                            return true;
                         }
-                    })();
-                    const csvData = (() => {
-                        if (settingKeyOpenai !== "") {
-                            return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
-                        } else if (histories.some(h=>h.speech_type === "action")) {
-                            return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
-                        } else {
-                            return "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                        const csvSuffix = (() => {
+                            switch (filterTarget) {
+                                case null:
+                                    return "all";
+                                case "speech":
+                                    return "speech";
+                                case "memo":
+                                    return "memo";
+                                case "screenshot":
+                                    return "screenshot";
+                                case "action":
+                                    return "action";
+                                default:
+                                    return "unknown";
+                            }
+                        })();
+                        const csvData = (() => {
+                            if (settingKeyOpenai !== "") {
+                                return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                            } else if (histories.some(h => h.speech_type === "action")) {
+                                return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                            } else {
+                                return "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                            }
+                        })()
+                        const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
+                        if (path) {
+                            await writeTextFile(path, csvData);
                         }
-                    })()
-                    const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
-                    if (path) {
-                        await writeTextFile(path, csvData);
-                    }
-                }}>
-                    <Download />
-                </button>
-                <div className="opacity-0 w-20 invisible rounded text-[12px] 
+                    }}>
+                        <Download />
+                    </button>
+                    <div className="opacity-0 w-20 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-4
                         group-hover:visible opacity-100 absolute text-center">ダウンロード
+                    </div>
                 </div>
             </div>
         </div>
         <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
-            <SpeechHistory histories={histories} />
+            <SpeechHistory histories={histories} setHistories={setHistories} />
             <div className="ml-[3.75rem] mb-[243px] text-gray-400" ref={bottomRef} >
                 {partialTextDesktop !== null && partialText !== null && <div className='flex flex-col'>
                     <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>デスクトップ音声：{partialTextDesktop}</p></div>

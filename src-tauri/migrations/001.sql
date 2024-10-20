@@ -8,6 +8,8 @@ CREATE TABLE speeches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     speech_type TEXT,
     -- speech|memo|screenshot|action
+    action_type TEXT,
+    -- chat|suggest
     created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
     content TEXT,
     content_2 TEXT,
@@ -35,7 +37,7 @@ VALUES("settingKeyAmivoice", "");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingLanguage", "日本語");
 INSERT INTO settings(setting_name, setting_status)
-VALUES("settingProcess", "文字起こし");
+VALUES("settingProcess", "文字起こし（汎用）");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingOnline", "OpenAI");
 INSERT INTO settings(setting_name, setting_status)
@@ -74,9 +76,13 @@ VALUES("base.en", "whisper");
 INSERT INTO models(model_name, model_type)
 VALUES("large", "whisper");
 INSERT INTO models(model_name, model_type)
+VALUES("large-turbo", "whisper");
+INSERT INTO models(model_name, model_type)
 VALUES("large-distil.en", "whisper");
 INSERT INTO models(model_name, model_type)
 VALUES("large-distil.ja", "whisper");
+INSERT INTO models(model_name, model_type)
+VALUES("large-distil.bilingual", "whisper");
 INSERT INTO models(model_name, model_type)
 VALUES("medium", "whisper");
 INSERT INTO models(model_name, model_type)
@@ -150,6 +156,24 @@ VALUES("small-cs-0.4-rhasspy", "vosk");
 INSERT INTO models(model_name, model_type)
 VALUES("small-pl-0.22", "vosk");
 INSERT INTO models(model_name, model_type)
-VALUES("fugumt-en-ja", "fugumt");
+VALUES("fugumt-en-ja", "fugumt-en-ja");
 INSERT INTO models(model_name, model_type)
-VALUES("honyaku13b-q4-0", "honyaku13b");
+VALUES("fugumt-ja-en", "fugumt-ja-en");
+INSERT INTO models(model_name, model_type)
+VALUES("honyaku-13b", "honyaku-13b");
+INSERT INTO models(model_name, model_type)
+VALUES("style-bert-vits2", "style-bert-vits2");
+INSERT INTO models(model_name, model_type)
+VALUES("tsukuyomi-chan", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("amitaro", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("koharune-ami", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("jvnv-F1-jp", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("jvnv-F2-jp", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("jvnv-M1-jp", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("jvnv-M2-jp", "style-bert-vits2-voice");

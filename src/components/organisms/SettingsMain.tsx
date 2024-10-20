@@ -16,18 +16,28 @@ import { SettingResource } from "../molecules/SettingResource"
 import { SettingModel } from "../molecules/SettingModel"
 import { SettingAILanguage } from "../molecules/SettingAILanguage"
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
-import { ModelDownloadFugumtButton } from "../molecules/ModelDownloadFugumtButton"
-import { ModelDownloadFugumtProgress } from "../molecules/ModelDownloadFugumtProgress"
+import { ModelDownloadFugumtEnJaButton } from "../molecules/ModelDownloadFugumtEnJaButton"
+import { ModelDownloadFugumtEnJaProgress } from "../molecules/ModelDownloadFugumtEnJaProgress"
 import { ModelDownloadHonyaku13BButton } from "../molecules/ModelDownloadHonyaku13BButton"
 import { ModelDownloadHonyaku13BProgress } from "../molecules/ModelDownloadHonyaku13BProgress"
 import { SettingProcesses } from "../molecules/SettingProcesses"
 import { SettingOnlines } from "../molecules/SettingOnlines"
 import { SettingAmiVoiceLogging } from "../molecules/SettingAmiVoiceLogging"
+import { ModelDownloadStyleBertVits2Button } from "../molecules/ModelDownloadStyleBertVits2Button"
+import { ModelDownloadStyleBertVits2Progress } from "../molecules/ModelDownloadStyleBertVits2Progress"
+import { SettingVoices } from "../molecules/SettingVoices"
+import { ModelDownloadStyleBertVits2VoiceButton } from "../molecules/ModelDownloadStyleBertVits2VoiceButton"
+import { ModelDownloadStyleBertVits2VoiceProgress } from "../molecules/ModelDownloadStyleBertVits2VoiceProgress"
+import { settingVoiceState } from "../../store/atoms/settingVoiceState"
+import { ModelDownloadFugumtJaEnButton } from "../molecules/ModelDownloadFugumtJaEnButton"
+import { ModelDownloadFugumtJaEnProgress } from "../molecules/ModelDownloadFugumtJaEnProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
     const settingProcess = useRecoilValue(settingProcessState);
     const settingOnline = useRecoilValue(settingOnlineState);
+    const settingVoice = useRecoilValue(settingVoiceState);
+
     return (
         <div className="p-5 overflow-auto" style={{ height: `calc(100vh - 64px)` }}>
             <h1 className="text-3xl flex items-center select-none cursor-default">
@@ -44,10 +54,10 @@ const SettingsMain = (): JSX.Element => {
                     </svg>
                     話し手の言語
                 </h2>
-                <div className="px-5">
+                <div className="px-5 mt-2">
                     <div className="mb-8">
                         <p>音声認識を行う対象の、言語パックをダウンロードしてください。</p>
-                        <p>言語によっては、利用メモリが少ないライト版のみ存在します。</p>
+                        <p>言語によっては、メモリ使用量が少ないライト版のみ存在します。</p>
                     </div>
                     <div className="mb-4 border-b">
                         <SettingLanguages />
@@ -452,43 +462,43 @@ const SettingsMain = (): JSX.Element => {
                     </>}
                 </div>
             </div>
-            <div className="px-5 select-none cursor-default">
+            <div className="px-5 select-none cursor-default mt-10">
                 <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
                     </svg>
                     追っかけ文字起こし・翻訳
                 </h2>
-                <div className="px-5">
+                <div className="px-5 mt-2">
                     <div className="mb-8">
-                        <p>通常の文字起こしを追いかける形で、高精度の文字起こしや翻訳を行います。</p>
+                        <p>通常の文字起こしを追いかける形式で、高精度の文字起こしや翻訳を行います。</p>
                         <p>各パックをダウンロードするか、オンライン設定を行ってください。</p>
                     </div>
                     <div className="mb-4 border-b">
                         <SettingProcesses />
                     </div>
-                    {settingProcess === "文字起こし" && <>
-                        <p className="text-sm mt-4 mb-4">汎用パック（高精度）を推奨します。速度に問題がある場合のみ、他を検討してください。</p>
-                        <div style={{ height: "86px" }}>
+                    {settingProcess === "文字起こし（汎用）" && <>
+                        <p className="text-sm mt-4 mb-4">汎用パック（高精度）を推奨します。<br />速度・メモリ使用量に問題がある場合は、汎用パック（速度優先）を利用ください。</p>
+                        {/* <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
                                     <p>汎用パック（低精度）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">whisper-small</div>
-                                        <div className="badge bg-slate-400 text-white ml-1">610 MB</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">447 MB</div>
                                     </div>
                                 </div>
                                 <ModelDownloadWhisperButton modelType="small" />
                             </div>
                             <ModelDownloadWhisperProgress modelType="small" />
-                        </div>
+                        </div> */}
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
                                     <p>汎用パック（中精度）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">whisper-medium</div>
-                                        <div className="badge bg-slate-400 text-white ml-1">2.0 GB</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.4 GB</div>
                                     </div>
                                 </div>
                                 <ModelDownloadWhisperButton modelType="medium" />
@@ -501,7 +511,7 @@ const SettingsMain = (): JSX.Element => {
                                     <p>汎用パック（高精度）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">whisper-large-v3</div>
-                                        <div className="badge bg-slate-400 text-white ml-1">4.0 GB</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">2.9 GB</div>
                                     </div>
                                 </div>
                                 <ModelDownloadWhisperButton modelType="large" />
@@ -511,10 +521,26 @@ const SettingsMain = (): JSX.Element => {
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>英語パック（速度優先）</p>
+                                    <p>汎用パック（速度優先）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white">whisper-large-v3-turbo</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.5 GB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadWhisperButton modelType="large-turbo" />
+                            </div>
+                            <ModelDownloadWhisperProgress modelType="large-turbo" />
+                        </div>
+                    </>}
+                    {settingProcess === "文字起こし（言語特化）" && <>
+                        <p className="text-sm mt-4 mb-4">汎用パック（高精度）を推奨します。</p>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>英語パック</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">distil-whisper/distil-large-v3</div>
-                                        <div className="badge bg-slate-400 text-white ml-1">2.6 GB</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.4 GB</div>
                                     </div>
                                 </div>
                                 <ModelDownloadWhisperButton modelType="large-distil.en" />
@@ -524,10 +550,10 @@ const SettingsMain = (): JSX.Element => {
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>日本語パック（速度優先）</p>
+                                    <p>日本語パック</p>
                                     <div className="flex my-1">
-                                        <div className="badge bg-slate-400 text-white">Kotoba-Whisper-v1.1</div>
-                                        <div className="badge bg-slate-400 text-white ml-1">2.6 GB</div>
+                                        <div className="badge bg-slate-400 text-white">Kotoba-Whisper-v2.0</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.2 GB</div>
                                     </div>
                                 </div>
                                 <ModelDownloadWhisperButton modelType="large-distil.ja" />
@@ -535,22 +561,22 @@ const SettingsMain = (): JSX.Element => {
                             <ModelDownloadWhisperProgress modelType="large-distil.ja" />
                         </div>
                     </>}
-                    {settingProcess === "翻訳" && <>
-                        <p className="text-sm mt-4 mb-4">有効にするには、文字起こしの汎用パック（高精度）が必要です。<br/>英語への翻訳も、文字起こしの汎用パックが担います。</p>
+                    {settingProcess === "翻訳（18言語⇒日本語）" && <>
+                        <p className="text-sm mt-4 mb-4">有効化するには、文字起こし（汎用）の汎用パック（高精度）が必要です。</p>
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>日本語パック（速度優先）</p>
+                                    <p>日本語パック（標準）</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">staka/fugumt-en-ja</div>
                                         <div className="badge bg-slate-400 text-white ml-1">114 MB</div>
                                     </div>
                                 </div>
-                                <ModelDownloadFugumtButton />
+                                <ModelDownloadFugumtEnJaButton />
                             </div>
-                            <ModelDownloadFugumtProgress />
+                            <ModelDownloadFugumtEnJaProgress />
                         </div>
-                        <div style={{ height: "86px" }}>
+                        <div style={{ height: "106px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
                                     <p>日本語パック（精度優先）</p>
@@ -559,7 +585,7 @@ const SettingsMain = (): JSX.Element => {
                                         <div className="badge bg-slate-400 text-white ml-1">7.1 GB</div>
                                     </div>
                                     <p className="text-sm">
-                                        ※ 処理が重いため、リアルタイムでの利用は推奨しません。
+                                        ※ メモリ解放されないバグのため、利用後にアプリ再起動が必要。
                                     </p>
                                 </div>
                                 <ModelDownloadHonyaku13BButton />
@@ -567,18 +593,201 @@ const SettingsMain = (): JSX.Element => {
                             <ModelDownloadHonyaku13BProgress />
                         </div>
                     </>}
+                    {settingProcess === "翻訳（日本語⇒英語）" && <>
+                        <p className="text-sm mt-4 mb-4">有効化するには、文字起こし（汎用）の汎用パック（高精度）が必要です。</p>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>英語パック（標準）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white">staka/fugumt-ja-en</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">114 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadFugumtJaEnButton />
+                            </div>
+                            <ModelDownloadFugumtJaEnProgress />
+                        </div>
+                    </>}
+                    {settingProcess === "翻訳（日本語⇔英語）" && <>
+                        <p className="text-sm mt-4 mb-4">翻訳（18言語⇒日本語）及び翻訳（日本語⇒英語）にて、<br/>速度に問題がある場合は、バイリンガルパックを利用ください。</p>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>バイリンガルパック</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white">kotoba-whisper-bilingual-v1.0</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.2 GB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadWhisperButton modelType="large-distil.bilingual" />
+                            </div>
+                            <ModelDownloadWhisperProgress modelType="large-distil.bilingual" />
+                        </div>
+                    </>}
                 </div>
             </div>
-            <div className="px-5 select-none cursor-default">
+            <div className="px-5 select-none cursor-default mt-10">
+                <h2 className="text-xl mt-5 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 mr-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46" />
+                    </svg>
+                    スマート読み上げ
+                </h2>
+                <div className="px-5 mt-2">
+                    <div className="mb-8">
+                        <p>テキストを感情豊かな音声で読み上げます。現在は発話サジェストで有効です。</p>
+                        <p>基本エンジンをダウンロードの上、各ボイスパックをダウンロードしてください。</p>
+                    </div>
+                    <div style={{ height: "86px" }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div>
+                                <p>基本エンジン</p>
+                                <div className="flex my-1">
+                                    <div className="badge bg-slate-400 text-white">Style-Bert-VITS2 JP-Extra</div>
+                                    <div className="badge bg-slate-400 text-white ml-1">1.2 GB</div>
+                                </div>
+                            </div>
+                            <ModelDownloadStyleBertVits2Button />
+                        </div>
+                        <ModelDownloadStyleBertVits2Progress />
+                    </div>
+                    <div className="mb-4 border-b">
+                        <SettingVoices />
+                    </div>
+                    {settingVoice === "JVNV" && <>
+                        <div className="text-sm mt-4 mb-4">
+                            <p>
+                                <a className="text-[#0f83fd]" href="https://sites.google.com/site/shinnosuketakamichi/research-topics/jvnv_corpus" target="_blank">JVNVコーパス</a>の音声で学習されました。
+                            </p>
+                            <p>このコーパスのライセンスは、<a className="text-[#0f83fd]" href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank">CC BY-SA 4.0</a>のため、利用規約はこれを継承します。</p>
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（女性1：jvnv-F1-jp）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="jvnv-F1-jp" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="jvnv-F1-jp" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（女性2：jvnv-F2-jp）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="jvnv-F2-jp" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="jvnv-F2-jp" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（男性1：jvnv-M1-jp）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="jvnv-M1-jp" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="jvnv-M1-jp" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（男性2：jvnv-M2-jp）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="jvnv-M2-jp" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="jvnv-M2-jp" />
+                        </div>
+                    </>}
+                    {settingVoice === "つくよみちゃん" && <>
+                        <div className="text-sm mt-4 mb-4">
+                            <p className="mb-4">
+                                本ソフトウェアの音声合成には、<br />フリー素材キャラクター「つくよみちゃん」が無料公開している音声データを使用しています。
+                            </p>
+                            <p>■つくよみちゃんコーパス（CV.夢前黎）</p>
+                            <a className="text-[#0f83fd]" href="https://tyc.rei-yumesaki.net/material/corpus/" target="_blank">https://tyc.rei-yumesaki.net/material/corpus/</a>
+                            <p className="mt-2">© Rei Yumesaki</p>
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（つくよみちゃん）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="tsukuyomi-chan" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="tsukuyomi-chan" />
+                        </div>
+                    </>}
+                    {settingVoice === "小春音アミ・あみたろ" && <>
+                        <div className="text-sm mt-4 mb-4">
+                            <p>
+                                <a className="text-[#0f83fd]" href="https://amitaro.net/" target="_blank">あみたろの声素材工房</a>のコーパス音声・ライブ配信音声から許可を得て学習されたモデルを使用しています。
+                            </p>
+                            <p>
+                                利用の際には、<a className="text-[#0f83fd]" href="https://amitaro.net/voice/voice_rule/" target="_blank">あみたろの声素材工房の規約</a>と<a className="text-[#0f83fd]" href="https://amitaro.net/voice/voice_rule/" target="_blank">あみたろのライブ配信音声・利用規約</a>を遵守してください。
+                            </p>
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（小春音アミ）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="koharune-ami" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="koharune-ami" />
+                        </div>
+                        <div style={{ height: "86px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>ボイスパック（あみたろ）</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white ml-1">231 MB</div>
+                                    </div>
+                                </div>
+                                <ModelDownloadStyleBertVits2VoiceButton modelType="amitaro" />
+                            </div>
+                            <ModelDownloadStyleBertVits2VoiceProgress modelType="amitaro" />
+                        </div>
+                    </>}
+                    {settingVoice === "カスタマイズ" &&
+                        <div className="text-sm mt-4 pb-[26px]">
+                            <p className="mb-4">
+                                sbv2ファイルを用意することで、<br />自身のStyle-Bert-ViTS2 JP-Extraモデルを利用することができます。
+                            </p>
+                            <p>下記ディレクトリに、用意したsbv2ファイルを格納してください。</p>
+                            <div className="text-white bg-gray-600 select-auto max-w-fit mt-1 px-2 py-1 rounded-sm">/Applications/Lycoris.app/Contents/Resources/resources/style-bert-vits/models</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div className="px-5 select-none cursor-default mt-10">
                 <h2 className="text-xl mt-5 mb-4 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
                     </svg>
                     オンライン設定
                 </h2>
-                <div className="px-5">
+                <div className="px-5 mt-2">
                     <div className="mb-8">
-                        <p>各利用したいAPIとの疎通設定を行ってください。</p>
+                        <p>利用したい各APIとの疎通設定を行ってください。</p>
                     </div>
                     <div className="mb-4 border-b">
                         <SettingOnlines />
@@ -587,7 +796,7 @@ const SettingsMain = (): JSX.Element => {
                 <div className="pl-5">
                     {settingOnline === "OpenAI" && <>
                         <div className="mb-6 text-sm">
-                            <p>OpenAI社のAPIを利用することで、高速な追っかけ文字起こし・翻訳やAIが選択可能となります。</p>
+                            <p>高速な追っかけ文字起こし・翻訳やアシスタントが選択可能となります。</p>
                             <p className="pb-2">あなたのアカウントのTierに応じて、利用可能なモデルが異なります。</p>
                             <a className="text-[#0f83fd]" href="https://platform.openai.com/settings/organization/limits" target="_blank">https://platform.openai.com/settings/organization/limits</a>
                         </div>
@@ -596,7 +805,7 @@ const SettingsMain = (): JSX.Element => {
                         </div>
                         <SettingModel />
                         <div className="mt-8 mb-4">
-                            <p className="mb-2">AIオプション</p>
+                            <p className="mb-2">アシスタント設定</p>
                             <hr />
                         </div>
                         <div className="mb-8">
@@ -618,7 +827,6 @@ const SettingsMain = (): JSX.Element => {
                     </>}
                     {settingOnline === "AmiVoice" && <>
                         <div className="mb-4 text-sm">
-                            <p>AmiVoice社のAPIを利用することで、</p>
                             <p>特定の業界に特化した文字起こしが選択可能となります。</p>
                         </div>
                         <div className="mb-8">
@@ -632,7 +840,7 @@ const SettingsMain = (): JSX.Element => {
                 </div>
             </div>
             <div className="h-48"></div>
-        </div>
+        </div >
     )
 }
 

@@ -34,7 +34,7 @@ impl WhisperModelDownloader {
             .to_string_lossy()
             .to_string();
         let url: &str = &format!(
-            "https://object-storage.tyo1.conoha.io/v1/nc_b22de95e3cf1434da07499038766e2b7/lycoris/ggml-{}.zip",
+            "https://lycoris-storage.wktk.dev/ggml-{}.zip",
             model_type.as_str()
         );
         let res = reqwest::get(url).await.unwrap();

@@ -114,26 +114,43 @@ const SpeakerLanguage = (): JSX.Element => {
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-52"
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
-                {downloadedModels.length > 0 && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
-                    {downloadedModels.filter(model => model.startsWith("small")).length > 0 && downloadedModels.filter(model => !model.startsWith("small")).length > 0 && <p className="text-sm ml-2 mb-2">通常</p>}
-                    {downloadedModels.filter(model => !model.startsWith("small")).map((model, i) => (
-                        <li key={"speaker-language_" + i}>
-                            <label className="label inline-flex active:!bg-inherit">
-                                <input type="radio" name="language-option" className="radio radio-accent" onChange={change} value={model} checked={model === speakerLanguage} />
-                                <a className="grow">{mapModel(model)}</a>
-                            </label>
-                        </li>
-                    ))}
-                    {downloadedModels.filter(model => model.startsWith("small")).length > 0 && downloadedModels.filter(model => !model.startsWith("small")).length > 0 && <><hr className="mt-2" /><p className="text-sm ml-2 my-2">ライト</p></>}
-                    {downloadedModels.filter(model => model.startsWith("small")).map((model, i) => (
-                        <li key={"speaker-language_" + i}>
-                            <label className="label inline-flex active:!bg-inherit">
-                                <input type="radio" name="language-option" className="radio radio-accent" onChange={change} value={model} checked={model === speakerLanguage} />
-                                <a className="grow">{mapModel(model)}</a>
-                            </label>
-                        </li>
-                    ))}
-                </ul>}
+                {downloadedModels.length > 0 &&
+                    <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
+                        {downloadedModels.filter(model => model.startsWith("small")).length > 0 && downloadedModels.filter(model => !model.startsWith("small")).length > 0 &&
+                            <p className="text-sm ml-2 my-2 flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
+                                    <path fillRule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388H3.61a.75.75 0 0 0 0 1.5h1.663l-.571 2.998H2.75a.75.75 0 0 0 0 1.5h1.666l-.403 2.114a.75.75 0 0 0 1.474.28l.456-2.394h2.973l-.403 2.114a.75.75 0 0 0 1.474.28l.456-2.394h1.947a.75.75 0 0 0 0-1.5h-1.661l.57-2.998h1.95a.75.75 0 0 0 0-1.5h-1.664l.402-2.108a.75.75 0 0 0-1.474-.28l-.455 2.388H7.085l.402-2.108ZM6.8 6.498l-.571 2.998h2.973l.57-2.998H6.8Z" clipRule="evenodd" />
+                                </svg>
+                                通常
+                            </p>
+                        }
+                        {downloadedModels.filter(model => !model.startsWith("small")).map((model, i) => (
+                            <li key={"speaker-language_" + i}>
+                                <label className="label inline-flex active:!bg-inherit">
+                                    <input type="radio" name="language-option" className="radio radio-accent" onChange={change} value={model} checked={model === speakerLanguage} />
+                                    <a className="grow">{mapModel(model)}</a>
+                                </label>
+                            </li>
+                        ))}
+                        {downloadedModels.filter(model => model.startsWith("small")).length > 0 && downloadedModels.filter(model => !model.startsWith("small")).length > 0 &&
+                            <>
+                                <hr className="mt-2" />
+                                <p className="text-sm ml-2 my-2 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
+                                        <path fillRule="evenodd" d="M7.487 2.89a.75.75 0 1 0-1.474-.28l-.455 2.388H3.61a.75.75 0 0 0 0 1.5h1.663l-.571 2.998H2.75a.75.75 0 0 0 0 1.5h1.666l-.403 2.114a.75.75 0 0 0 1.474.28l.456-2.394h2.973l-.403 2.114a.75.75 0 0 0 1.474.28l.456-2.394h1.947a.75.75 0 0 0 0-1.5h-1.661l.57-2.998h1.95a.75.75 0 0 0 0-1.5h-1.664l.402-2.108a.75.75 0 0 0-1.474-.28l-.455 2.388H7.085l.402-2.108ZM6.8 6.498l-.571 2.998h2.973l.57-2.998H6.8Z" clipRule="evenodd" />
+                                    </svg>
+                                    ライト
+                                </p>
+                            </>}
+                        {downloadedModels.filter(model => model.startsWith("small")).map((model, i) => (
+                            <li key={"speaker-language_" + i}>
+                                <label className="label inline-flex active:!bg-inherit">
+                                    <input type="radio" name="language-option" className="radio radio-accent" onChange={change} value={model} checked={model === speakerLanguage} />
+                                    <a className="grow">{mapModel(model)}</a>
+                                </label>
+                            </li>
+                        ))}
+                    </ul>}
             </ul>
         </div>
     )

@@ -1,10 +1,12 @@
 import { useRef, useState } from "react"
+import { useRecoilState } from "recoil"
+import { actionState } from "../../store/atoms/actionState"
 
 const ActionSet = (): JSX.Element => {
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
-    const [targetAction, setTargetAction] = useState<string | null>("チャット")
-    const actions = ["チャット"]
+    const [targetAction, setTargetAction] = useRecoilState(actionState)
+    const actions = ["チャット", "発話サジェスト"]
     const [toggle, setToggle] = useState(false)
 
     const change = (actionName: string) => {

@@ -25,6 +25,9 @@ const MyMarkdown = (props: MyMarkdownProps) => {
 
     const [contents, setContents] = useState<string[]>([]);
 
+    const [isTableSelected, setIsTableSelected] = useState(false);
+    const [tableId, setTableId] = useState(0);
+
     const [isTextSelected, setIsTextSelected] = useState(false);
     const [textSelected, setTextSelected] = useState("");
     const handleMouseDown = (e: MouseEvent) => {
@@ -49,18 +52,34 @@ const MyMarkdown = (props: MyMarkdownProps) => {
         clipboard.writeText(contents[elementId]);
     }
     const handleImage = async (type: "copy" | "download") => {
-        const target = rootRef.current?.querySelectorAll("pre code")[elementId] as HTMLElement;
-        const canvas = await html2canvas(target,
-            {
-                backgroundColor: null,
-                onclone: (_, element) => {
-                    element.style.setProperty("overflow-x", "unset");
-                    element.style.setProperty("width", "fit-content");
-                    if (!target.className.includes("mermaid")) {
-                        element.style.backgroundColor = "#1a2638";
-                    }
-                }
-            });
+        const target = (() => {
+            if (isTableSelected) return rootRef.current?.querySelectorAll("table")[tableId] as HTMLElement;
+            return rootRef.current?.querySelectorAll("pre code")[elementId] as HTMLElement;
+        })();
+        const canvas = await (async () => {
+            if (isTableSelected) {
+                return await html2canvas(target,
+                    {
+                        backgroundColor: null,
+                        onclone: (_, element) => {
+                            element.style.setProperty("overflow-x", "unset");
+                            element.style.setProperty("width", "fit-content");
+                        }
+                    });
+            } else {
+                return await html2canvas(target,
+                    {
+                        backgroundColor: null,
+                        onclone: (_, element) => {
+                            element.style.setProperty("overflow-x", "unset");
+                            if (!target.className.includes("mermaid")) {
+                                element.style.backgroundColor = "#1a2638";
+                                element.style.width = "unset";
+                            }
+                        }
+                    });
+            }
+        })();
         if (type === "download") {
             const blob = await new Promise<Blob>((resolve) => {
                 canvas.toBlob((blob) => {
@@ -90,12 +109,29 @@ const MyMarkdown = (props: MyMarkdownProps) => {
                 block.classList.add("hover:border-base-300", "border-2", "border-transparent", "rounded-lg", "cursor-pointer");
             } else {
                 hljs.highlightBlock(block as HTMLElement);
+                block.classList.add("cursor-pointer", "w-full");
             }
 
             const handleContextMenu = (e: MouseEvent) => {
                 e.preventDefault();
                 setAnchorPoint({ x: e.clientX, y: e.clientY });
+                setIsTableSelected(false);
                 setElementId(index);
+                setOpen(true);
+            };
+
+            (block as HTMLElement).addEventListener('contextmenu', handleContextMenu);
+            listeners.set(block, ['contextmenu', handleContextMenu]);
+        });
+
+        rootRef.current?.querySelectorAll('table').forEach(async (block, index) => {
+            block.classList.add("hover:border-base-300", "border-2", "border-transparent", "rounded-lg", "cursor-pointer", "!w-fit");
+
+            const handleContextMenu = (e: MouseEvent) => {
+                e.preventDefault();
+                setAnchorPoint({ x: e.clientX, y: e.clientY });
+                setIsTableSelected(true);
+                setTableId(index);
                 setOpen(true);
             };
 
@@ -135,20 +171,31 @@ const MyMarkdown = (props: MyMarkdownProps) => {
                             <p className='pl-2'>コピー</p>
                         </MenuItem>
                     </> :
-                    <>
-                        <MenuItem onClick={handleText}>
-                            <PaperClip />
-                            <p className='pl-2'>全体をコピー</p>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleImage("copy")}>
-                            <PaperClip />
-                            <p className='pl-2'>画像としてコピー</p>
-                        </MenuItem>
-                        <MenuItem onClick={() => handleImage("download")}>
-                            <Download />
-                            <p className='pl-2'>画像としてダウンロード</p>
-                        </MenuItem>
-                    </>}
+                    isTableSelected ?
+                        <>
+                            <MenuItem onClick={() => handleImage("copy")}>
+                                <PaperClip />
+                                <p className='pl-2'>画像としてコピー</p>
+                            </MenuItem>
+                            <MenuItem onClick={() => handleImage("download")}>
+                                <Download />
+                                <p className='pl-2'>画像としてダウンロード</p>
+                            </MenuItem>
+                        </> :
+                        <>
+                            <MenuItem onClick={handleText}>
+                                <PaperClip />
+                                <p className='pl-2'>全体をコピー</p>
+                            </MenuItem>
+                            <MenuItem onClick={() => handleImage("copy")}>
+                                <PaperClip />
+                                <p className='pl-2'>画像としてコピー</p>
+                            </MenuItem>
+                            <MenuItem onClick={() => handleImage("download")}>
+                                <Download />
+                                <p className='pl-2'>画像としてダウンロード</p>
+                            </MenuItem>
+                        </>}
             </ControlledMenu>
         </div>
     )
