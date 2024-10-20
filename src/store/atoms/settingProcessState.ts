@@ -6,7 +6,7 @@ const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
     const db = (await DB.getInstance())
     const savedValue =  await db.loadSetting("settingProcess");
     if (savedValue === null) {
-      setSelf("文字起こし");
+      setSelf("文字起こし（汎用）");
     } else {
       setSelf(savedValue!.setting_status);
     }
@@ -19,7 +19,7 @@ const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
   onSet(async(newValue, _, isReset:any) => {
     const db = await DB.getInstance()
     if (isReset) {
-      await db.updateSetting("settingProcess", "文字起こし")
+      await db.updateSetting("settingProcess", "文字起こし（汎用）")
     } else {
       await db.updateSetting("settingProcess", newValue)
     }
@@ -28,7 +28,7 @@ const sqliteEffect: AtomEffect<string> = ({setSelf, onSet, trigger}) => {
 
 export const settingProcessState = atom<string>({
   key: 'settingProcessState',
-  default: "文字起こし",
+  default: "文字起こし（汎用）",
   effects: [
     sqliteEffect,
   ]

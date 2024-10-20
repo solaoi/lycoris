@@ -8,8 +8,10 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
 use super::sqlite::{Content, Sqlite};
+use tokio::runtime::Runtime;
 
 pub struct Action {
+    runtime: Runtime,
     app_handle: AppHandle,
     sqlite: Sqlite,
     note_id: u64,
@@ -19,12 +21,14 @@ pub struct Action {
 
 impl Action {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
+        let runtime = Runtime::new().expect("Failed to create Tokio runtime");
         let sqlite = Sqlite::new();
         let token = sqlite.select_whisper_token().unwrap();
         let model = sqlite
             .select_ai_model()
             .unwrap_or_else(|_| "gpt-4o-mini".to_string());
         Self {
+            runtime,
             app_handle,
             sqlite,
             note_id,
@@ -33,7 +37,6 @@ impl Action {
         }
     }
 
-    #[tokio::main]
     async fn request_gpt(
         model: String,
         question: String,
@@ -90,17 +93,25 @@ impl Action {
                             .push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
                         current_content.clear();
                     }
-                    prompt.push_str(&format!(
-                        ":::assistant\n[query]\n{}\n[answer]\n{}\n:::\n",
-                        content.content, content.content_2
-                    ));
+                    if content.action_type == "suggest" {
+                        prompt.push_str(&format!(
+                                ":::assistant\n[query]\n次の発言者のための3つの発話サジェストとその理由を生成してください。\n[answer] {}\n{}\n:::\n",
+                                content.content, content.content_2
+                            ));
+                    } else {
+                        prompt.push_str(&format!(
+                            ":::assistant\n[query]\n{}\n[answer]\n{}\n:::\n",
+                            content.content, content.content_2
+                        ));
+                    }
                 }
                 "speech" | _ => {
                     let speech_type = if content.speech_type == "speech" {
                         "transcription"
                     } else if content.speech_type == "memo" {
                         "note"
-                    } else { // "screenshot"
+                    } else {
+                        // "screenshot"
                         "note"
                     };
                     if speech_type != current_type && !current_content.is_empty() {
@@ -160,6 +171,176 @@ impl Action {
         Ok(response_text)
     }
 
+    async fn request_gpt_suggest(
+        contents: Vec<Content>,
+        token: String,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let url = "https://api.openai.com/v1/chat/completions";
+        let temperature = 0.7;
+
+        let client = Client::new();
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("Bearer {}", token))?,
+        );
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+        let mut messages: Vec<Value> = Vec::new();
+        let mut prompt = "あなたは高度な会話分析・発話提案AIアシスタントです。提供される情報を分析し、次の発言者に対して適切な発話サジェストを生成することがあなたの役割です。以下の手順に従って処理を行ってください：
+
+1. 情報の分析：
+   a) 文字起こし (:::transcription で囲まれた部分)：直近の会話の内容と流れを詳細に把握します。
+   b) メモ (:::note で囲まれた部分)：会話の背景や補足情報として扱います。
+   c) 過去のAIとのQ&A (:::assistant で囲まれた部分)：関連する追加情報として考慮します。ただし直近の発話サジェストは、今回の発話サジェストが同一性を持たないように考慮します。
+
+2. 会話の状況把握：
+   - 誰が最後に発言したか、どのような内容だったかを特定します。
+   - 発話サジェストを受ける人が直前で聞き手だったことを前提とします。
+
+3. 発話サジェストの生成：
+   会話の流れ、文脈、および背景情報を考慮し、以下の3種類の発言提案を生成します：
+   a) 中立的な発言：会話を自然に進行させる発言
+   b) ポジティブな発言：質問、共感、あるいは会話を前向きな方向に導く発言。
+   c) ネガティブな発言：懸念や問題点を指摘する発言
+
+4. 各発言提案の理由付け：
+   それぞれの発言提案について、なぜその発言が適切か、どのような効果が期待できるかを簡潔に説明します。理由付けの詳細さは、必要に応じて調整します。
+
+5. 発話サジェストの調整：
+   - 会話の雰囲気や目的に応じて、各提案の内容や調子を調整します。
+   - 文化的背景や社会的文脈を考慮し、適切な表現を選択します。
+
+以下に提供される情報を上記の手順に従って分析し、中立的、ポジティブ（質問・共感を含む）、ネガティブな3つの発話サジェストとその理由を生成してください。各サジェストは自然で、会話の流れに沿ったものにしてください：
+
+".to_string();
+        let mut current_type = String::new();
+        let mut current_content = String::new();
+
+        for content in contents.iter() {
+            match content.speech_type.as_str() {
+                "action" => {
+                    if !current_content.is_empty() {
+                        prompt
+                            .push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+                        current_content.clear();
+                    }
+                    if content.action_type == "suggest" {
+                        prompt.push_str(&format!(
+                                ":::assistant\n[query]\n次の発言者のための3つの発話サジェストとその理由を生成してください。\n[answer] {}\n{}\n:::\n",
+                                content.content, content.content_2
+                            ));
+                    } else {
+                        prompt.push_str(&format!(
+                            ":::assistant\n[query]\n{}\n[answer]\n{}\n:::\n",
+                            content.content, content.content_2
+                        ));
+                    }
+                }
+                "speech" | _ => {
+                    let speech_type = if content.speech_type == "speech" {
+                        "transcription"
+                    } else if content.speech_type == "memo" {
+                        "note"
+                    } else {
+                        // "screenshot"
+                        "note"
+                    };
+                    if speech_type != current_type && !current_content.is_empty() {
+                        prompt
+                            .push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+                        current_content.clear();
+                    }
+                    current_type = speech_type.to_string();
+                    current_content.push_str(&content.content);
+                    current_content.push('\n');
+                }
+            }
+        }
+
+        if !current_content.is_empty() {
+            prompt.push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+        }
+
+        messages.push(json!({
+            "role": "system",
+            "content": prompt
+        }));
+        messages.push(json!({
+            "role": "user",
+            "content": "上記の情報を基に、次の発言者のための3つの発話サジェストとその理由を生成してください。"
+        }));
+
+        // for debugging
+        // println!("messages: {:?}", messages);
+
+        let response_format = json!({
+            "type": "json_schema",
+            "json_schema": {
+                "name": "generate_speech_suggestions",
+                "description": "提供されたコンテキストに基づいて、ニュートラル、ポジティブ、ネガティブな発言の提案とその理由を生成します。",
+                "strict": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "neutral": { "$ref": "#/$defs/suggestion" },
+                        "positive": { "$ref": "#/$defs/suggestion" },
+                        "negative": { "$ref": "#/$defs/suggestion" }
+                    },
+                    "required": ["neutral", "positive", "negative"],
+                    "additionalProperties": false,
+                    "$defs": {
+                        "suggestion": {
+                            "type": "object",
+                            "description": "発言の提案とその理由",
+                            "properties": {
+                                "content": {
+                                    "type": "string",
+                                    "description": "提案される発言内容"
+                                },
+                                "reason": {
+                                    "type": "string",
+                                    "description": "その発言を提案する理由"
+                                }
+                            },
+                            "required": ["content", "reason"],
+                            "additionalProperties": false
+                        }
+                    }
+                }
+            }
+        });
+
+        let post_body = json!({
+          "model": "gpt-4o-2024-08-06",
+          "temperature": temperature,
+          "messages": messages,
+          "response_format": response_format
+        });
+
+        let response = client
+            .post(url)
+            .headers(headers)
+            .json(&post_body)
+            .send()
+            .await?;
+
+        let status = response.status();
+        let json_response: Value = response.json().await?;
+
+        let response_text = if status == 200 {
+            json_response["choices"][0]["message"]["content"]
+                .as_str()
+                .unwrap_or("choices[0].message.content field not found")
+                .to_string()
+        } else {
+            json_response.to_string()
+        };
+
+        Ok(response_text)
+    }
+
     pub fn execute(&mut self) {
         if self.token == "" {
             println!("whisper token is empty, so skipping...");
@@ -168,62 +349,112 @@ impl Action {
         let mut is_executing = IS_EXECUTING.lock().unwrap();
         *is_executing = true;
 
-        while let Ok(action) = self.sqlite.select_first_unexecuted_action(self.note_id) {
-            match self
-                .sqlite
-                .select_has_no_permission_of_execute_action(self.note_id, action.id)
-            {
-                Ok(permissions) => {
-                    if permissions.is_empty() || permissions.iter().any(|p| p.model == "whisper") {
-                        match self.sqlite.select_contents_by(self.note_id, action.id) {
-                            Ok(contents) => {
-                                match Self::request_gpt(
-                                    self.model.clone(),
-                                    action.content,
-                                    contents,
-                                    self.token.clone(),
-                                ) {
-                                    Ok(answer) => {
-                                        match self
-                                            .sqlite
-                                            .update_action_content_2(action.id, answer.clone())
+        self.runtime.block_on(async {
+            while let Ok(action) = self.sqlite.select_first_unexecuted_action(self.note_id) {
+                match self
+                    .sqlite
+                    .select_has_no_permission_of_execute_action(self.note_id, action.id)
+                {
+                    Ok(permissions) => {
+                        if permissions.is_empty()
+                            || permissions.iter().any(|p| p.model == "whisper")
+                        {
+                            match self.sqlite.select_contents_by(self.note_id, action.id) {
+                                Ok(contents) => match action.action_type.as_str() {
+                                    "chat" => {
+                                        match Self::request_gpt(
+                                            self.model.clone(),
+                                            action.content,
+                                            contents,
+                                            self.token.clone(),
+                                        )
+                                        .await
                                         {
-                                            Ok(result) => {
-                                                let _ = self
-                                                    .app_handle
-                                                    .emit_all("actionExecuted", result);
+                                            Ok(answer) => {
+                                                match self.sqlite.update_action_content_2(
+                                                    action.id,
+                                                    answer.clone(),
+                                                ) {
+                                                    Ok(result) => {
+                                                        let _ = self
+                                                            .app_handle
+                                                            .emit_all("actionExecuted", result);
+                                                    }
+                                                    Err(e) => {
+                                                        println!(
+                                                            "Error updating action content_2: {:?}",
+                                                            e
+                                                        );
+                                                        break;
+                                                    }
+                                                }
                                             }
-                                            Err(e) => {
+                                            Err(_) => {
                                                 println!(
-                                                    "Error updating action content_2: {:?}",
-                                                    e
+                                                    "gpt api is temporarily failed, so skipping..."
                                                 );
                                                 break;
                                             }
                                         }
                                     }
-                                    Err(_) => {
-                                        println!("gpt api is temporarily failed, so skipping...");
+                                    "suggest" => {
+                                        match Self::request_gpt_suggest(
+                                            contents,
+                                            self.token.clone(),
+                                        )
+                                        .await
+                                        {
+                                            Ok(answer) => {
+                                                match self.sqlite.update_action_content_2(
+                                                    action.id,
+                                                    answer.clone(),
+                                                ) {
+                                                    Ok(result) => {
+                                                        let _ = self
+                                                            .app_handle
+                                                            .emit_all("actionExecuted", result);
+                                                    }
+                                                    Err(e) => {
+                                                        println!(
+                                                            "Error updating action content_2: {:?}",
+                                                            e
+                                                        );
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            Err(_) => {
+                                                println!(
+                                                    "gpt api is temporarily failed, so skipping..."
+                                                );
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    &_ => {
+                                        println!("Unsupported action type, so skipping...");
                                         break;
                                     }
+                                },
+                                Err(e) => {
+                                    println!("Error selecting contents: {:?}", e);
+                                    break;
                                 }
                             }
-                            Err(e) => {
-                                println!("Error selecting contents: {:?}", e);
-                                break;
-                            }
+                        } else {
+                            println!(
+                                "has_no_permission_of_execute_action is false, so skipping..."
+                            );
+                            break;
                         }
-                    } else {
-                        println!("has_no_permission_of_execute_action is false, so skipping...");
+                    }
+                    Err(e) => {
+                        println!("Error checking permissions: {:?}", e);
                         break;
                     }
                 }
-                Err(e) => {
-                    println!("Error checking permissions: {:?}", e);
-                    break;
-                }
             }
-        }
+        });
 
         *is_executing = false;
     }

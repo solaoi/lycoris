@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.21"
+version = "0.9.22"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -43,18 +43,15 @@ core-graphics = "0.24.0"
 objc = "0.2"
 objc-foundation = "0.1"
 objc_id = "0.1"
-ct2rs = { version = "0.7.3", features = ["accelerate"] }
-mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.3.0", features = [
+ct2rs = { version = "0.9.4", features = ["accelerate"] }
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", rev = "32e8945", features = [
     "metal",
 ] }
-# mistralrsの要求がtauriの要求と競合するため、tauriの要求を上書きする
-uuid = "=1.10.0"
 tauri-plugin-clipboard = "1.1.4"
-
-[target.'cfg(target_arch = "x86_64")'.dependencies]
-whisper-rs = { version = "0.11.1", features = ["metal"] }
-[target.'cfg(target_arch = "aarch64")'.dependencies]
-whisper-rs = { version = "0.11.1", features = ["metal", "coreml"] }
+sbv2_core = { version = "0.1.4", features = ["dynamic"] }
+# whisper-rs = { version = "0.11.1", features = ["metal"] }
+# whisper-rs = { git = "https://github.com/tazz4843/whisper-rs.git", rev = "67924ca", features = ["metal"] }
+whisper-rs = { git = "https://github.com/arizhih/whisper-rs.git", branch = "whisper-cpp-1-7-x", features = ["metal"] }
 
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/plugins-workspace"

@@ -14,7 +14,12 @@ const Screenshot = (props: ScreenshotProps): JSX.Element => {
             <div className="w-16 pl-2 flex-none">{date}</div>
             <div className="pr-2 pb-4 ml-5">
                 <Zoom>
-                    <img className="w-2/3" src={convertFileSrc(content)} alt="screenshot" />
+                    <img
+                        alt="screenshot"
+                        src={convertFileSrc(content)}
+                        height="500"
+                        width="500"
+                        />
                 </Zoom>
             </div>
         </div>

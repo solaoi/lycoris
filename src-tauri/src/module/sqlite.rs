@@ -29,12 +29,14 @@ pub struct Updated {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct UnexecutedAction {
     pub id: u16,
+    pub action_type: String,
     pub content: String,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Content {
     pub speech_type: String,
+    pub action_type: String,
     pub content: String,
     pub content_2: String,
 }
@@ -195,13 +197,14 @@ impl Sqlite {
         note_id: u64,
         id: u16,
     ) -> Result<Vec<Content>, rusqlite::Error> {
-        let mut stmt = self.conn.prepare("SELECT speech_type,content,content_2 FROM speeches WHERE note_id = ?1 AND id < ?2 ORDER BY created_at_unixtime ASC").unwrap();
+        let mut stmt = self.conn.prepare("SELECT speech_type,action_type,content,content_2 FROM speeches WHERE note_id = ?1 AND id < ?2 ORDER BY created_at_unixtime ASC").unwrap();
         let results = stmt
             .query_map(params![note_id, id], |row| {
                 Ok(Content {
                     speech_type: row.get_unwrap(0),
-                    content: row.get_unwrap(1),
-                    content_2: row.get(2).unwrap_or_default(),
+                    action_type: row.get(1).unwrap_or_default(),
+                    content: row.get_unwrap(2),
+                    content_2: row.get(3).unwrap_or_default(),
                 })
             })
             .unwrap()
@@ -213,9 +216,9 @@ impl Sqlite {
         &self,
         note_id: u64,
     ) -> Result<UnexecutedAction, rusqlite::Error> {
-        return self.conn.query_row("SELECT id, content FROM speeches WHERE speech_type = \"action\" AND content_2 IS NULL AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1",
+        return self.conn.query_row("SELECT id, action_type, content FROM speeches WHERE speech_type = \"action\" AND content_2 IS NULL AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1",
             params![note_id],
-            |row| Ok(UnexecutedAction{id: row.get_unwrap(0), content: row.get_unwrap(1)}),
+            |row| Ok(UnexecutedAction{id: row.get_unwrap(0), action_type: row.get_unwrap(1), content: row.get_unwrap(2)}),
         );
     }
 

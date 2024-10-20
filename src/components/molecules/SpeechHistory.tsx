@@ -7,13 +7,16 @@ import { Screenshot } from './Screenshot'
 import { MyMarkdown } from './MyMarkdown'
 import 'zenn-content-css';
 import { selectedNoteState } from '../../store/atoms/selectedNoteState'
+import { useState } from 'react'
+import { SuggestCard } from './SuggestCard'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
+    setHistories: (valOrUpdater: SpeechHistoryType[] | ((currVal: SpeechHistoryType[]) => SpeechHistoryType[])) => void
 }
 
 const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
-    const { histories = [] } = props
+    const { histories = [], setHistories } = props
     const filterTarget = useRecoilValue(speechFilterState)
     const filterdHistories = histories.filter(
         h => {
@@ -31,6 +34,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
         }
     );
     const selectedNote = useRecoilValue(selectedNoteState)
+    const [editMemoId, setEditMemoId] = useState<number | null>(null)
 
     return (
         <div>
@@ -50,8 +54,11 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             {c.speech_type === "memo"
                                 && <div className='flex py-1' key={"memo_" + i}>
                                     <div className="w-16 pl-2 flex-none">{date}</div>
-                                    <div className="flex flex-col items-start ml-5" >
-                                        <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
+                                    <div className="flex flex-col items-start ml-5 cursor-pointer hover:border-base-300 border-2 border-transparent rounded-lg"
+                                        onDoubleClick={(e) => { e.preventDefault(); setEditMemoId(i); }}>
+                                        {editMemoId === null || editMemoId !== i ?
+                                            <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
+                                            : <textarea rows={c.content.split("\n").length} value={c.content} autoFocus onBlur={() => { setEditMemoId(null) }} />}
                                     </div>
                                 </div>}
                             {
@@ -60,20 +67,46 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                     <div className="w-16 pl-2 flex-none">{date}</div>
                                     <div className="card w-4/5 bg-base-200 shadow-xl ml-5">
                                         <div className="card-body">
-                                            <div className="chat chat-start">
-                                                <div className="flex chat-bubble bg-white text-slate-500">
-                                                    <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
+                                            {c.action_type === "chat" &&
+                                                <>
+                                                    <div className="chat chat-start">
+                                                        <div className="flex chat-bubble bg-white text-slate-500">
+                                                            <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="chat chat-end">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full">
+                                                            {c.content_2 ?
+                                                                <MyMarkdown content={c.content_2} title={`${selectedNote?.note_title.trim()}_action-end_${i}`} />
+                                                                :
+                                                                <span className="loading loading-dots loading-sm"></span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            }
+                                            {c.action_type === "suggest" &&
+                                                <div className="chat chat-start">
+                                                    <div className="flex chat-bubble bg-white text-slate-500">
+                                                        {c.content_2 ?
+                                                            <SuggestCard
+                                                                id={c.id!}
+                                                                active={c.content}
+                                                                suggestions={c.content_2}
+                                                                update={
+                                                                    (id, active) => {
+                                                                        setHistories((prev) => {
+                                                                            return prev.map(h => {
+                                                                                if (h.id === id) { return { ...h, content: active } } else { return h }
+                                                                            })
+                                                                        })
+                                                                    }} />
+                                                            :
+                                                            <span className="loading loading-dots loading-sm"></span>
+                                                        }
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="chat chat-end">
-                                                <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full">
-                                                    {c.content_2 ?
-                                                        <MyMarkdown content={c.content_2} title={`${selectedNote?.note_title.trim()}_action-end_${i}`} />
-                                                        :
-                                                        <span className="loading loading-dots loading-sm"></span>
-                                                    }
-                                                </div>
-                                            </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>

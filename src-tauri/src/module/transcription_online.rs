@@ -146,16 +146,64 @@ impl TranscriptionOnline {
             "ja"
         };
         let part_language = multipart::Part::text(language);
+        let prompt = if is_translate {
+            "Hello, welcome to my lecture."
+        } else {
+            if language == "en" {
+                "Hello, welcome to my lecture."
+            } else if language == "zh" {
+                "你好，欢迎来到我的讲座。"
+            } else if language == "ko" {
+                "안녕하세요, 제 강의에 오신 것을 환영합니다."
+            } else if language == "fr" {
+                "Bonjour, bienvenue à mon cours."
+            } else if language == "de" {
+                "Hallo, willkommen zu meiner Vorlesung."
+            } else if language == "ru" {
+                "Привет, добро пожаловать на мою лекцию."
+            } else if language == "es" {
+                "Hola, bienvenido a mi conferencia."
+            } else if language == "pt" {
+                "Olá, bem-vindo à minha palestra."
+            } else if language == "tr" {
+                "Merhaba, dersime hoş geldiniz."
+            } else if language == "vi" {
+                "Xin chào, chào mừng bạn đến với bài giảng của tôi."
+            } else if language == "it" {
+                "Ciao, benvenuto alla mia conferenza."
+            } else if language == "nl" {
+                "Hallo, welkom bij mijn lezing."
+            } else if language == "ca" {
+                "Hola, benvingut a la meva conferència."
+            } else if language == "uk" {
+                "Привіт, ласкаво просимо на мою лекцію."
+            } else if language == "sv" {
+                "Hej, välkommen till min föreläsning."
+            } else if language == "hi" {
+                "नमस्ते, मेरे व्याख्यान में आपका स्वागत है।"
+            } else if language == "cs" {
+                "Ahoj, vítejte na mé přednášce."
+            } else if language == "pl" {
+                "Cześć, witaj na mojej wykładzie."
+            } else if language == "ja" {
+                "こんにちは、私の講義へようこそ。"
+            } else {
+                "Hello, welcome to my lecture."
+            }
+        };
+        let part_prompt = multipart::Part::text(prompt);
 
         let form = if is_translate {
             multipart::Form::new()
                 .part("file", part_file)
                 .part("model", part_model)
+                .part("prompt", part_prompt)
         } else {
             multipart::Form::new()
                 .part("file", part_file)
                 .part("model", part_model)
                 .part("language", part_language)
+                .part("prompt", part_prompt)
         };
 
         let response = client

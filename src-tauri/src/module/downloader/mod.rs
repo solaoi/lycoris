@@ -1,4 +1,5 @@
-pub mod whisper;
+pub mod model_dir;
+pub mod sbv2;
+pub mod sbv2_voice;
 pub mod vosk;
-pub mod fugumt;
-pub mod honyaku13b;
+pub mod whisper;

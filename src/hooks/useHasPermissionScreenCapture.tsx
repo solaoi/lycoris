@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
+import { useRecoilState } from 'recoil';
+import { hasPermissionState } from '../store/atoms/hasPermissionState';
 
 const useHasPermissionScreenCapture = (forceReload: boolean | null = null) => {
-  const [hasPermission, setPermission] = useState(false);
+  const [hasPermission, setPermission] = useRecoilState(hasPermissionState);
   useEffect(() => {
     if (forceReload !== null && !hasPermission) {
       invoke('has_screen_capture_permission_command').then(trusted => setPermission(trusted as boolean))

@@ -14,7 +14,7 @@ const SettingTemplate = (): JSX.Element => {
             <p className="w-[12rem]">システム ロール</p>
             <div className="flex flex-col w-full">
                 <div className="flex flex-col ml-2.5 mb-2">
-                    <p className="font-medium mb-2">AIへの役割設定</p>
+                    <p className="font-medium mb-2">アシスタントへの役割設定</p>
                     <p>ユーザーの入力を、{"{{question}}"}</p>
                     <p>CLI Resourceを、{"{{resource}}"}、として利用可能</p>
                 </div>

@@ -26,8 +26,15 @@ export default class DB {
 
   public async updateSpeech(speech: SpeechHistoryType) {
     await this.db.execute(
-      'UPDATE speeches SET speech_type = $1, created_at_unixtime = $2, content = $3, wav = $4, model = $5, model_description = $6, note_id = $7 WHERE id = $8',
-      [speech.speech_type, speech.created_at_unixtime, speech.content, speech.wav, speech.model, speech.model_description, speech.note_id, speech.id]
+      'UPDATE speeches SET speech_type = $1, action_type = $2, created_at_unixtime = $3, content = $4, wav = $5, model = $6, model_description = $7, note_id = $8 WHERE id = $9',
+      [speech.speech_type, speech.action_type, speech.created_at_unixtime, speech.content, speech.wav, speech.model, speech.model_description, speech.note_id, speech.id]
+    )
+  }
+
+  public async updateSuggest(id: number, active: string) {
+    await this.db.execute(
+      'UPDATE speeches SET content = $1 WHERE id = $2',
+      [active, id]
     )
   }
 
@@ -53,8 +60,8 @@ export default class DB {
 
   public async saveSpeech(speech: SpeechHistoryType): Promise<SpeechHistoryType> {
     const { lastInsertId } = await this.db.execute(
-      'INSERT INTO speeches(speech_type, created_at_unixtime, content, wav, model, model_description, note_id) VALUES($1, $2, $3, $4, $5, $6, $7)',
-      [speech.speech_type, speech.created_at_unixtime, speech.content, speech.wav, speech.model, speech.model_description, speech.note_id]
+      'INSERT INTO speeches(speech_type, action_type, created_at_unixtime, content, wav, model, model_description, note_id) VALUES($1, $2, $3, $4, $5, $6, $7, $8)',
+      [speech.speech_type, speech.action_type, speech.created_at_unixtime, speech.content, speech.wav, speech.model, speech.model_description, speech.note_id]
     )
 
     return {

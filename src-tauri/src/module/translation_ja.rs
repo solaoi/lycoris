@@ -1,7 +1,7 @@
 use super::{sqlite::Sqlite, transcriber::Transcriber};
 
 use crossbeam_channel::Receiver;
-use ct2rs::{config::Config, sentencepiece::Tokenizer, TranslationOptions, Translator};
+use ct2rs::{tokenizers::auto::Tokenizer, Config, TranslationOptions, Translator};
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use std::sync::Mutex;
@@ -36,7 +36,6 @@ impl TranslationJa {
             ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
             translator: Translator::new(
                 &model_path,
-                Tokenizer::new(&model_path).unwrap(),
                 &Config::default(),
             )
             .unwrap(),
@@ -154,6 +153,7 @@ impl TranslationJa {
                             beam_size: 5,
                             ..Default::default()
                         },
+                        None
                     )
                     .unwrap();
                 let mut translated: Vec<String> = vec!["".to_string()];

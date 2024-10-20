@@ -6,7 +6,7 @@ import { ProgressType } from '../../type/progress.type'
 import { modelHonyaku13BDownloadedState } from '../../store/atoms/modelHonyaku13BDownloadedState'
 
 const ModelDownloadHonyaku13BProgress = (): JSX.Element => {
-    const modelType = "honyaku13b-q4-0"
+    const modelType = "honyaku-13b"
     const setDownloadedModel = useSetRecoilState(modelHonyaku13BDownloadedState)
     const [downloadingModels, setDownloadingModels] = useRecoilState(modelHonyaku13BDownloadingState)
     const [progress, setProgress] = useState<ProgressType>({

@@ -3,12 +3,15 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, GGUFLoaderBuilder,
-    GGUFSpecificConfig, MistralRs, MistralRsBuilder, ModelDType, NormalRequest, Request,
-    RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource,
+    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, MistralRs, MistralRsBuilder,
+    ModelDType, NormalLoaderBuilder, NormalLoaderType, NormalRequest, NormalSpecificConfig,
+    Request, RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource,
 };
 use samplerate_rs::{convert, ConverterType};
-use std::sync::{Arc, Mutex};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex},
+};
 use tauri::{AppHandle, Manager};
 use tokio::sync::mpsc::channel;
 use whisper_rs::WhisperContext;
@@ -30,24 +33,30 @@ impl TranslationJaHigh {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
             .path_resolver()
-            .resolve_resource(format!("resources/honyaku13b-q4-0"))
+            .resolve_resource(format!("resources/honyaku-13b"))
             .unwrap()
             .to_string_lossy()
             .to_string();
-        let loader = GGUFLoaderBuilder::new(
-            Some(format!("{}/chat_templates_llama2.json", model_path)),
-            None,
-            model_path,
-            vec!["aixsatoshi-Honyaku-13b-Q4_0.gguf".to_string()],
-            // vec!["aixsatoshi-Honyaku-13b-IQ4_XS.gguf".to_string()],
-            GGUFSpecificConfig {
+        let loader = NormalLoaderBuilder::new(
+            NormalSpecificConfig {
+                use_flash_attn: false,
                 prompt_batchsize: None,
                 topology: None,
+                organization: Default::default(),
+                write_uqff: None,
+                from_uqff: Some(PathBuf::from(format!(
+                    "{}/Honyaku-13b-q4_0.uqff",
+                    model_path
+                ))),
             },
+            None,
+            None,
+            Some(model_path),
         )
-        .build();
-        let pipeline = tokio::task::block_in_place(|| {
-            loader.load_model_from_hf(
+        .build(Some(NormalLoaderType::Llama))
+        .unwrap();
+        let pipeline = loader
+            .load_model_from_hf(
                 None,
                 TokenSource::None,
                 &ModelDType::Auto,
@@ -57,8 +66,7 @@ impl TranslationJaHigh {
                 None,
                 None,
             )
-        })
-        .unwrap();
+            .unwrap();
 
         TranslationJaHigh {
             app_handle,
@@ -70,6 +78,7 @@ impl TranslationJaHigh {
                     method: DefaultSchedulerMethod::Fixed(5.try_into().unwrap()),
                 },
             )
+            .with_no_prefix_cache(true)
             .build(),
             speaker_language,
             note_id,
@@ -177,14 +186,14 @@ impl TranslationJaHigh {
 
                 let result_on_whisper = converted.join("");
                 let prompt = format!("<english>: {} <NL>\n\n<japanese>: ", result_on_whisper);
-                let (tx, mut rx) = channel(10_000);
+                let (tx, mut rx) = channel(1);
                 let request = Request::Normal(NormalRequest {
                     messages: RequestMessage::Completion {
                         text: prompt,
                         echo_prompt: false,
                         best_of: 1,
                     },
-                    sampling_params: SamplingParams::default(),
+                    sampling_params: SamplingParams::deterministic(),
                     response: tx,
                     return_logprobs: false,
                     is_streaming: false,
