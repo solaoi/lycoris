@@ -2,8 +2,11 @@
 # will have compiled files and executables
 /target/
 
-/resources/*/*
-!.gitkeep
+/resources/*
+!/resources/style-bert-vits/
+/resources/style-bert-vits/*
+!/resources/style-bert-vits/models/
+/resources/style-bert-vits/models/*
+!/resources/style-bert-vits/models/.gitkeep
 !COPYING
 !NOTICE
-!ggml-metal.metal
