@@ -8823,16 +8823,16 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.13.1"
-source = "git+https://github.com/arizhih/whisper-rs.git?branch=whisper-cpp-1-7-x#9f56a7350b31ce09f6e95be928beeea837684a59"
+version = "0.12.1"
+source = "git+https://github.com/tazz4843/whisper-rs.git?rev=67924ca#67924ca473d1b17140bc7bd3d04fed3a779608d3"
 dependencies = [
  "whisper-rs-sys",
 ]
 
 [[package]]
 name = "whisper-rs-sys"
-version = "0.11.1"
-source = "git+https://github.com/arizhih/whisper-rs.git?branch=whisper-cpp-1-7-x#9f56a7350b31ce09f6e95be928beeea837684a59"
+version = "0.10.1"
+source = "git+https://github.com/tazz4843/whisper-rs.git?rev=67924ca#67924ca473d1b17140bc7bd3d04fed3a779608d3"
 dependencies = [
  "bindgen",
  "cfg-if",

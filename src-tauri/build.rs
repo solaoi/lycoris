@@ -5,11 +5,6 @@ fn env_var(var: &str) -> String {
 }
 
 fn main() {
-    // for whisper-rs
-    println!("cargo:rustc-flags=-lc++");
-    // println!("cargo:rustc-link-lib=dylib=c++");
-    println!("cargo:rustc-link-lib=framework=Accelerate");
-
     // for vosk
     let lib_path = PathBuf::from(env_var("CARGO_MANIFEST_DIR")).join("lib");
     println!(
