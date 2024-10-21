@@ -50,8 +50,7 @@ mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", rev = "32e
 tauri-plugin-clipboard = "1.1.4"
 sbv2_core = { version = "0.1.4", features = ["dynamic"] }
 # whisper-rs = { version = "0.11.1", features = ["metal"] }
-# whisper-rs = { git = "https://github.com/tazz4843/whisper-rs.git", rev = "67924ca", features = ["metal"] }
-whisper-rs = { git = "https://github.com/arizhih/whisper-rs.git", branch = "whisper-cpp-1-7-x", features = ["metal"] }
+whisper-rs = { git = "https://github.com/tazz4843/whisper-rs.git", rev = "67924ca", features = ["metal"] }
 
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/plugins-workspace"
