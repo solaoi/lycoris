@@ -99,57 +99,57 @@ impl Transcriber {
         if transcription_accuracy.starts_with("large-distil.bilingual") {
             params.set_translate(true);
             if language == "en" {
-                params.set_initial_prompt("こんにちは、私の講義へようこそ。");
+                params.set_initial_prompt("これは日本語の音声です。適切な句読点を用いて正確に書き起こしてください。");
                 params.set_language(Some("ja"));
             } else if language == "ja" {
-                params.set_initial_prompt("Hello, welcome to my lecture.");
+                params.set_initial_prompt("This is an audio in English. Please transcribe it accurately with appropriate punctuation.");
                 params.set_language(Some("en"));
             }
         } else {
             params.set_language(Some(language));
             if transcription_accuracy.ends_with("en") {
                 params.set_translate(true);
-                params.set_initial_prompt("Hello, welcome to my lecture.");
+                params.set_initial_prompt("This is an audio in English. Please transcribe it accurately with appropriate punctuation.");
             } else {
                 params.set_translate(false);
                 if language == "en" {
-                    params.set_initial_prompt("Hello, welcome to my lecture.");
+                    params.set_initial_prompt("This is an audio in English. Please transcribe it accurately with appropriate punctuation.");
                 } else if language == "zh" {
-                    params.set_initial_prompt("你好，欢迎来到我的讲座。");
+                    params.set_initial_prompt("这是中文音频。请使用适当的标点符号准确记录。");
                 } else if language == "ko" {
-                    params.set_initial_prompt("안녕하세요, 제 강의에 오신 것을 환영합니다.");
+                    params.set_initial_prompt("이것은 한국어 음성입니다. 적절한 문장부호를 사용하여 정확하게 받아써 주세요.");
                 } else if language == "fr" {
-                    params.set_initial_prompt("Bonjour, bienvenue à mon cours.");
+                    params.set_initial_prompt("Ceci est un audio en français. Veuillez le transcrire avec précision en utilisant la ponctuation appropriée.");
                 } else if language == "de" {
-                    params.set_initial_prompt("Hallo, willkommen zu meiner Vorlesung.");
+                    params.set_initial_prompt("Dies ist eine deutsche Audioaufnahme. Bitte transkribieren Sie sie genau mit der entsprechenden Interpunktion.");
                 } else if language == "ru" {
-                    params.set_initial_prompt("Привет, добро пожаловать на мою лекцию.");
+                    params.set_initial_prompt("Это аудио на русском языке. Пожалуйста, сделайте точную расшифровку с правильной пунктуацией.");
                 } else if language == "es" {
-                    params.set_initial_prompt("Hola, bienvenido a mi conferencia.");
+                    params.set_initial_prompt("Este es un audio en español. Por favor, transcríbalo con precisión usando la puntuación adecuada.");
                 } else if language == "pt" {
-                    params.set_initial_prompt("Olá, bem-vindo à minha palestra.");
+                    params.set_initial_prompt("Este é um áudio em português. Por favor, transcreva-o com precisão usando a pontuação adequada.");
                 } else if language == "tr" {
-                    params.set_initial_prompt("Merhaba, dersime hoş geldiniz.");
+                    params.set_initial_prompt("Bu bir Türkçe ses kaydıdır. Lütfen uygun noktalama işaretlerini kullanarak doğru bir şekilde yazıya dökün.");
                 } else if language == "vi" {
-                    params.set_initial_prompt("Xin chào, chào mừng bạn đến với bài giảng của tôi.");
+                    params.set_initial_prompt("Đây là bản ghi âm tiếng Việt. Vui lòng ghi chép chính xác với dấu câu phù hợp.");
                 } else if language == "it" {
-                    params.set_initial_prompt("Ciao, benvenuto alla mia conferenza.");
+                    params.set_initial_prompt("Questo è un audio in italiano. Si prega di trascriverlo accuratamente con la punteggiatura appropriata.");
                 } else if language == "nl" {
-                    params.set_initial_prompt("Hallo, welkom bij mijn lezing.");
+                    params.set_initial_prompt("Dit is een Nederlandse audio. Gelieve deze nauwkeurig te transcriberen met de juiste interpunctie.");
                 } else if language == "ca" {
-                    params.set_initial_prompt("Hola, benvingut a la meva conferència.");
+                    params.set_initial_prompt("Aquest és un àudio en català. Si us plau, transcriviu-lo amb precisió utilitzant la puntuació adequada.");
                 } else if language == "uk" {
-                    params.set_initial_prompt("Привіт, ласкаво просимо на мою лекцію.");
+                    params.set_initial_prompt("Це аудіо українською мовою. Будь ласка, зробіть точний транскрипт з правильною пунктуацією.");
                 } else if language == "sv" {
-                    params.set_initial_prompt("Hej, välkommen till min föreläsning.");
+                    params.set_initial_prompt("Detta är ett svenskt ljudklipp. Var god transkribera det noggrant med lämplig interpunktion.");
                 } else if language == "hi" {
-                    params.set_initial_prompt("नमस्ते, मेरे व्याख्यान में आपका स्वागत है।");
+                    params.set_initial_prompt("यह हिंदी में ऑडियो है। कृपया उचित विराम चिह्नों का उपयोग करते हुए सटीक प्रतिलेखन करें।");
                 } else if language == "cs" {
-                    params.set_initial_prompt("Ahoj, vítejte na mé přednášce.");
+                    params.set_initial_prompt("Toto je audio v češtině. Prosím, přepište jej přesně s použitím vhodné interpunkce.");
                 } else if language == "pl" {
-                    params.set_initial_prompt("Cześć, witaj na mojej wykładzie.");
+                    params.set_initial_prompt("To jest nagranie w języku polskim. Proszę dokonać dokładnej transkrypcji z odpowiednią interpunkcją.");
                 } else if language == "ja" {
-                    params.set_initial_prompt("こんにちは、私の講義へようこそ。");
+                    params.set_initial_prompt("これは日本語の音声です。適切な句読点を用いて正確に書き起こしてください。");
                 }
             }
         }
