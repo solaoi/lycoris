@@ -73,6 +73,20 @@ impl Transcription {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 
             let spec = reader.spec();
+            if (reader.duration() / spec.sample_rate as u32) < 1 {
+                println!("input is too short, so skipping...");
+                let mut updated = self
+                    .sqlite
+                    .update_model_vosk_to_whisper(speech.id, "".to_string())
+                    .unwrap();
+                updated.content = speech.content;
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
+                return Ok(());
+            }
+
             let mut data =
                 Vec::with_capacity((spec.channels as usize) * (reader.duration() as usize));
             match (spec.bits_per_sample, spec.sample_format) {
@@ -148,7 +162,16 @@ impl Transcription {
                         .unwrap();
                 }
             } else {
-                println!("whisper is temporally failed, so skipping...")
+                println!("whisper is temporally failed, so skipping...");
+                let mut updated = self
+                    .sqlite
+                    .update_model_vosk_to_whisper(speech.id, "".to_string())
+                    .unwrap();
+                updated.content = speech.content;
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
             }
 
             Ok(())
