@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, Fragment, useRef } from "react";
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { transcriptionAccuracyState } from "../../store/atoms/transcriptionAccuracyState";
 import { modelWhisperDownloadedState } from "../../store/atoms/modelWhisperDownloadedState";
@@ -128,7 +128,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
                 <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent">
-                    <li key="transcription-accuracy_off">
+                    <li>
                         <label className="label inline-flex active:!bg-inherit">
                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={transcriptionAccuracy === "off"} />
                             <a className="grow">オフ</a>
@@ -142,7 +142,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                         {downloadedModels
                             .filter(m => transcriptionModels.includes(m))
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`transcription-accuracy-item-0_${i}`}>
                                     {i === 0 ?
                                         <p className="text-sm ml-2 my-2 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
@@ -151,13 +151,13 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                             </svg>
                                             文字起こし（汎用）
                                         </p> : ""}
-                                    <li key={"transcription-accuracy_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {downloadedModels
@@ -180,7 +180,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                 return [...a, c]
                             }, [])
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`transcription-accuracy-item-1_${i}`}>
                                     {i === 0 ?
                                         <p className="text-sm ml-2 my-2 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
@@ -189,19 +189,19 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                             </svg>
                                             文字起こし（言語特化）
                                         </p> : ""}
-                                    <li key={"transcription-accuracy_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {(speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) && downloadedModels
                             .filter(m => m === "large-distil.bilingual")
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`transcription-accuracy-item-2_${i}`}>
                                     {i === 0 ?
                                         <p className="text-sm ml-2 my-2 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
@@ -210,19 +210,19 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                             </svg>
                                             翻訳（英語⇒日本語）
                                         </p> : ""}
-                                    <li key={"transcription-accuracy_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja")) && downloadedModels
                             .filter(m => m === "large-distil.bilingual")
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`transcription-accuracy-item-3_${i}`}>
                                     {i === 0 ?
                                         <p className="text-sm ml-2 my-2 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
@@ -231,20 +231,20 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                             </svg>
                                             翻訳（日本語⇒英語）
                                         </p> : ""}
-                                    <li key={"transcription-accuracy_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {!(speakerLanguage?.startsWith("en-us") || speakerLanguage?.startsWith("small-en-us")) && downloadedModels
                             .filter(m => transcriptionModels.includes(m))
                             .map(m => `${m}-translate-to-en`)
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`transcription-accuracy-item-4_${i}`}>
                                     {i === 0 ?
                                         <p className="text-sm ml-2 my-2 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-1">
@@ -253,13 +253,13 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                             </svg>
                                             翻訳（18言語⇒英語）
                                         </p> : ""}
-                                    <li key={"transcription-accuracy_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value={model} checked={model === transcriptionAccuracy} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {downloadedModels.includes("large")
@@ -301,7 +301,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                                     翻訳（日本語⇒英語）
                                 </p>
                                 {downloadedModelsFugumtJaEn.length > 0 && <>
-                                    <li key="transcription-accuracy_fugumt-en-ja">
+                                    <li key="transcription-accuracy_fugumt-ja-en">
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="fugumt-ja-en" checked={"fugumt-ja-en" === transcriptionAccuracy} />
                                             <a className="grow">英語パック（標準）</a>
