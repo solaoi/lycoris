@@ -82,3 +82,11 @@ jobs:
         releaseDraft: true
         prerelease: false
         args: --target aarch64-apple-darwin
+
+  action-timeline:
+    needs:
+      - release
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Kesin11/actions-timeline@v2
