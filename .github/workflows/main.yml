@@ -6,6 +6,11 @@ on:
       - main
 
 jobs:
+  generateTOC:
+    name: TOC Generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/toc-generator@v4
   contrib-readme-job:
     runs-on: ubuntu-latest
     name: A job to automate contrib in readme
