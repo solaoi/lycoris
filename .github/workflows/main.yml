@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: technote-space/toc-generator@v4
+        with:
+          TOC_TITLE: "## Table of Contents"
   contrib-readme-job:
     runs-on: ubuntu-latest
     name: A job to automate contrib in readme
