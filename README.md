@@ -1,4 +1,4 @@
-# Lycoris
+# 📝 Lycoris: Real-time Speech Recognition & AI Note-taking App
 
 [![license](https://img.shields.io/github/license/solaoi/lycoris)](https://github.com/solaoi/lycoris/blob/main/LICENSE)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/solaoi/lycoris)](https://github.com/solaoi/lycoris/releases)
@@ -6,13 +6,15 @@
 [![PIXIV FANBOX](https://img.shields.io/badge/%E5%AF%84%E4%BB%98-PIXIV%20FANBOX-ff69b4)](https://solaoi.fanbox.cc/)
 ![MacOs](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
 
-外部データ通信無しで、リアルタイム音声認識で文字起こしを行う音声ノートアプリケーションです。
-
 <div align="center">
   <a href="https://github.com/solaoi/lycoris">
     <img width="600" alt="lycoris" src="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png">
   </a>
 </div>
+
+**Lycoris** is a feature-rich, user-friendly app for macOS, designed to enhance your note-taking experience with real-time speech recognition, transcription, and translation capabilities. With offline and online modes, Lycoris balances flexibility with privacy.
+
+> ⚠️ **Note**: Currently, Lycoris is optimized for Japanese users. While it aims to support transcription and translation in 19 languages in the future, the current version may have limited functionality in other languages.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -32,71 +34,76 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## 対応環境
+## ✨ Key Features
 
-- macOS 13 Ventura以降
+- 🎙️ **Real-time Speech Recognition**: 
+   - **Offline Mode**:
+      - **Vosk for Real-time Transcription**: Lycoris uses **Vosk** to quickly generate initial real-time transcriptions, which are then refined using **Whisper** for enhanced accuracy and detail.
+      - **Whisper for Detailed Transcription**: The primary transcription model for offline mode, **Whisper** delivers high-quality, multi-language transcription. For Japanese-only use cases, **Kotoba-Whisper** is available as an alternative for optimized Japanese transcription.
+   - **Online Mode**:
+      - **OpenAI Whisper API**: For users seeking cloud-based transcription, Lycoris integrates with the **OpenAI Whisper API**, allowing for high-quality transcriptions with cloud resources.
+      - **AmiVoice API**: Additionally, users can choose **amiVoice** for specialized Japanese transcription via API key.
 
-## インストール
+- 🌐 **Advanced Translation**:
+   - **Whisper + FuguMT**: Supports translation from **18 languages into Japanese**. Whisper transcribes any of the 18 languages into English, and **FuguMT** then translates the English transcription into Japanese, ensuring high accuracy.
+   - **Kotoba-Whisper-Bilingual**: Specialized for direct bi-directional translation between Japanese and English.
 
-[Releases](https://github.com/solaoi/lycoris/releases)から最新のものをインストールしてください。
+- 📄 **Flexible Note-Taking with Markdown Support**: Notes support **Markdown formatting**, allowing for organized and visually enhanced note-taking.
 
-## データ保存場所
+- 💬 **Contextual Speech Suggestions**:
+   - **Sentiment-Based Suggestions**: Generate contextual responses in Neutral, Positive, and Negative tones with just a click.
+   - **Text-to-Speech Capabilities**: Use **Style-BERT-VITS2 JP-Extra** to convert suggested responses into natural-sounding speech.
 
-> $HOME/Library/Application\ Support/blog.aota.Lycoris
+- 🤖 **Real-Time ChatGPT Integration**:
+   - Interact with transcriptions or summaries in real-time using ChatGPT for tasks like summarization and contextual insights. This feature helps streamline discussions or capture essential points without losing context.
 
-## ユースケース
+- 📶 **Offline & Online Modes**: Fully functional offline with local models to ensure privacy; online mode available with API integration for cloud-based services like OpenAI Whisper API.
 
-### Zoomで議事録をとる
+## 💻 System Requirements
 
-## 開発用設定
+- **Operating System**: macOS 13 Ventura or later.
+- **Processor**: Compatible with Apple Silicon (M1, M2, M3) and Intel processors.
+- **Memory**: Minimum 8GB RAM recommended for optimal performance.
 
-### 必要なモデルのダウンロード
+## ⚙️ Installation
 
-```
-# vosk
-VOSK_MODEL_VERSION=0.22
-curl -LO https://alphacephei.com/vosk/models/vosk-model-ja-$VOSK_MODEL_VERSION.zip
-mkdir ./src-tauri/resources
-mv vosk-model-ja-$VOSK_MODEL_VERSION.zip ./src-tauri/resources
-unzip ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip -d ./src-tauri/resources
-rm ./src-tauri/resources/vosk-model-ja-$VOSK_MODEL_VERSION.zip
+1. **Download**: Obtain the latest version of Lycoris from the [GitHub Releases page](https://github.com/solaoi/lycoris/releases).
+   - **For Intel processors**: Download the `.dmg` file ending in `x64.dmg`.
+   - **For Apple Silicon processors**: Download the `.dmg` file ending in `aarch64.dmg`.
+   - *Note*: Only the version number in the file name changes with each release.
+2. **Install**: After downloading the `.dmg` file, double-click it to open. You’ll see the Lycoris application and the Applications folder. Simply drag the Lycoris app into the Applications folder.
+3. **Permissions**: On first launch, grant necessary permissions for microphone and screen recording as prompted.
 
-# whisper
-curl -LO https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v1.bin
-mv ggml-large-v1.bin ./src-tauri/resources/ggml-large.bin
-```
+## 🚀 Usage Guide
 
-### voskのライブラリ更新
+1. **Download Language Packs**:
+   - Open the app and go to settings (⚙️).
+   - Download language packs for speech recognition as needed.
+   
+2. **Configure API Key** (for online features):
+   - In settings, enter your API keys for services like amiVoice or OpenAI Whisper API to enable extended transcription and AI features.
 
-```
-VOSK_VERSION=0.3.42
-curl -LO https://github.com/alphacep/vosk-api/releases/download/v$VOSK_VERSION/vosk-osx-$VOSK_VERSION.zip
-mv vosk-osx-$VOSK_VERSION.zip ./src-tauri/lib
-unzip ./src-tauri/lib/vosk-osx-$VOSK_VERSION.zip -d ./src-tauri/lib
-rm ./src-tauri/lib/vosk-osx-$VOSK_VERSION.zip
-// ライブラリ自身のPathを確認
-otool -D ./src-tauri/lib/libvosk.dylib
-// ライブラリ自身のPathを変更
-install_name_tool -id @rpath/libvosk.dylib ./src-tauri/lib/libvosk.dylib
-// 署名を確認
-codesign -dvvv ./src-tauri/lib/libvosk.dylib
-// 公証用に署名を追加
-codesign -fs 'キーチェーンアクセスの該当鍵（Developer ID Application: ...）' ./src-tauri/lib/libvosk.dylib
-```
+3. **Create a Note**:
+   - Click "Add Note" next to the search bar.
+   - Set the speaker’s language, transcription method, and audio source.
+   - Click "Start Recording" to begin capturing notes in real time!
+   - With OpenAI’s online feature, you can also receive **sentiment-based response suggestions** (Neutral, Positive, Negative) for discussions, and use **real-time ChatGPT integration** to summarize or discuss the transcribed content directly.
 
-### 開発者モードで起動
+## 🙌 Support & Contributions
 
-```
-yarn tauri dev
-```
+Lycoris is available for free on BOOTH to reach a wide audience. Download the appropriate version for your macOS processor:
 
-### 開発者向けインストール
+- **For Apple Silicon users**: [Download on BOOTH](https://booth.pm/ja/items/4675430)
+- **For Intel users**: [Download on BOOTH](https://solaoi.booth.pm/items/4669259)
 
-```
-yarn tauri build
-```
+If you’d like to support further development:
 
-## Contributors
+- **For Japanese users**: Contributions are welcome via [Fanbox](https://solaoi.fanbox.cc/) or by making a voluntary purchase on BOOTH.
+- **For international users**: You can support Lycoris by becoming a sponsor on [GitHub Sponsors](https://github.com/sponsors/solaoi).
+
+Whether you’re a developer interested in contributing or a user wanting to support this project, every contribution helps Lycoris grow and improve for all!
+
+## 👥 Contributors
 
 <!-- readme: contributors -start -->
 <table>
@@ -117,3 +124,5 @@ yarn tauri build
     </td></tr>
 </table>
 <!-- readme: contributors -end -->
+
+Your support keeps Lycoris accessible and continually improving. Thank you for helping us make smarter, AI-powered note-taking a reality! 📒✨
