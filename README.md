@@ -26,7 +26,7 @@
 - [🚀 Usage Guide](#-usage-guide)
 - [🙌 Support & Contributions](#-support--contributions)
 - [👥 Contributors](#-contributors)
-- [Star History](#star-history)
+- [📈 Star History](#-star-history)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
