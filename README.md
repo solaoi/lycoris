@@ -32,6 +32,8 @@
 
 ## ✨ Key Features
 
+![key-features](https://github.com/user-attachments/assets/5a118e9f-d84a-404b-9912-b11b02a901d9)
+
 - 🎙️ **Real-time Speech Recognition**: 
    - **Offline Mode**:
       - **Vosk for Real-time Transcription**: Lycoris uses **Vosk** to quickly generate initial real-time transcriptions, which are then refined using **Whisper** for enhanced accuracy and detail.
