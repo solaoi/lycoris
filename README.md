@@ -120,4 +120,8 @@ Whether you’re a developer interested in contributing or a user wanting to sup
 </table>
 <!-- readme: contributors -end -->
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=solaoi/lycoris&type=Date)](https://star-history.com/#solaoi/lycoris&Date)
+
 Your support keeps Lycoris accessible and continually improving. Thank you for helping us make smarter, AI-powered note-taking a reality! 📒✨
