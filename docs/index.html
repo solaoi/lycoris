@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Lycoris - AIパワードのリアルタイム音声認識＆ノートテイキングアプリ。19言語対応の翻訳機能とMarkdown編集で、効率的なノート作成を実現。">
+    <meta name="keywords" content="Lycoris, 音声認識, AI, ノートテイキング, 翻訳, マークダウン, macOS">
+    <meta name="author" content="solaoi">
+    <meta property="og:title" content="Lycoris - AI Note-taking Revolution">
+    <meta property="og:description" content="AIパワードのリアルタイム音声認識＆ノートテイキングアプリ">
+    <meta property="og:image"
+        content="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png">
+    <meta property="og:url" content="https://solaoi.github.io/lycoris">
+    <title>Lycoris - AI Note-taking Revolution</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        @keyframes blob {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            25% {
+                transform: translate(20px, -50px) scale(1.1);
+            }
+
+            50% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            75% {
+                transform: translate(-40px, -20px) scale(1.05);
+            }
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .gradient-text {
+            background: linear-gradient(120deg, #ff69b4, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .delay-150 {
+            animation-delay: 150ms;
+        }
+
+        .app-image-container {
+            position: relative;
+            z-index: 10;
+            transition: transform 500ms;
+        }
+
+        .app-image-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: lg;
+            margin: 0 auto;
+        }
+
+        .glass-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            z-index: 2;
+            -webkit-mask-image: linear-gradient(45deg,
+                    transparent 50%,
+                    rgba(0, 0, 0, 0.4) 60%,
+                    rgba(0, 0, 0, 0.7) 70%,
+                    black 80%,
+                    rgba(0, 0, 0, 0.7) 90%,
+                    rgba(0, 0, 0, 0.4) 100%,
+                    transparent 110%);
+            mask-image: linear-gradient(45deg,
+                    transparent 50%,
+                    rgba(0, 0, 0, 0.4) 60%,
+                    rgba(0, 0, 0, 0.7) 70%,
+                    black 80%,
+                    rgba(0, 0, 0, 0.7) 90%,
+                    rgba(0, 0, 0, 0.4) 100%,
+                    transparent 110%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .main-image {
+            width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 500ms ease;
+        }
+
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .delay-300 {
+            animation-delay: 300ms;
+        }
+
+        .floating-icon {
+            position: absolute;
+            animation: float 6s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        .feature-card {
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .hero-pattern {
+            background-image: radial-gradient(#ff69b4 0.5px, transparent 0.5px);
+            background-size: 10px 10px;
+            opacity: 0.1;
+            will-change: transform;
+        }
+
+        .workflow-animation {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .download-button {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 1023px) {
+            .floating-icon {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Hero Section -->
+    <div
+        class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-50 to-pink-50">
+        <div class="hero-pattern absolute inset-0"></div>
+
+        <!-- Floating Elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="floating-icon" style="top: 10%; left: 45%;">
+                <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                    <span class="text-2xl">🎙️</span>
+                </div>
+            </div>
+            <div class="floating-icon delay-150" style="top: 20%; right: 15%;">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="text-xl">🌐</span>
+                </div>
+            </div>
+            <div class="floating-icon delay-300" style="bottom: 30%; left: 60%;">
+                <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="text-2xl">💭</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-6 relative z-10 max-w-5xl">
+            <div class="flex flex-col lg:flex-row items-center gap-10">
+                <div class="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
+                    <!-- Badge -->
+                    <div class="inline-block my-6">
+                        <span class="bg-pink-100 text-pink-800 text-sm font-medium px-4 py-2 rounded-full">
+                            macOS 13+ 対応
+                        </span>
+                    </div>
+
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6">
+                        <span class="gradient-text">Lycoris</span>
+                        <span class="block text-3xl lg:text-4xl mt-3 text-gray-700">AI Note-taking Revolution</span>
+                    </h1>
+
+                    <p class="text-xl lg:text-2xl text-gray-600 mb-8 leading-relaxed">
+                        あなたのノートテイキングを革新する。
+                        <span class="block mt-2 text-lg text-gray-500" style="word-break: keep-all;">
+                            リアルタイム音声認識・19言語対応の翻訳機能で、
+                            <br class="hidden md:inline">新しいノート体験を。
+                        </span>
+                    </p>
+
+                    <!-- Feature Highlights -->
+                    <div class="grid grid-cols-2 gap-4 mb-8 max-w-lg mx-auto lg:mx-0">
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <div class="text-pink-500 font-bold mb-1">オフライン対応</div>
+                            <div class="text-sm text-gray-600">プライバシー重視の設計</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <div class="text-pink-500 font-bold mb-1">19言語対応</div>
+                            <div class="text-sm text-gray-600">高精度な文字起こし・翻訳機能</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                        <a href="https://github.com/solaoi/lycoris" target="_blank" rel="noopener noreferrer"
+                            class="group bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-all transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                                GitHubで見る
+                            </div>
+                        </a>
+                        <a href="#download"
+                            class="group bg-gradient-to-r from-pink-500 to-pink-600 text-white px-8 py-3 rounded-lg transition-all transform hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                今すぐダウンロード
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:w-1/2 relative">
+                    <!-- Main App Image -->
+                    <div class="app-image-container">
+                        <div class="app-image-wrapper">
+                            <img src="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png"
+                                alt="Lycoris App Interface" class="main-image" />
+                            <div class="glass-overlay"></div>
+                            <div class="glass-overlay-right"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 max-w-4xl mx-auto">
+                <div class="bg-white/80 backdrop-blur-sm p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-pink-500">19</div>
+                    <div class="text-sm text-gray-600">対応言語</div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-pink-500">100%</div>
+                    <div class="text-sm text-gray-600">オフライン対応</div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-pink-500">300+</div>
+                    <div class="text-sm text-gray-600">ダウンロード</div>
+                </div>
+                <div class="bg-white/80 backdrop-blur-sm p-4 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-pink-500">50+</div>
+                    <div class="text-sm text-gray-600">高評価</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Workflow Animation Section -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">
+                シームレスなワークフロー
+            </h2>
+            <div class="workflow-animation">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+                    <defs>
+                        <path id="wave" d="M0,0 Q20,-15 40,0 T80,0" fill="none" stroke="#ff69b4" stroke-width="3">
+                            <animate attributeName="d"
+                                values="M0,0 Q20,-15 40,0 T80,0;M0,0 Q20,15 40,0 T80,0;M0,0 Q20,-15 40,0 T80,0" dur="2s"
+                                repeatCount="indefinite" />
+                        </path>
+
+                        <linearGradient id="aiAssistGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#bbdefb">
+                                <animate attributeName="stop-color" values="#bbdefb;#90caf9;#bbdefb" dur="3s"
+                                    repeatCount="indefinite" />
+                            </stop>
+                            <stop offset="100%" stop-color="#e3f2fd">
+                                <animate attributeName="stop-color" values="#e3f2fd;#bbdefb;#e3f2fd" dur="3s"
+                                    repeatCount="indefinite" />
+                            </stop>
+                        </linearGradient>
+
+                        <linearGradient id="noteGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffffff" />
+                            <stop offset="100%" stop-color="#f8f9fa" />
+                        </linearGradient>
+
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                            <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+
+                        <linearGradient id="skeletonGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#e0e0e0">
+                                <animate attributeName="offset" values="-1; 1" dur="2s" repeatCount="indefinite" />
+                            </stop>
+                            <stop offset="50%" stop-color="#eeeeee">
+                                <animate attributeName="offset" values="0; 2" dur="2s" repeatCount="indefinite" />
+                            </stop>
+                            <stop offset="100%" stop-color="#e0e0e0">
+                                <animate attributeName="offset" values="1; 3" dur="2s" repeatCount="indefinite" />
+                            </stop>
+                        </linearGradient>
+                    </defs>
+
+                    <rect width="800" height="200" fill="#fff" />
+
+                    <g transform="translate(200,100)">
+                        <circle cx="0" cy="0" r="30" fill="none" stroke="#ff69b4" stroke-width="2" opacity="0.3"
+                            filter="url(#glow)">
+                            <animate attributeName="r" values="30;35;30" dur="2s" repeatCount="indefinite" />
+                            <animate attributeName="opacity" values="0.3;0.1;0.3" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle cx="0" cy="0" r="24" fill="#ff69b4" />
+                        <path d="M-5,-10 h10 v14 a5,5 0 0,1 -10,0 z" fill="white" />
+                        <path d="M-7,7 a7,3 0 0,0 14,0" stroke="white" fill="none" stroke-width="2" />
+                        <path d="M0,10 v5" stroke="white" fill="none" stroke-width="2" />
+                        <path d="M-5,15 h10" stroke="white" fill="none" stroke-width="2" />
+                        <use href="#wave" transform="translate(40,0)" />
+                    </g>
+
+                    <g transform="translate(400,100)">
+                        <rect width="160" height="130" x="-80" y="-65" fill="url(#noteGradient)" rx="5" stroke="#e6e6e6"
+                            stroke-width="1" />
+                        <line x1="-70" y1="-20" x2="60" y2="-20" stroke="#e6e6e6" stroke-width="1" />
+                        <line x1="-70" y1="0" x2="60" y2="0" stroke="#e6e6e6" stroke-width="1" />
+                        <line x1="-70" y1="20" x2="60" y2="20" stroke="#e6e6e6" stroke-width="1" />
+                        <line x1="-70" y1="40" x2="60" y2="40" stroke="#e6e6e6" stroke-width="1" />
+
+                        <text x="-70" y="-45" font-family="system-ui" font-size="12" fill="#666">Meeting Notes</text>
+                        <text x="-65" y="-25" font-family="system-ui" font-size="10" fill="#666"># Heading</text>
+                        <text x="-65" y="-5" font-family="system-ui" font-size="10" fill="#666">* List item</text>
+
+                        <g>
+                            <rect x="-65" y="5" width="115" height="8" rx="4" fill="url(#skeletonGradient)"
+                                opacity="0.7">
+                                <animate attributeName="width" values="20;115;115" dur="2s" begin="0s" repeatCount="1"
+                                    fill="freeze" />
+                            </rect>
+                            <rect x="-65" y="25" width="90" height="8" rx="4" fill="url(#skeletonGradient)"
+                                opacity="0.7">
+                                <animate attributeName="width" values="0;90;90" dur="2s" begin="0.5s" repeatCount="1"
+                                    fill="freeze" />
+                            </rect>
+                        </g>
+                    </g>
+
+                    <g transform="translate(650,100)">
+                        <rect width="200" height="180" x="-100" y="-90" fill="url(#aiAssistGradient)" rx="10"
+                            opacity="0.1">
+                            <animate attributeName="opacity" values="0.1;0.2;0.1" dur="3s" repeatCount="indefinite" />
+                        </rect>
+
+                        <rect width="200" height="180" x="-100" y="-90" fill="none" stroke="#2196f3" stroke-width="1"
+                            rx="10" />
+
+                        <g transform="translate(-65,-60)">
+                            <rect width="130" height="50" rx="5" fill="white" stroke="#2196f3" stroke-width="1" />
+                            <text x="10" y="20" font-family="system-ui" font-size="11" fill="#2196f3">🌐
+                                Translation</text>
+                            <text x="10" y="38" font-family="system-ui" font-size="11" fill="#2196f3">💭
+                                Suggestions</text>
+                        </g>
+
+                        <g transform="translate(-65,5)">
+                            <rect width="130" height="60" rx="5" fill="white" stroke="#2196f3" stroke-width="1" />
+                            <text x="10" y="18" font-family="system-ui" font-size="11" fill="#2196f3">🤖 Chat
+                                Insights</text>
+
+                            <path
+                                d="M10,30 h55 a4,4 0 0 1 4,4 v6 a4,4 0 0 1 -4,4 h-45 l-5,5 v-5 h-5 a4,4 0 0 1 -4,-4 v-6 a4,4 0 0 1 4,-4"
+                                fill="#f1f8ff" stroke="#2196f3" stroke-width="1">
+                                <animate attributeName="opacity" values="0;1;1;1;1;0;0;0;0;1;1;1" dur="12s"
+                                    repeatCount="indefinite" />
+                            </path>
+
+                            <path
+                                d="M45,39 h55 a4,4 0 0 1 4,4 v6 a4,4 0 0 1 -4,4 h-45 l-5,5 v-5 h-5 a4,4 0 0 1 -4,-4 v-6 a4,4 0 0 1 4,-4"
+                                fill="#e3f2fd" stroke="#2196f3" stroke-width="1">
+                                <animate attributeName="opacity" values="0;0;0;1;1;1;0;0;0;0;0;0" dur="12s"
+                                    repeatCount="indefinite" />
+                            </path>
+                        </g>
+                    </g>
+
+                    <g stroke="#2196f3" stroke-width="1.5" fill="none">
+                        <path d="M240,100 H320" stroke-dasharray="5,5">
+                            <animate attributeName="stroke-dashoffset" values="10;0" dur="1s"
+                                repeatCount="indefinite" />
+                        </path>
+                        <path d="M480,100 H550" stroke-dasharray="5,5">
+                            <animate attributeName="stroke-dashoffset" values="10;0" dur="1s"
+                                repeatCount="indefinite" />
+                        </path>
+                    </g>
+                </svg>
+            </div>
+            <div class="text-center mt-8">
+                <p class="text-lg text-gray-600">
+                    音声認識 → ノート作成 → AI支援による強化
+                </p>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gradient-to-r from-pink-50 to-pink-100">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 gradient-text">
+                主要機能
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">🎙️</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">リアルタイム音声認識</h3>
+                    <p class="text-gray-600">
+                        オフライン・オンラインモードに対応。
+                        Voskによる高速な認識とWhisperによる高精度な文字起こしを実現。
+                    </p>
+                </div>
+
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">🌐</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">高度な翻訳機能</h3>
+                    <p class="text-gray-600">
+                        18言語から日本語への翻訳に対応。
+                        WhisperとFuguMTの組み合わせで高精度な翻訳を実現。
+                    </p>
+                </div>
+
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">📝</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Markdown対応</h3>
+                    <p class="text-gray-600">
+                        整理された見やすいノートを作成。
+                        Markdownフォーマットで柔軟な記述が可能。
+                    </p>
+                </div>
+
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">💬</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">感情に基づく応答提案</h3>
+                    <p class="text-gray-600">
+                        ニュートラル、ポジティブ、ネガティブな
+                        トーンの応答をワンクリックで生成。
+                    </p>
+                </div>
+
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">🤖</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">ChatGPT連携</h3>
+                    <p class="text-gray-600">
+                        リアルタイムで文字起こしした内容を
+                        要約や分析が可能。会話の文脈を保ったまま処理。
+                    </p>
+                </div>
+
+                <div class="feature-card p-6 bg-white rounded-xl shadow-lg">
+                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                        <span class="text-3xl">📶</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">オフライン対応</h3>
+                    <p class="text-gray-600">
+                        プライバシーを重視した完全オフライン動作。
+                        必要に応じてクラウドサービスも利用可能。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Download Section -->
+    <section class="py-20 bg-white" id="download">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-8 gradient-text">
+                今すぐ始める
+            </h2>
+            <p class="text-xl text-gray-600 mb-12">
+                macOS 13 Ventura以降に対応。<br>
+                Apple Silicon・Intelプロセッサどちらでも動作します。
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <a href="https://booth.pm/ja/items/4675430" target="_blank" rel="noopener noreferrer"
+                    class="download-button bg-pink-500 text-white px-8 py-4 rounded-lg hover:bg-pink-600 transition-colors">
+                    Apple Silicon版ダウンロード
+                </a>
+                <a href="https://solaoi.booth.pm/items/4669259" target="_blank" rel="noopener noreferrer"
+                    class="download-button bg-gray-800 text-white px-8 py-4 rounded-lg hover:bg-gray-900 transition-colors">
+                    Intel版ダウンロード
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h2 class="text-2xl font-bold gradient-text">Lycoris</h2>
+                </div>
+                <div class="flex gap-8">
+                    <a href="https://github.com/solaoi/lycoris" class="hover:text-pink-400 transition-colors"
+                        target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a href="https://solaoi.fanbox.cc/" class="hover:text-pink-400 transition-colors" target="_blank"
+                        rel="noopener noreferrer">Fanbox</a>
+                    <a href="https://github.com/sponsors/solaoi" target="_blank" rel="noopener noreferrer"
+                        class="hover:text-pink-400 transition-colors">Sponsor</a>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-400">
+                <p>&copy; 2024 Lycoris. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
