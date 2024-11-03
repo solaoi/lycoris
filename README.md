@@ -1,4 +1,14 @@
-# 📝 Lycoris: Real-time Speech Recognition & AI Note-taking App
+<div align="center">
+    <img width="600" alt="lycoris" src="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png">
+</div>
+
+<div align="center">
+
+# Real-time Speech Recognition & AI Note-taking App
+
+</div>
+
+<div align="center">
 
 [![license](https://img.shields.io/github/license/solaoi/lycoris)](https://github.com/solaoi/lycoris/blob/main/LICENSE)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/solaoi/lycoris)](https://github.com/solaoi/lycoris/releases)
@@ -6,15 +16,44 @@
 [![PIXIV FANBOX](https://img.shields.io/badge/%E5%AF%84%E4%BB%98-PIXIV%20FANBOX-ff69b4)](https://solaoi.fanbox.cc/)
 ![MacOs](https://shields.io/badge/MacOS--9cf?logo=Apple&style=social)
 
-<div align="center">
-  <a href="https://github.com/solaoi/lycoris">
-    <img width="600" alt="lycoris" src="https://user-images.githubusercontent.com/46414076/227781834-2eeaea6f-fae6-4607-8862-4ca74a4416b9.png">
-  </a>
 </div>
 
 **Lycoris** is a feature-rich, user-friendly app for macOS, designed to enhance your note-taking experience with real-time speech recognition, transcription, and translation capabilities. With offline and online modes, Lycoris balances flexibility with privacy.
 
 > ⚠️ **Note**: Currently, Lycoris is optimized for Japanese users. While it aims to support transcription and translation in 19 languages in the future, the current version may have limited functionality in other languages.
+
+<p align="center">
+📌 <a href="https://solaoi.github.io/lycoris/" target="_blank" rel="noopener noreferrer">Introduction</a>
+</p>
+
+<div align="center">
+
+![日本語](https://img.shields.io/badge/日本語-d9d9d9)
+![English](https://img.shields.io/badge/English-d9d9d9)
+![中文](https://img.shields.io/badge/中文-d9d9d9)
+![한국어](https://img.shields.io/badge/한국어-d9d9d9)
+![Français](https://img.shields.io/badge/Français-d9d9d9)
+![Deutsch](https://img.shields.io/badge/Deutsch-d9d9d9)
+![Русский](https://img.shields.io/badge/Русский-d9d9d9)
+![Español](https://img.shields.io/badge/Español-d9d9d9)
+![Português](https://img.shields.io/badge/Português-d9d9d9)
+![Türkçe](https://img.shields.io/badge/Türkçe-d9d9d9)
+
+</div>
+
+<div align="center">
+
+![Tiếng Việt](https://img.shields.io/badge/Tiếng_Việt-d9d9d9)
+![Italiano](https://img.shields.io/badge/Italiano-d9d9d9)
+![Nederlands](https://img.shields.io/badge/Nederlands-d9d9d9)
+![Català](https://img.shields.io/badge/Català-d9d9d9)
+![Українська](https://img.shields.io/badge/Українська-d9d9d9)
+![Svenska](https://img.shields.io/badge/Svenska-d9d9d9)
+![हिंदी(हिन्दी)](https://img.shields.io/badge/हिंदी(हिन्दी)-d9d9d9)
+![Čeština](https://img.shields.io/badge/Čeština-d9d9d9)
+![Polski](https://img.shields.io/badge/Polski-d9d9d9)
+
+</div>
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
