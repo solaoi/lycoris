@@ -23,7 +23,7 @@
 > ⚠️ **Note**: Currently, Lycoris is optimized for Japanese users. While it aims to support transcription and translation in 19 languages in the future, the current version may have limited functionality in other languages.
 
 <p align="center">
-📌 <a href="https://solaoi.github.io/lycoris/" target="_blank" rel="noopener noreferrer">Introduction</a>
+📌 <a href="https://solaoi.github.io/lycoris/">Introduction</a>
 </p>
 
 <div align="center">
