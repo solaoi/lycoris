@@ -147,48 +147,48 @@ impl TranscriptionOnline {
         };
         let part_language = multipart::Part::text(language);
         let prompt = if is_translate {
-            "Hello, welcome to my lecture."
+            "This is an audio in English. Please transcribe it accurately with appropriate punctuation."
         } else {
             if language == "en" {
-                "Hello, welcome to my lecture."
+                "This is an audio in English. Please transcribe it accurately with appropriate punctuation."
             } else if language == "zh" {
-                "你好，欢迎来到我的讲座。"
+                "这是中文音频。请使用适当的标点符号准确记录。"
             } else if language == "ko" {
-                "안녕하세요, 제 강의에 오신 것을 환영합니다."
+                "이것은 한국어 음성입니다. 적절한 문장부호를 사용하여 정확하게 받아써 주세요."
             } else if language == "fr" {
-                "Bonjour, bienvenue à mon cours."
+                "Ceci est un audio en français. Veuillez le transcrire avec précision en utilisant la ponctuation appropriée."
             } else if language == "de" {
-                "Hallo, willkommen zu meiner Vorlesung."
+                "Dies ist eine deutsche Audioaufnahme. Bitte transkribieren Sie sie genau mit der entsprechenden Interpunktion."
             } else if language == "ru" {
-                "Привет, добро пожаловать на мою лекцию."
+                "Это аудио на русском языке. Пожалуйста, сделайте точную расшифровку с правильной пунктуацией."
             } else if language == "es" {
-                "Hola, bienvenido a mi conferencia."
+                "Este es un audio en español. Por favor, transcríbalo con precisión usando la puntuación adecuada."
             } else if language == "pt" {
-                "Olá, bem-vindo à minha palestra."
+                "Este é um áudio em português. Por favor, transcreva-o com precisão usando a pontuação adequada."
             } else if language == "tr" {
-                "Merhaba, dersime hoş geldiniz."
+                "Bu bir Türkçe ses kaydıdır. Lütfen uygun noktalama işaretlerini kullanarak doğru bir şekilde yazıya dökün."
             } else if language == "vi" {
-                "Xin chào, chào mừng bạn đến với bài giảng của tôi."
+                "Đây là bản ghi âm tiếng Việt. Vui lòng ghi chép chính xác với dấu câu phù hợp."
             } else if language == "it" {
-                "Ciao, benvenuto alla mia conferenza."
+                "Questo è un audio in italiano. Si prega di trascriverlo accuratamente con la punteggiatura appropriata."
             } else if language == "nl" {
-                "Hallo, welkom bij mijn lezing."
+                "Dit is een Nederlandse audio. Gelieve deze nauwkeurig te transcriberen met de juiste interpunctie."
             } else if language == "ca" {
-                "Hola, benvingut a la meva conferència."
+                "Aquest és un àudio en català. Si us plau, transcriviu-lo amb precisió utilitzant la puntuació adequada."
             } else if language == "uk" {
-                "Привіт, ласкаво просимо на мою лекцію."
+                "Це аудіо українською мовою. Будь ласка, зробіть точний транскрипт з правильною пунктуацією."
             } else if language == "sv" {
-                "Hej, välkommen till min föreläsning."
+                "Detta är ett svenskt ljudklipp. Var god transkribera det noggrant med lämplig interpunktion."
             } else if language == "hi" {
-                "नमस्ते, मेरे व्याख्यान में आपका स्वागत है।"
+                "यह हिंदी में ऑडियो है। कृपया उचित विराम चिह्नों का उपयोग करते हुए सटीक प्रतिलेखन करें।"
             } else if language == "cs" {
-                "Ahoj, vítejte na mé přednášce."
+                "Toto je audio v češtině. Prosím, přepište jej přesně s použitím vhodné interpunkce."
             } else if language == "pl" {
-                "Cześć, witaj na mojej wykładzie."
+                "To jest nagranie w języku polskim. Proszę dokonać dokładnej transkrypcji z odpowiednią interpunkcją."
             } else if language == "ja" {
-                "こんにちは、私の講義へようこそ。"
+                "これは日本語の音声です。適切な句読点を用いて正確に書き起こしてください。"
             } else {
-                "Hello, welcome to my lecture."
+                "This is an audio in English. Please transcribe it accurately with appropriate punctuation."
             }
         };
         let part_prompt = multipart::Part::text(prompt);
@@ -226,6 +226,26 @@ impl TranscriptionOnline {
     fn convert(&mut self) -> Result<(), rusqlite::Error> {
         let vosk_speech = self.sqlite.select_vosk(self.note_id);
         return vosk_speech.and_then(|speech| {
+            let reader = hound::WavReader::open(speech.wav.clone()).unwrap();
+
+            let spec = reader.spec();
+            let sample_rate = spec.sample_rate;
+            let is_too_short = (reader.duration() / sample_rate as u32) < 1;
+
+            if is_too_short {
+                println!("input is too short, so skipping...");
+                let mut updated = self
+                    .sqlite
+                    .update_model_vosk_to_whisper(speech.id, "".to_string())
+                    .unwrap();
+                updated.content = speech.content;
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
+                return Ok(());
+            }
+
             let result = Self::request(
                 self.speaker_language.clone(),
                 speech.wav,

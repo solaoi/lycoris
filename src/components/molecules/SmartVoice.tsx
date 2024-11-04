@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, Fragment, useEffect, useRef, useState } from "react";
 import { useRecoilState } from 'recoil';
 import { lengthScaleState } from "../../store/atoms/smartVoices/lengthScaleState";
 import { sdpRatioState } from "../../store/atoms/smartVoices/sdpRatioState";
@@ -88,9 +88,9 @@ const SmartVoice = (): JSX.Element => {
                 style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
                 <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent" style={selectedModel !== "off" || (isLoading && selectedModel === "off") ? { paddingBottom: "0.5rem" } : {}}>
-                    <li key="transcription-accuracy_off">
+                    <li key="smart-voice_off">
                         <label className="label inline-flex active:!bg-inherit">
-                            <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="off" checked={selectedModel === "off"} />
+                            <input type="radio" name="voice-option" className="radio radio-accent" onChange={change} value="off" checked={selectedModel === "off"} />
                             <a className="grow">オフ</a>
                         </label>
                     </li>
@@ -101,20 +101,20 @@ const SmartVoice = (): JSX.Element => {
                                 return a.localeCompare(b, 'ja');
                             })
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`smart-voice-item_${i}`}>
                                     {i === 0 && <>
                                         <hr className="my-2" />
                                         <div className="flex justify-center sticky top-0 z-10 w-full mb-2" style={{ backgroundColor: "hsl(24 33% 97%)" }}>
                                             <p className="text-xs text-gray-400">デフォルト</p>
                                         </div>
                                     </>}
-                                    <li key={"smart-voice_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input disabled={isLoading} type="radio" name="voice-option" className="radio radio-accent" onChange={change} value={model} checked={model === selectedModel} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                         {models
@@ -123,20 +123,20 @@ const SmartVoice = (): JSX.Element => {
                                 return a.localeCompare(b, 'ja');
                             })
                             .map((model, i) => (
-                                <>
+                                <Fragment key={`smart-voice-custom-item_${i}`}>
                                     {i === 0 && <>
                                         <hr className="my-2" />
                                         <div className="flex justify-center sticky top-0 z-10 w-full mb-2" style={{ backgroundColor: "hsl(24 33% 97%)" }}>
                                             <p className="text-xs text-gray-400">カスタマイズ</p>
                                         </div>
                                     </>}
-                                    <li key={"smart-voice-custom_" + i}>
+                                    <li>
                                         <label className="label inline-flex active:!bg-inherit">
                                             <input disabled={isLoading} type="radio" name="voice-option" className="radio radio-accent" onChange={change} value={model} checked={model === selectedModel} />
                                             <a className="grow">{mapModel(model)}</a>
                                         </label>
                                     </li>
-                                </>
+                                </Fragment>
                             ))
                         }
                     </>}

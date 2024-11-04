@@ -24,7 +24,8 @@ use tauri::{api::path::data_dir, AppHandle, Manager};
 
 use super::{
     chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
-    transcription_online, translation_en, translation_ja, translation_ja_high, writer::Writer,
+    transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high,
+    writer::Writer,
 };
 
 pub struct Record {
@@ -248,6 +249,15 @@ impl Record {
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }
+                            } else if transcription_accuracy_clone.starts_with("reazonspeech") {
+                                transcription_ja::initialize_transcription_ja(
+                                    app_handle_clone,
+                                    note_id,
+                                );
+                                let mut lock = transcription_ja::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             } else {
                                 transcription::initialize_transcription(
                                     app_handle_clone,
@@ -284,6 +294,7 @@ impl Record {
         if !is_no_transcription {
             stop_convert_tx.send(()).unwrap();
             transcription::drop_transcription();
+            transcription_ja::drop_transcription_ja();
             translation_en::drop_translation_en();
             translation_ja::drop_translation_ja();
             translation_ja_high::drop_translation_ja_high();

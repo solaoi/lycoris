@@ -74,100 +74,106 @@ impl TranslationEn {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 
             let spec = reader.spec();
-            let mut data =
-                Vec::with_capacity((spec.channels as usize) * (reader.duration() as usize));
-            match (spec.bits_per_sample, spec.sample_format) {
-                (16, SampleFormat::Int) => {
-                    for sample in reader.samples::<i16>() {
-                        data.push((sample.unwrap() as f32) / (0x7fffi32 as f32));
-                    }
-                }
-                (24, SampleFormat::Int) => {
-                    for sample in reader.samples::<i32>() {
-                        let val = (sample.unwrap() as f32) / (0x00ff_ffffi32 as f32);
-                        data.push(val);
-                    }
-                }
-                (32, SampleFormat::Int) => {
-                    for sample in reader.samples::<i32>() {
-                        data.push((sample.unwrap() as f32) / (0x7fff_ffffi32 as f32));
-                    }
-                }
-                (32, SampleFormat::Float) => {
-                    for sample in reader.samples::<f32>() {
-                        data.push(sample.unwrap());
-                    }
-                }
-                _ => panic!(
-                    "Tried to read file but there was a problem: {:?}",
-                    hound::Error::Unsupported
-                ),
-            }
-            let data = if spec.channels != 1 {
-                whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
+            let sample_rate = spec.sample_rate;
+            let is_too_short = (reader.duration() / sample_rate as u32) < 1;
+
+            let target = if is_too_short {
+                println!("input is too short, so vosk transcription using...");
+                speech.content
             } else {
-                data
+                let mut data =
+                    Vec::with_capacity((spec.channels as usize) * (reader.duration() as usize));
+                match (spec.bits_per_sample, spec.sample_format) {
+                    (16, SampleFormat::Int) => {
+                        for sample in reader.samples::<i16>() {
+                            data.push((sample.unwrap() as f32) / (0x7fffi32 as f32));
+                        }
+                    }
+                    (24, SampleFormat::Int) => {
+                        for sample in reader.samples::<i32>() {
+                            let val = (sample.unwrap() as f32) / (0x00ff_ffffi32 as f32);
+                            data.push(val);
+                        }
+                    }
+                    (32, SampleFormat::Int) => {
+                        for sample in reader.samples::<i32>() {
+                            data.push((sample.unwrap() as f32) / (0x7fff_ffffi32 as f32));
+                        }
+                    }
+                    (32, SampleFormat::Float) => {
+                        for sample in reader.samples::<f32>() {
+                            data.push(sample.unwrap());
+                        }
+                    }
+                    _ => panic!(
+                        "Tried to read file but there was a problem: {:?}",
+                        hound::Error::Unsupported
+                    ),
+                }
+                let data = if spec.channels != 1 {
+                    whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
+                } else {
+                    data
+                };
+                let audio_data = convert(
+                    spec.sample_rate,
+                    16000,
+                    1,
+                    ConverterType::SincBestQuality,
+                    &data,
+                )
+                .unwrap();
+
+                let mut state = self.ctx.create_state().expect("failed to create state");
+                let result = state.full(
+                    Transcriber::build_params("ja".to_string(), "large".to_string()),
+                    &audio_data[..],
+                );
+                if result.is_ok() {
+                    let num_segments = state
+                        .full_n_segments()
+                        .expect("failed to get number of segments");
+                    let mut converted: Vec<String> = vec!["".to_string()];
+                    for i in 0..num_segments {
+                        let segment = state.full_get_segment_text(i);
+                        if segment.is_ok() {
+                            converted.push(segment.unwrap().to_string());
+                        };
+                    }
+                    converted.join("")
+                } else {
+                    println!("whisper is temporally failed, so vosk transcription using....");
+                    speech.content
+                }
             };
-            let audio_data = convert(
-                spec.sample_rate,
-                16000,
-                1,
-                ConverterType::SincBestQuality,
-                &data,
-            )
-            .unwrap();
 
-            let mut state = self.ctx.create_state().expect("failed to create state");
-            let result = state.full(
-                Transcriber::build_params(
-                    "ja".to_string(),
-                    "large".to_string(),
-                ),
-                &audio_data[..],
-            );
-            if result.is_ok() {
-                let num_segments = state
-                    .full_n_segments()
-                    .expect("failed to get number of segments");
-                let mut converted: Vec<String> = vec!["".to_string()];
-                for i in 0..num_segments {
-                    let segment = state.full_get_segment_text(i);
-                    if segment.is_ok() {
-                        converted.push(segment.unwrap().to_string());
-                    };
-                }
+            let sources: Vec<String> = target.lines().map(String::from).collect();
+            let res: Vec<(String, Option<f32>)> = self
+                .translator
+                .translate_batch(
+                    &sources,
+                    &TranslationOptions {
+                        beam_size: 5,
+                        ..Default::default()
+                    },
+                    None,
+                )
+                .unwrap();
+            let mut translated: Vec<String> = vec!["".to_string()];
+            for (r, _) in res {
+                translated.push(r);
+            }
 
-                let result_on_whisper = converted.join("");
-                let sources: Vec<String> = result_on_whisper.lines().map(String::from).collect();
-                let res: Vec<(String, Option<f32>)> = self
-                    .translator
-                    .translate_batch(
-                        &sources,
-                        &TranslationOptions {
-                            beam_size: 5,
-                            ..Default::default()
-                        },
-                        None,
-                    )
+            let updated = self
+                .sqlite
+                .update_model_vosk_to_whisper(speech.id, translated.join(""));
+
+            let updated = updated.unwrap();
+            if updated.content != "" {
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
                     .unwrap();
-                let mut translated: Vec<String> = vec!["".to_string()];
-                for (r, _) in res {
-                    translated.push(r);
-                }
-
-                let updated = self
-                    .sqlite
-                    .update_model_vosk_to_whisper(speech.id, translated.join(""));
-
-                let updated = updated.unwrap();
-                if updated.content != "" {
-                    self.app_handle
-                        .clone()
-                        .emit_all("finalTextConverted", updated)
-                        .unwrap();
-                }
-            } else {
-                println!("whisper is temporally failed, so skipping...")
             }
 
             Ok(())

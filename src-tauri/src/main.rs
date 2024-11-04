@@ -4,13 +4,17 @@
 )]
 
 use tauri::{
-    http::{HttpRange, ResponseBuilder},
-    AppHandle, Manager, State, Window,
+    http::{HttpRange, ResponseBuilder}, AppHandle, Manager, PathResolver, State, Window
 };
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 use std::{
-    cmp::min, env, io::{Read, Seek, SeekFrom}, path::PathBuf, str::FromStr, sync::{Arc, Mutex}
+    cmp::min,
+    env,
+    io::{Read, Seek, SeekFrom},
+    path::PathBuf,
+    str::FromStr,
+    sync::{Arc, Mutex},
 };
 
 use crossbeam_channel::{unbounded, Sender};
@@ -37,6 +41,7 @@ use module::{
     synthesizer::{self, Synthesizer},
     transcription::{TraceCompletion, Transcription},
     transcription_amivoice::TranscriptionAmivoice,
+    transcription_ja::TranscriptionJa,
     transcription_online::TranscriptionOnline,
     translation_en::TranslationEn,
     translation_ja::TranslationJa,
@@ -134,6 +139,14 @@ fn download_honyaku13b_model_command(app_handle: AppHandle) {
 }
 
 #[tauri::command]
+fn download_reazonspeech_model_command(app_handle: AppHandle) {
+    std::thread::spawn(move || {
+        let dl = ModelDirDownloader::new(app_handle);
+        dl.download("reazonspeech", "downloadReazonSpeechProgress")
+    });
+}
+
+#[tauri::command]
 fn download_sbv2_command(app_handle: AppHandle) {
     std::thread::spawn(move || {
         let dl = StyleBertVits2ModelDownloader::new(app_handle);
@@ -165,7 +178,11 @@ fn list_app_windows_command(app_name: String) -> Vec<AppWindow> {
 }
 
 #[tauri::command]
-async fn screenshot_command(app_handle: AppHandle, window_id: u32, note_id: u64) -> Result<bool, ()> {
+async fn screenshot_command(
+    app_handle: AppHandle,
+    window_id: u32,
+    note_id: u64,
+) -> Result<bool, ()> {
     let result = screenshot::screenshot(window_id, note_id, app_handle);
     Ok(result)
 }
@@ -305,6 +322,9 @@ fn start_trace_command(
             let mut translation_ja_high =
                 TranslationJaHigh::new(app_handle, speaker_language, note_id);
             translation_ja_high.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("reazonspeech") {
+            let mut transcription_ja = TranscriptionJa::new(app_handle, note_id);
+            transcription_ja.start(stop_convert_rx, true);
         } else {
             let mut transcription = Transcription::new(
                 app_handle,
@@ -327,6 +347,17 @@ fn stop_trace_command(state: State<'_, RecordState>, app_handle: AppHandle) {
                 .unwrap();
         })
     }
+}
+
+fn set_ort_env(path_resolver: &PathResolver) {
+    let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
+
+    let dynamic_library_path = path_resolver
+        .resolve_resource(format!("lib/{}", dynamic_library_name))
+        .expect("fail to resolve dynamic library path");
+
+    println!("dynamic lib: {}", dynamic_library_path.display());
+    std::env::set_var("ORT_DYLIB_PATH", dynamic_library_path);
 }
 
 fn main() {
@@ -387,6 +418,10 @@ fn main() {
                 )
                 .build(),
         )
+        .setup(|app| {
+            set_ort_env(&app.path_resolver());
+            Ok(())
+        })
         .manage(RecordState(Default::default()))
         .manage(SynthesizeState(Default::default()))
         .invoke_handler(tauri::generate_handler![
@@ -400,6 +435,7 @@ fn main() {
             download_fugumt_enja_model_command,
             download_fugumt_jaen_model_command,
             download_honyaku13b_model_command,
+            download_reazonspeech_model_command,
             download_sbv2_command,
             download_sbv2_model_command,
             list_devices_command,

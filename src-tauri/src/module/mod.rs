@@ -15,6 +15,7 @@ mod sqlite;
 pub mod synthesizer;
 mod transcriber;
 pub mod transcription;
+pub mod transcription_ja;
 pub mod transcription_amivoice;
 pub mod transcription_online;
 pub mod translation_en;
