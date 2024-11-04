@@ -11,15 +11,19 @@ fn main() {
         "cargo:rustc-link-search=native={}",
         lib_path.to_str().unwrap()
     );
+
     let is_release = match &*env_var("PROFILE") {
         "debug" => false,
         "release" => true,
         _ => panic!("unexpected value set for PROFILE env"),
     };
+
+    // for vosk and sbv2_core
     if is_release {
         println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/../Resources/lib");
     } else {
         println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/../../lib");
     }
+
     tauri_build::build()
 }

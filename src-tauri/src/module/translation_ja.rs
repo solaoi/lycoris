@@ -34,11 +34,7 @@ impl TranslationJa {
             app_handle,
             sqlite: Sqlite::new(),
             ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
-            translator: Translator::new(
-                &model_path,
-                &Config::default(),
-            )
-            .unwrap(),
+            translator: Translator::new(&model_path, &Config::default()).unwrap(),
             speaker_language,
             note_id,
         }
@@ -80,100 +76,126 @@ impl TranslationJa {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 
             let spec = reader.spec();
-            let mut data =
-                Vec::with_capacity((spec.channels as usize) * (reader.duration() as usize));
-            match (spec.bits_per_sample, spec.sample_format) {
-                (16, SampleFormat::Int) => {
-                    for sample in reader.samples::<i16>() {
-                        data.push((sample.unwrap() as f32) / (0x7fffi32 as f32));
-                    }
-                }
-                (24, SampleFormat::Int) => {
-                    for sample in reader.samples::<i32>() {
-                        let val = (sample.unwrap() as f32) / (0x00ff_ffffi32 as f32);
-                        data.push(val);
-                    }
-                }
-                (32, SampleFormat::Int) => {
-                    for sample in reader.samples::<i32>() {
-                        data.push((sample.unwrap() as f32) / (0x7fff_ffffi32 as f32));
-                    }
-                }
-                (32, SampleFormat::Float) => {
-                    for sample in reader.samples::<f32>() {
-                        data.push(sample.unwrap());
-                    }
-                }
-                _ => panic!(
-                    "Tried to read file but there was a problem: {:?}",
-                    hound::Error::Unsupported
-                ),
-            }
-            let data = if spec.channels != 1 {
-                whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
-            } else {
-                data
-            };
-            let audio_data = convert(
-                spec.sample_rate,
-                16000,
-                1,
-                ConverterType::SincBestQuality,
-                &data,
-            )
-            .unwrap();
+            let sample_rate = spec.sample_rate;
+            let is_too_short = (reader.duration() / sample_rate as u32) < 1;
 
-            let mut state = self.ctx.create_state().expect("failed to create state");
-            let result = state.full(
-                Transcriber::build_params(
-                    self.speaker_language.clone(),
-                    "large-translate-to-en".to_string(),
-                ),
-                &audio_data[..],
-            );
-            if result.is_ok() {
-                let num_segments = state
-                    .full_n_segments()
-                    .expect("failed to get number of segments");
-                let mut converted: Vec<String> = vec!["".to_string()];
-                for i in 0..num_segments {
-                    let segment = state.full_get_segment_text(i);
-                    if segment.is_ok() {
-                        converted.push(segment.unwrap().to_string());
-                    };
-                }
-
-                let result_on_whisper = converted.join("");
-                let sources: Vec<String> = result_on_whisper.lines().map(String::from).collect();
-                let res: Vec<(String, Option<f32>)> = self
-                    .translator
-                    .translate_batch(
-                        &sources,
-                        &TranslationOptions {
-                            beam_size: 5,
-                            ..Default::default()
-                        },
-                        None
-                    )
-                    .unwrap();
-                let mut translated: Vec<String> = vec!["".to_string()];
-                for (r, _) in res {
-                    translated.push(r);
-                }
-
-                let updated = self
+            if is_too_short
+                && !(self.speaker_language.starts_with("en-us")
+                    || self.speaker_language.starts_with("small-en-us"))
+            {
+                println!("input is too short, so skipping...");
+                let mut updated = self
                     .sqlite
-                    .update_model_vosk_to_whisper(speech.id, translated.join(""));
+                    .update_model_vosk_to_whisper(speech.id, "".to_string())
+                    .unwrap();
+                updated.content = speech.content;
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
+                return Ok(());
+            }
 
-                let updated = updated.unwrap();
-                if updated.content != "" {
-                    self.app_handle
-                        .clone()
-                        .emit_all("finalTextConverted", updated)
-                        .unwrap();
-                }
+            let target = if is_too_short {
+                println!("input is too short, so vosk transcription using...");
+                speech.content
             } else {
-                println!("whisper is temporally failed, so skipping...")
+                let mut data =
+                    Vec::with_capacity((spec.channels as usize) * (reader.duration() as usize));
+                match (spec.bits_per_sample, spec.sample_format) {
+                    (16, SampleFormat::Int) => {
+                        for sample in reader.samples::<i16>() {
+                            data.push((sample.unwrap() as f32) / (0x7fffi32 as f32));
+                        }
+                    }
+                    (24, SampleFormat::Int) => {
+                        for sample in reader.samples::<i32>() {
+                            let val = (sample.unwrap() as f32) / (0x00ff_ffffi32 as f32);
+                            data.push(val);
+                        }
+                    }
+                    (32, SampleFormat::Int) => {
+                        for sample in reader.samples::<i32>() {
+                            data.push((sample.unwrap() as f32) / (0x7fff_ffffi32 as f32));
+                        }
+                    }
+                    (32, SampleFormat::Float) => {
+                        for sample in reader.samples::<f32>() {
+                            data.push(sample.unwrap());
+                        }
+                    }
+                    _ => panic!(
+                        "Tried to read file but there was a problem: {:?}",
+                        hound::Error::Unsupported
+                    ),
+                }
+                let data = if spec.channels != 1 {
+                    whisper_rs::convert_stereo_to_mono_audio(&data).unwrap()
+                } else {
+                    data
+                };
+                let audio_data = convert(
+                    spec.sample_rate,
+                    16000,
+                    1,
+                    ConverterType::SincBestQuality,
+                    &data,
+                )
+                .unwrap();
+
+                let mut state = self.ctx.create_state().expect("failed to create state");
+                let result = state.full(
+                    Transcriber::build_params(
+                        self.speaker_language.clone(),
+                        "large-translate-to-en".to_string(),
+                    ),
+                    &audio_data[..],
+                );
+                if result.is_ok() {
+                    let num_segments = state
+                        .full_n_segments()
+                        .expect("failed to get number of segments");
+                    let mut converted: Vec<String> = vec!["".to_string()];
+                    for i in 0..num_segments {
+                        let segment = state.full_get_segment_text(i);
+                        if segment.is_ok() {
+                            converted.push(segment.unwrap().to_string());
+                        };
+                    }
+                    converted.join("")
+                } else {
+                    println!("whisper is temporally failed, so vosk transcription using....");
+                    speech.content
+                }
+            };
+
+            let sources: Vec<String> = target.lines().map(String::from).collect();
+            let res: Vec<(String, Option<f32>)> = self
+                .translator
+                .translate_batch(
+                    &sources,
+                    &TranslationOptions {
+                        beam_size: 5,
+                        ..Default::default()
+                    },
+                    None,
+                )
+                .unwrap();
+            let mut translated: Vec<String> = vec!["".to_string()];
+            for (r, _) in res {
+                translated.push(r);
+            }
+
+            let updated = self
+                .sqlite
+                .update_model_vosk_to_whisper(speech.id, translated.join(""));
+
+            let updated = updated.unwrap();
+            if updated.content != "" {
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
             }
 
             Ok(())
