@@ -31,6 +31,8 @@ import { ModelDownloadStyleBertVits2VoiceProgress } from "../molecules/ModelDown
 import { settingVoiceState } from "../../store/atoms/settingVoiceState"
 import { ModelDownloadFugumtJaEnButton } from "../molecules/ModelDownloadFugumtJaEnButton"
 import { ModelDownloadFugumtJaEnProgress } from "../molecules/ModelDownloadFugumtJaEnProgress"
+import { ModelDownloadReazonSpeechButton } from "../molecules/ModelDownloadReazonSpeechButton"
+import { ModelDownloadReazonSpeechProgress } from "../molecules/ModelDownloadReazonSpeechProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -550,7 +552,7 @@ const SettingsMain = (): JSX.Element => {
                         <div style={{ height: "86px" }}>
                             <div className="flex items-center justify-between mb-2">
                                 <div>
-                                    <p>日本語パック</p>
+                                    <p>日本語パック1</p>
                                     <div className="flex my-1">
                                         <div className="badge bg-slate-400 text-white">Kotoba-Whisper-v2.0</div>
                                         <div className="badge bg-slate-400 text-white ml-1">1.2 GB</div>
@@ -559,6 +561,22 @@ const SettingsMain = (): JSX.Element => {
                                 <ModelDownloadWhisperButton modelType="large-distil.ja" />
                             </div>
                             <ModelDownloadWhisperProgress modelType="large-distil.ja" />
+                        </div>
+                        <div style={{ height: "106px" }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <div>
+                                    <p>日本語パック2</p>
+                                    <div className="flex my-1">
+                                        <div className="badge bg-slate-400 text-white">reazonspeech-k2-v2</div>
+                                        <div className="badge bg-slate-400 text-white ml-1">1.3 GB</div>
+                                    </div>
+                                    <p className="text-sm">
+                                        ※ 追っかけ開始が遅い代わりに、高速な文字起こしを行います。
+                                    </p>
+                                </div>
+                                <ModelDownloadReazonSpeechButton />
+                            </div>
+                            <ModelDownloadReazonSpeechProgress />
                         </div>
                     </>}
                     {settingProcess === "翻訳（18言語⇒日本語）" && <>

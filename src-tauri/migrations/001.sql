@@ -162,6 +162,8 @@ VALUES("fugumt-ja-en", "fugumt-ja-en");
 INSERT INTO models(model_name, model_type)
 VALUES("honyaku-13b", "honyaku-13b");
 INSERT INTO models(model_name, model_type)
+VALUES("reazonspeech", "reazonspeech");
+INSERT INTO models(model_name, model_type)
 VALUES("style-bert-vits2", "style-bert-vits2");
 INSERT INTO models(model_name, model_type)
 VALUES("tsukuyomi-chan", "style-bert-vits2-voice");
