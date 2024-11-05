@@ -25,31 +25,25 @@ use crossbeam_channel::{unbounded, Receiver, Sender};
 use hound::{WavSpec, WavWriter};
 use tauri::{api::path::data_dir, AppHandle, Manager};
 
+use core_media_rs::cm_sample_buffer::CMSampleBuffer;
 use screencapturekit::{
-    cm_sample_buffer::CMSampleBuffer,
-    sc_content_filter::{InitParams, SCContentFilter},
-    sc_error_handler::StreamErrorHandler,
-    sc_output_handler::{SCStreamOutputType, StreamOutput},
-    sc_shareable_content::SCShareableContent,
-    sc_stream::SCStream,
-    sc_stream_configuration::SCStreamConfiguration,
+    shareable_content::SCShareableContent,
+    stream::{
+        configuration::SCStreamConfiguration, content_filter::SCContentFilter,
+        output_trait::SCStreamOutputTrait, output_type::SCStreamOutputType, SCStream,
+    },
 };
 
 use vosk::Recognizer;
 
 use super::{
-    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice, transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high, writer::Writer
+    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
+    transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high,
+    writer::Writer,
 };
 
 pub struct RecordDesktop {
     app_handle: AppHandle,
-}
-
-struct ErrorHandler;
-impl StreamErrorHandler for ErrorHandler {
-    fn on_error(&self) {
-        println!("Error!");
-    }
 }
 
 struct StoreAudioHandler {
@@ -60,32 +54,34 @@ struct StoreAudioHandler {
     channels: u16,
 }
 
-impl StreamOutput for StoreAudioHandler {
+impl SCStreamOutputTrait for StoreAudioHandler {
     fn did_output_sample_buffer(&self, sample: CMSampleBuffer, _of_type: SCStreamOutputType) {
-        let audio_buffers = sample.sys_ref.get_av_audio_buffer_list();
+        let audio_buffers = sample.get_audio_buffer_list();
         if audio_buffers.is_err() {
             println!("Error getting audio buffer list");
         }
-        let bytes = &audio_buffers.unwrap()[0].data; // 最初のチャンネルのデータを選択
+        if let Some(buffer) = audio_buffers.unwrap().get(0) {
+            let bytes = &buffer.data();
 
-        // バッファのデータを直接処理
-        let samples: Vec<f32> = bytes
-            .chunks_exact(4)
-            .map(|chunk| f32::from_le_bytes(chunk.try_into().unwrap()))
-            .collect();
+            // バッファのデータを f32 に変換
+            let samples: Vec<f32> = bytes
+                .chunks_exact(4)
+                .map(|chunk| f32::from_le_bytes(chunk.try_into().unwrap()))
+                .collect();
 
-        if let Some(recognizer) = self.recognizer.upgrade() {
-            MyRecognizer::recognize(
-                self.app_handle.clone(),
-                &mut recognizer.lock().unwrap(),
-                &samples,
-                self.channels,
-                self.notify_decoding_state_is_finalized_tx.clone(),
-                true,
-            );
+            if let Some(recognizer) = self.recognizer.upgrade() {
+                MyRecognizer::recognize(
+                    self.app_handle.clone(),
+                    &mut recognizer.lock().unwrap(),
+                    &samples,
+                    self.channels,
+                    self.notify_decoding_state_is_finalized_tx.clone(),
+                    true,
+                );
+            }
+
+            Writer::write_input_data::<f32, f32>(&samples, &self.writer_clone);
         }
-
-        Writer::write_input_data::<f32, f32>(&samples, &self.writer_clone);
     }
 }
 
@@ -102,32 +98,29 @@ impl RecordDesktop {
         stop_record_rx: Receiver<()>,
         stop_record_clone_tx: Option<Sender<()>>,
     ) {
-        let mut current = SCShareableContent::current();
-        let display = current.displays.pop().unwrap();
+        let display = SCShareableContent::get().unwrap().displays().remove(0);
 
-        let channels = 1 as u16;
+        let channels = 1 as u8;
+        // the system uses a default sample rate of 48 kHz.
+        // https://developer.apple.com/documentation/screencapturekit/scstreamconfiguration/3931903-samplerate
         let sample_rate = 48000;
         let bits_per_sample = 32;
-        let config = SCStreamConfiguration {
-            width: 100,
-            height: 100,
-            captures_audio: true,
-            sample_rate,
-            channel_count: channels as u32,
-            excludes_current_process_audio: true,
-            ..Default::default()
-        };
-
+        let config = SCStreamConfiguration::new()
+            .set_captures_audio(true)
+            .unwrap()
+            .set_channel_count(channels)
+            .unwrap();
+        
         let recognizer = MyRecognizer::build(
             self.app_handle.clone(),
             speaker_language.clone(),
-            config.sample_rate as f32,
+            sample_rate as f32,
         );
         let recognizer_arc = Arc::new(Mutex::new(recognizer));
         let recognizer_weak = Arc::downgrade(&recognizer_arc);
 
         let spec = WavSpec {
-            channels,
+            channels: channels as u16,
             sample_rate,
             bits_per_sample,
             sample_format: hound::SampleFormat::Float,
@@ -145,15 +138,15 @@ impl RecordDesktop {
         let (notify_decoding_state_is_finalized_tx, notify_decoding_state_is_finalized_rx) =
             sync_channel(1);
         let app_handle = self.app_handle.clone();
-        let filter = SCContentFilter::new(InitParams::Display(display));
-        let mut stream = SCStream::new(filter, config, ErrorHandler);
-        stream.add_output(
+        let filter = SCContentFilter::new().with_display_excluding_windows(&display, &[]);
+        let mut stream = SCStream::new(&filter, &config);
+        stream.add_output_handler(
             StoreAudioHandler {
                 app_handle,
                 recognizer: recognizer_weak,
                 notify_decoding_state_is_finalized_tx,
                 writer_clone,
-                channels,
+                channels: channels as u16,
             },
             SCStreamOutputType::Audio,
         );

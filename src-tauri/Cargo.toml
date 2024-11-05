@@ -34,9 +34,9 @@ futures-util = "0.3.30"
 # serve audio
 urlencoding = "2.1.3"
 # screencapturekit = "0.2.8"
-# fix thread crash
-# screencapturekit = { git = "https://github.com/doom-fish/screencapturekit-rs", rev = "8829f70"}
-screencapturekit = { git = "https://github.com/solaoi/screencapturekit-rs" }
+screencapturekit = { git = "https://github.com/doom-fish/screencapturekit-rs", rev = "3582a58"}
+core-media-rs = { git = "https://github.com/doom-fish/core-frameworks.git" }
+
 xcap = "0.0.14"
 # permission
 macos-accessibility-client = "0.0.1"
