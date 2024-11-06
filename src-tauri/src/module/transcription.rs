@@ -154,8 +154,14 @@ impl Transcription {
                     .sqlite
                     .update_model_vosk_to_whisper(speech.id, converted.join(""));
 
-                let updated = updated.unwrap();
+                let mut updated = updated.unwrap();
                 if updated.content != "" {
+                    self.app_handle
+                        .clone()
+                        .emit_all("finalTextConverted", updated)
+                        .unwrap();
+                } else {
+                    updated.content = speech.content;
                     self.app_handle
                         .clone()
                         .emit_all("finalTextConverted", updated)
