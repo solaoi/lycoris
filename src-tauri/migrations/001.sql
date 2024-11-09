@@ -183,3 +183,7 @@ INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M1-jp", "style-bert-vits2-voice");
 INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M2-jp", "style-bert-vits2-voice");
+CREATE INDEX idx_hybrid_status ON speeches(
+    is_done_with_hybrid_reazonspeech,
+    is_done_with_hybrid_whisper
+);

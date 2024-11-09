@@ -9,9 +9,6 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use whisper_rs::WhisperContext;
 
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct TraceCompletion {}
-
 pub struct TranscriptionHybridWhisper {
     app_handle: AppHandle,
     sqlite: Sqlite,

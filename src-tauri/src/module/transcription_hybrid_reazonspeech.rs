@@ -6,9 +6,6 @@ use sherpa_rs::zipformer::ZipFormer;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct TraceCompletion {}
-
 pub struct TranscriptionHybridReazonspeech {
     app_handle: AppHandle,
     sqlite: Sqlite,

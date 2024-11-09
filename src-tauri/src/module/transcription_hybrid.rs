@@ -1,11 +1,10 @@
-use super::{transcription_hybrid_online, transcription_hybrid_reazonspeech, transcription_hybrid_whisper};
+use super::{
+    transcription_hybrid_online, transcription_hybrid_reazonspeech, transcription_hybrid_whisper,
+};
 
 use crossbeam_channel::Receiver;
 use std::{sync::Mutex, thread};
 use tauri::AppHandle;
-
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct TraceCompletion {}
 
 pub struct TranscriptionHybrid {
     app_handle: AppHandle,
@@ -38,7 +37,10 @@ impl TranscriptionHybrid {
                 .lock()
                 .unwrap();
             if let Some(singleton) = lock.as_mut() {
-                singleton.start(stop_convert_rx_clone_for_reazonspeech, use_no_vosk_queue_terminate_mode);
+                singleton.start(
+                    stop_convert_rx_clone_for_reazonspeech,
+                    use_no_vosk_queue_terminate_mode,
+                );
             }
         });
 
@@ -51,7 +53,10 @@ impl TranscriptionHybrid {
                 .lock()
                 .unwrap();
             if let Some(singleton) = lock.as_mut() {
-                singleton.start(stop_convert_rx_clone_for_whisper, use_no_vosk_queue_terminate_mode);
+                singleton.start(
+                    stop_convert_rx_clone_for_whisper,
+                    use_no_vosk_queue_terminate_mode,
+                );
             }
         });
     }

@@ -190,24 +190,19 @@ const NoteMain = (): JSX.Element => {
     }, [isRecording])
 
     useEffect(() => {
-        const unlisten = listen('traceCompletion', () => {
+        const resetPartialTexts = () => {
             setPartialText(null);
             setPartialTextDesktop(null);
-        })
-        return () => {
-            unlisten.then(f => f());
-        }
-    }, [])
+        };
 
-    useEffect(() => {
-        const unlisten = listen('traceUnCompletion', () => {
-            setPartialText(null);
-            setPartialTextDesktop(null);
-        })
+        const unlistenCompletion = listen('traceCompletion', resetPartialTexts);
+        const unlistenUnCompletion = listen('traceUnCompletion', resetPartialTexts);
+
         return () => {
-            unlisten.then(f => f());
+            unlistenCompletion.then(f => f());
+            unlistenUnCompletion.then(f => f());
         }
-    }, [])
+    }, []);
 
     return (<>
         <div className='bg-white'>
