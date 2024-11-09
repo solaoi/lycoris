@@ -13,6 +13,10 @@ CREATE TABLE speeches (
     created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
     content TEXT,
     content_2 TEXT,
+    is_done_with_hybrid_reazonspeech INTEGER DEFAULT 0,
+    is_done_with_hybrid_whisper INTEGER DEFAULT 0,
+    hybrid_reazonspeech_content TEXT,
+    hybrid_whisper_content TEXT,
     wav TEXT,
     model TEXT,
     -- manual|vosk|whisper
@@ -179,3 +183,7 @@ INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M1-jp", "style-bert-vits2-voice");
 INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M2-jp", "style-bert-vits2-voice");
+CREATE INDEX idx_hybrid_status ON speeches(
+    is_done_with_hybrid_reazonspeech,
+    is_done_with_hybrid_whisper
+);

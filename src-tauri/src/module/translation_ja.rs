@@ -40,9 +40,9 @@ impl TranslationJa {
         }
     }
 
-    pub fn start(&mut self, stop_convert_rx: Receiver<()>, is_continuous: bool) {
+    pub fn start(&mut self, stop_convert_rx: Receiver<()>, use_no_vosk_queue_terminate_mode: bool) {
         while Self::convert(self).is_ok() {
-            if is_continuous {
+            if use_no_vosk_queue_terminate_mode {
                 let vosk_speech = self.sqlite.select_vosk(self.note_id);
                 if vosk_speech.is_err() {
                     self.app_handle
