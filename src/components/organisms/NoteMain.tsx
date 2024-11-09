@@ -60,6 +60,7 @@ const NoteMain = (): JSX.Element => {
         showGotoBottomButton();
     }, []);
     const [isReadyToRecognize, setIsReadyToRecognize] = useState(false);
+
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
@@ -68,6 +69,7 @@ const NoteMain = (): JSX.Element => {
             return () => scrollContainer.removeEventListener('scroll', scroll);
         }
     }, [selectedNote]);
+
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
             const rect = bottomRef.current?.getBoundingClientRect();
@@ -79,6 +81,7 @@ const NoteMain = (): JSX.Element => {
             }
         }
     }, [histories, recordingNote]);
+
     useEffect(() => {
         setPartialText(null)
         setPartialTextDesktop(null)
@@ -96,6 +99,7 @@ const NoteMain = (): JSX.Element => {
             unlistenPartialText.then(f => f());
         }
     }, [selectedNote, recordingNote])
+
     useEffect(() => {
         const unlistenFinalText = listen('finalTextRecognized', event => {
             const { is_desktop, ...current } = event.payload as SpeechHistoryType & { is_desktop: boolean }
@@ -184,6 +188,26 @@ const NoteMain = (): JSX.Element => {
             setPartialTextDesktop(null);
         }
     }, [isRecording])
+
+    useEffect(() => {
+        const unlisten = listen('traceCompletion', () => {
+            setPartialText(null);
+            setPartialTextDesktop(null);
+        })
+        return () => {
+            unlisten.then(f => f());
+        }
+    }, [])
+
+    useEffect(() => {
+        const unlisten = listen('traceUnCompletion', () => {
+            setPartialText(null);
+            setPartialTextDesktop(null);
+        })
+        return () => {
+            unlisten.then(f => f());
+        }
+    }, [])
 
     return (<>
         <div className='bg-white'>

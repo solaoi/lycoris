@@ -4,7 +4,8 @@
 )]
 
 use tauri::{
-    http::{HttpRange, ResponseBuilder}, AppHandle, Manager, PathResolver, State, Window
+    http::{HttpRange, ResponseBuilder},
+    AppHandle, Manager, PathResolver, State, Window,
 };
 use tauri_plugin_sql::{Migration, MigrationKind};
 
@@ -41,6 +42,7 @@ use module::{
     synthesizer::{self, Synthesizer},
     transcription::{TraceCompletion, Transcription},
     transcription_amivoice::TranscriptionAmivoice,
+    transcription_hybrid::TranscriptionHybrid,
     transcription_ja::TranscriptionJa,
     transcription_online::TranscriptionOnline,
     translation_en::TranslationEn,
@@ -325,6 +327,9 @@ fn start_trace_command(
         } else if transcription_accuracy.starts_with("reazonspeech") {
             let mut transcription_ja = TranscriptionJa::new(app_handle, note_id);
             transcription_ja.start(stop_convert_rx, true);
+        } else if transcription_accuracy.starts_with("hybrid-transcript") {
+            let mut transcription_hybrid = TranscriptionHybrid::new(app_handle, note_id);
+            transcription_hybrid.start(stop_convert_rx, true);
         } else {
             let mut transcription = Transcription::new(
                 app_handle,

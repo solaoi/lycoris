@@ -21,6 +21,13 @@ pub struct Speech {
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
+pub struct PreTranscript {
+    pub id: u16,
+    pub hybrid_whisper_content: String,
+    pub hybrid_reazonspeech_content: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct Updated {
     pub id: u16,
     pub content: String,
@@ -92,6 +99,92 @@ impl Sqlite {
                     model_description: row.get_unwrap(6),
                     note_id: row.get_unwrap(7),
                     is_desktop: false,
+                })
+            });
+    }
+
+    pub fn select_lateset_speeches(
+        &self,
+        note_id: u64,
+        max_hisotry_count: u64,
+    ) -> Result<Vec<Speech>, rusqlite::Error> {
+        let mut stmt = self.conn
+            .prepare("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE model = \"whisper\" AND is_done_with_hybrid_whisper = 1 AND is_done_with_hybrid_reazonspeech = 1 AND note_id = ?1 ORDER BY created_at_unixtime DESC LIMIT ?2").unwrap();
+        let results = stmt
+            .query_map(params![note_id, max_hisotry_count], |row| {
+                Ok(Speech {
+                    id: row.get_unwrap(0),
+                    speech_type: row.get_unwrap(1),
+                    created_at_unixtime: row.get_unwrap(2),
+                    content: row.get_unwrap(3),
+                    wav: row.get_unwrap(4),
+                    model: row.get_unwrap(5),
+                    model_description: row.get_unwrap(6),
+                    note_id: row.get_unwrap(7),
+                    is_desktop: false,
+                })
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn select_no_proccessed_with_hybrid_reazonspeech(
+        &self,
+        note_id: u64,
+    ) -> Result<Speech, rusqlite::Error> {
+        return self.conn
+            .query_row("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE model = \"vosk\" AND is_done_with_hybrid_reazonspeech = 0 AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
+            |row| {
+                Ok(Speech {
+                    id: row.get_unwrap(0),
+                    speech_type: row.get_unwrap(1),
+                    created_at_unixtime: row.get_unwrap(2),
+                    content: row.get_unwrap(3),
+                    wav: row.get_unwrap(4),
+                    model: row.get_unwrap(5),
+                    model_description: row.get_unwrap(6),
+                    note_id: row.get_unwrap(7),
+                    is_desktop: false,
+                })
+            });
+    }
+
+    pub fn select_no_proccessed_with_hybrid_whisper(
+        &self,
+        note_id: u64,
+    ) -> Result<Speech, rusqlite::Error> {
+        return self.conn
+            .query_row("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE model = \"vosk\" AND is_done_with_hybrid_whisper = 0 AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
+            |row| {
+                Ok(Speech {
+                    id: row.get_unwrap(0),
+                    speech_type: row.get_unwrap(1),
+                    created_at_unixtime: row.get_unwrap(2),
+                    content: row.get_unwrap(3),
+                    wav: row.get_unwrap(4),
+                    model: row.get_unwrap(5),
+                    model_description: row.get_unwrap(6),
+                    note_id: row.get_unwrap(7),
+                    is_desktop: false,
+                })
+            });
+    }
+
+    pub fn select_pre_transcript_with_hybrid(
+        &self,
+        note_id: u64,
+    ) -> Result<PreTranscript, rusqlite::Error> {
+        return self.conn
+            .query_row("SELECT id, hybrid_whisper_content, hybrid_reazonspeech_content FROM speeches WHERE model = \"vosk\" AND is_done_with_hybrid_whisper = 1 AND is_done_with_hybrid_reazonspeech = 1 AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
+            |row| {
+                Ok(PreTranscript {
+                    id: row.get_unwrap(0),
+                    hybrid_whisper_content: row.get_unwrap(1),
+                    hybrid_reazonspeech_content: row.get_unwrap(2),
                 })
             });
     }
@@ -284,6 +377,34 @@ impl Sqlite {
                 Ok(_) => Ok(Updated { id, content }),
                 Err(err) => Err(err),
             }
+        }
+    }
+
+    pub fn update_hybrid_reazonspeech_content(
+        &self,
+        id: u16,
+        content: String,
+    ) -> Result<Updated, rusqlite::Error> {
+        match self.conn.execute(
+            "UPDATE speeches SET is_done_with_hybrid_reazonspeech = 1, hybrid_reazonspeech_content = ?1 WHERE id = ?2",
+            params![content, id],
+        ) {
+            Ok(_) => Ok(Updated { id, content }),
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn update_hybrid_whisper_content(
+        &self,
+        id: u16,
+        content: String,
+    ) -> Result<Updated, rusqlite::Error> {
+        match self.conn.execute(
+            "UPDATE speeches SET is_done_with_hybrid_whisper = 1, hybrid_whisper_content = ?1 WHERE id = ?2",
+            params![content, id],
+        ) {
+            Ok(_) => Ok(Updated { id, content }),
+            Err(err) => Err(err),
         }
     }
 
