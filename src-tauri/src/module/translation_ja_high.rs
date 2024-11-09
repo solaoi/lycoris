@@ -256,7 +256,7 @@ impl TranslationJaHigh {
                 .update_model_vosk_to_whisper(speech.id, translated);
 
             let updated = updated.unwrap();
-            if updated.content != "" {
+            if !updated.content.is_empty() {
                 self.app_handle
                     .clone()
                     .emit_all("finalTextConverted", updated)

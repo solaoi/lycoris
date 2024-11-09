@@ -154,13 +154,15 @@ impl Transcription {
                     .sqlite
                     .update_model_vosk_to_whisper(speech.id, converted.join(""));
 
-                let updated = updated.unwrap();
-                if updated.content != "" {
-                    self.app_handle
-                        .clone()
-                        .emit_all("finalTextConverted", updated)
-                        .unwrap();
+                let mut updated = updated.unwrap();
+                if updated.content.is_empty() {
+                    println!("Whisper returned empty content, falling back to Vosk content");
+                    updated.content = speech.content;
                 }
+                self.app_handle
+                    .clone()
+                    .emit_all("finalTextConverted", updated)
+                    .unwrap();
             } else {
                 println!("whisper is temporally failed, so skipping...");
                 let mut updated = self

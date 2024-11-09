@@ -296,9 +296,9 @@ const NoteMain = (): JSX.Element => {
                     }}>
                         <Download />
                     </button>
-                    <div className="opacity-0 w-20 invisible rounded text-[12px] 
+                    <div className="w-20 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-4
-                        group-hover:visible opacity-100 absolute text-center">ダウンロード
+                        group-hover:visible absolute text-center">ダウンロード
                     </div>
                 </div>
             </div>

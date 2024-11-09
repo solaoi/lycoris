@@ -268,7 +268,7 @@ impl Sqlite {
         id: u16,
         content: String,
     ) -> Result<Updated, rusqlite::Error> {
-        if content == "" {
+        if content.is_empty() {
             match self.conn.execute(
                 "UPDATE speeches SET model = 'whisper' WHERE id = ?1",
                 params![id],
