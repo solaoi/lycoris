@@ -85,9 +85,9 @@ impl TranslationJaHigh {
         }
     }
 
-    pub fn start(&mut self, stop_convert_rx: Receiver<()>, is_continuous: bool) {
+    pub fn start(&mut self, stop_convert_rx: Receiver<()>, use_no_vosk_queue_terminate_mode: bool) {
         while Self::convert(self).is_ok() {
-            if is_continuous {
+            if use_no_vosk_queue_terminate_mode {
                 let vosk_speech = self.sqlite.select_vosk(self.note_id);
                 if vosk_speech.is_err() {
                     self.app_handle
@@ -256,7 +256,7 @@ impl TranslationJaHigh {
                 .update_model_vosk_to_whisper(speech.id, translated);
 
             let updated = updated.unwrap();
-            if updated.content != "" {
+            if !updated.content.is_empty() {
                 self.app_handle
                     .clone()
                     .emit_all("finalTextConverted", updated)

@@ -21,7 +21,7 @@ impl NoteDeleter {
         let sqlite = Sqlite::new();
         let speeches = sqlite.select_all_speeches_by(note_id).unwrap();
         let _ = speeches.iter().for_each(|speech| {
-            if speech.wav != "" {
+            if !speech.wav.is_empty() {
                 if let Err(e) = remove_file(&speech.wav) {
                     eprintln!("Failed to delete file {}: {}", &speech.wav, e);
                 }

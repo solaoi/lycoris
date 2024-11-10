@@ -60,6 +60,7 @@ const NoteMain = (): JSX.Element => {
         showGotoBottomButton();
     }, []);
     const [isReadyToRecognize, setIsReadyToRecognize] = useState(false);
+
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
@@ -68,6 +69,7 @@ const NoteMain = (): JSX.Element => {
             return () => scrollContainer.removeEventListener('scroll', scroll);
         }
     }, [selectedNote]);
+
     useEffect(() => {
         if (recordingNote === selectedNote!.note_id) {
             const rect = bottomRef.current?.getBoundingClientRect();
@@ -79,6 +81,7 @@ const NoteMain = (): JSX.Element => {
             }
         }
     }, [histories, recordingNote]);
+
     useEffect(() => {
         setPartialText(null)
         setPartialTextDesktop(null)
@@ -96,6 +99,7 @@ const NoteMain = (): JSX.Element => {
             unlistenPartialText.then(f => f());
         }
     }, [selectedNote, recordingNote])
+
     useEffect(() => {
         const unlistenFinalText = listen('finalTextRecognized', event => {
             const { is_desktop, ...current } = event.payload as SpeechHistoryType & { is_desktop: boolean }
@@ -184,6 +188,21 @@ const NoteMain = (): JSX.Element => {
             setPartialTextDesktop(null);
         }
     }, [isRecording])
+
+    useEffect(() => {
+        const resetPartialTexts = () => {
+            setPartialText(null);
+            setPartialTextDesktop(null);
+        };
+
+        const unlistenCompletion = listen('traceCompletion', resetPartialTexts);
+        const unlistenUnCompletion = listen('traceUnCompletion', resetPartialTexts);
+
+        return () => {
+            unlistenCompletion.then(f => f());
+            unlistenUnCompletion.then(f => f());
+        }
+    }, []);
 
     return (<>
         <div className='bg-white'>
@@ -296,9 +315,9 @@ const NoteMain = (): JSX.Element => {
                     }}>
                         <Download />
                     </button>
-                    <div className="opacity-0 w-20 invisible rounded text-[12px] 
+                    <div className="w-20 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-4
-                        group-hover:visible opacity-100 absolute text-center">ダウンロード
+                        group-hover:visible absolute text-center">ダウンロード
                     </div>
                 </div>
             </div>

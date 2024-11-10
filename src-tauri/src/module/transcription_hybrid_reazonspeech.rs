@@ -1,4 +1,4 @@
-use super::sqlite::Sqlite;
+use super::{sqlite::Sqlite, transcription_hybrid_online};
 
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
@@ -6,17 +6,14 @@ use sherpa_rs::zipformer::ZipFormer;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct TraceCompletion {}
-
-pub struct TranscriptionJa {
+pub struct TranscriptionHybridReazonspeech {
     app_handle: AppHandle,
     sqlite: Sqlite,
     model: ZipFormer,
     note_id: u64,
 }
 
-impl TranscriptionJa {
+impl TranscriptionHybridReazonspeech {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let model_path = app_handle
             .path_resolver()
@@ -33,7 +30,7 @@ impl TranscriptionJa {
             ..Default::default()
         };
 
-        TranscriptionJa {
+        TranscriptionHybridReazonspeech {
             app_handle,
             sqlite: Sqlite::new(),
             model: ZipFormer::new(config).unwrap(),
@@ -42,37 +39,46 @@ impl TranscriptionJa {
     }
 
     pub fn start(&mut self, stop_convert_rx: Receiver<()>, use_no_vosk_queue_terminate_mode: bool) {
-        while Self::convert(self).is_ok() {
+        while Self::convert(
+            self,
+            stop_convert_rx.clone(),
+            use_no_vosk_queue_terminate_mode,
+        )
+        .is_ok()
+        {
             if use_no_vosk_queue_terminate_mode {
-                let vosk_speech = self.sqlite.select_vosk(self.note_id);
+                transcription_hybrid_online::initialize_transcription_hybrid_online(
+                    self.app_handle.clone(),
+                    self.note_id,
+                );
+                let mut lock = transcription_hybrid_online::SINGLETON_INSTANCE
+                    .lock()
+                    .unwrap();
+                if let Some(singleton) = lock.as_mut() {
+                    singleton.start(stop_convert_rx.clone(), use_no_vosk_queue_terminate_mode);
+                }
+
+                let vosk_speech = self
+                    .sqlite
+                    .select_no_proccessed_with_hybrid_reazonspeech(self.note_id);
                 if vosk_speech.is_err() {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
-                        .unwrap();
                     break;
                 }
             }
             if stop_convert_rx.try_recv().is_ok() {
-                let vosk_speech = self.sqlite.select_vosk(self.note_id);
-                if vosk_speech.is_err() {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
-                        .unwrap();
-                } else {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
-                        .unwrap();
-                }
                 break;
             }
         }
     }
 
-    fn convert(&mut self) -> Result<(), rusqlite::Error> {
-        let vosk_speech = self.sqlite.select_vosk(self.note_id);
+    fn convert(
+        &mut self,
+        stop_convert_rx: Receiver<()>,
+        use_no_vosk_queue_terminate_mode: bool,
+    ) -> Result<(), rusqlite::Error> {
+        let vosk_speech = self
+            .sqlite
+            .select_no_proccessed_with_hybrid_reazonspeech(self.note_id);
 
         return vosk_speech.and_then(|speech| {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
@@ -139,29 +145,36 @@ impl TranscriptionJa {
 
             let text = self.model.decode(sample_rate, data);
 
-            let updated = self.sqlite.update_model_vosk_to_whisper(speech.id, text);
-            let updated = updated.unwrap();
+            let _updated = self
+                .sqlite
+                .update_hybrid_reazonspeech_content(speech.id, text);
 
-            self.app_handle
-                .clone()
-                .emit_all("finalTextConverted", updated)
+            transcription_hybrid_online::initialize_transcription_hybrid_online(
+                self.app_handle.clone(),
+                self.note_id,
+            );
+            let mut lock = transcription_hybrid_online::SINGLETON_INSTANCE
+                .lock()
                 .unwrap();
+            if let Some(singleton) = lock.as_mut() {
+                singleton.start(stop_convert_rx, use_no_vosk_queue_terminate_mode);
+            }
 
             Ok(())
         });
     }
 }
 
-pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionJa>> = Mutex::new(None);
+pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionHybridReazonspeech>> = Mutex::new(None);
 
-pub fn initialize_transcription_ja(app_handle: AppHandle, note_id: u64) {
+pub fn initialize_transcription_hybrid_reazonspeech(app_handle: AppHandle, note_id: u64) {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     if singleton.is_none() {
-        *singleton = Some(TranscriptionJa::new(app_handle, note_id));
+        *singleton = Some(TranscriptionHybridReazonspeech::new(app_handle, note_id));
     }
 }
 
-pub fn drop_transcription_ja() {
+pub fn drop_transcription_hybrid_reazonspeech() {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     *singleton = None;
 }
