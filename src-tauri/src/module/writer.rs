@@ -47,16 +47,18 @@ impl Writer {
 
     fn to_float<S: cpal::Sample>(sample: &S) -> f32 {
         let sample_f32 = sample.to_f32();
-        let sample_i16 = sample.to_i16();
+        let sample_i16_original = sample.to_i16();
+        let sample_i16_abs = sample_i16_original.saturating_abs();
         let sample_u16 = sample.to_u16();
-        let max_abs = sample_f32
-            .abs()
-            .max(sample_i16.abs() as f32)
+    
+        let max_abs = sample_f32.abs()
+            .max(sample_i16_abs as f32)
             .max(sample_u16 as f32);
+    
         if max_abs == sample_f32.abs() {
             sample_f32
-        } else if max_abs == sample_i16.abs() as f32 {
-            sample_i16 as f32 / i16::MAX as f32
+        } else if max_abs == sample_i16_abs as f32 {
+            sample_i16_original as f32 / i16::MAX as f32
         } else {
             (sample_u16 as f32 - u16::MAX as f32 / 2.0) / (u16::MAX as f32 / 2.0)
         }
