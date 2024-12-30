@@ -1,3 +1,5 @@
+use crate::module::transcription_hybrid_online;
+
 use super::{sqlite::Sqlite, transcriber::Transcriber};
 
 use crossbeam_channel::Receiver;
@@ -7,68 +9,67 @@ use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
 use whisper_rs::WhisperContext;
 
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct TraceCompletion {}
-
-pub struct Transcription {
+pub struct TranscriptionHybridWhisper {
     app_handle: AppHandle,
     sqlite: Sqlite,
     ctx: WhisperContext,
-    speaker_language: String,
-    transcription_accuracy: String,
     note_id: u64,
 }
 
-impl Transcription {
-    pub fn new(
-        app_handle: AppHandle,
-        transcription_accuracy: String,
-        speaker_language: String,
-        note_id: u64,
-    ) -> Self {
+impl TranscriptionHybridWhisper {
+    pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let app_handle_clone = app_handle.clone();
-        Transcription {
+
+        TranscriptionHybridWhisper {
             app_handle,
             sqlite: Sqlite::new(),
-            ctx: Transcriber::build(app_handle_clone, transcription_accuracy.clone()),
-            speaker_language,
-            transcription_accuracy,
+            ctx: Transcriber::build(app_handle_clone, "large".to_string()),
             note_id,
         }
     }
 
     pub fn start(&mut self, stop_convert_rx: Receiver<()>, use_no_vosk_queue_terminate_mode: bool) {
-        while Self::convert(self).is_ok() {
+        while Self::convert(
+            self,
+            stop_convert_rx.clone(),
+            use_no_vosk_queue_terminate_mode,
+        )
+        .is_ok()
+        {
             if use_no_vosk_queue_terminate_mode {
-                let vosk_speech = self.sqlite.select_vosk(self.note_id);
+                transcription_hybrid_online::initialize_transcription_hybrid_online(
+                    self.app_handle.clone(),
+                    self.note_id,
+                );
+                let mut lock = transcription_hybrid_online::SINGLETON_INSTANCE
+                    .lock()
+                    .unwrap();
+                if let Some(singleton) = lock.as_mut() {
+                    singleton.start(stop_convert_rx.clone(), use_no_vosk_queue_terminate_mode);
+                }
+
+                let vosk_speech = self
+                    .sqlite
+                    .select_no_proccessed_with_hybrid_whisper(self.note_id);
                 if vosk_speech.is_err() {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
-                        .unwrap();
                     break;
                 }
             }
             if stop_convert_rx.try_recv().is_ok() {
-                let vosk_speech = self.sqlite.select_vosk(self.note_id);
-                if vosk_speech.is_err() {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
-                        .unwrap();
-                } else {
-                    self.app_handle
-                        .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
-                        .unwrap();
-                }
                 break;
             }
         }
     }
 
-    fn convert(&mut self) -> Result<(), rusqlite::Error> {
-        let vosk_speech = self.sqlite.select_vosk(self.note_id);
+    fn convert(
+        &mut self,
+        stop_convert_rx: Receiver<()>,
+        use_no_vosk_queue_terminate_mode: bool,
+    ) -> Result<(), rusqlite::Error> {
+        let vosk_speech = self
+            .sqlite
+            .select_no_proccessed_with_hybrid_whisper(self.note_id);
+
         return vosk_speech.and_then(|speech| {
             let mut reader = hound::WavReader::open(speech.wav).unwrap();
 
@@ -132,10 +133,7 @@ impl Transcription {
 
             let mut state = self.ctx.create_state().expect("failed to create state");
             let result = state.full(
-                Transcriber::build_params(
-                    self.speaker_language.clone(),
-                    self.transcription_accuracy.clone(),
-                ),
+                Transcriber::build_params("ja".to_string(), "large".to_string()),
                 &audio_data[..],
             );
             if result.is_ok() {
@@ -150,19 +148,32 @@ impl Transcription {
                     };
                 }
 
-                let updated = self
-                    .sqlite
-                    .update_model_vosk_to_whisper(speech.id, converted.join(""));
-
-                let mut updated = updated.unwrap();
-                if updated.content.is_empty() {
+                let result = converted.join("");
+                if result.is_empty() {
                     println!("Whisper returned empty content, falling back to Vosk content");
+                    let mut updated = self
+                        .sqlite
+                        .update_model_vosk_to_whisper(speech.id, result)
+                        .unwrap();
                     updated.content = speech.content;
+                    self.app_handle
+                        .clone()
+                        .emit_all("finalTextConverted", updated)
+                        .unwrap();
+                } else {
+                    let _updated = self.sqlite.update_hybrid_whisper_content(speech.id, result);
+
+                    transcription_hybrid_online::initialize_transcription_hybrid_online(
+                        self.app_handle.clone(),
+                        self.note_id,
+                    );
+                    let mut lock = transcription_hybrid_online::SINGLETON_INSTANCE
+                        .lock()
+                        .unwrap();
+                    if let Some(singleton) = lock.as_mut() {
+                        singleton.start(stop_convert_rx, use_no_vosk_queue_terminate_mode);
+                    }
                 }
-                self.app_handle
-                    .clone()
-                    .emit_all("finalTextConverted", updated)
-                    .unwrap();
             } else {
                 println!("whisper is temporally failed, so skipping...");
                 let mut updated = self
@@ -181,26 +192,16 @@ impl Transcription {
     }
 }
 
-pub static SINGLETON_INSTANCE: Mutex<Option<Transcription>> = Mutex::new(None);
+pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionHybridWhisper>> = Mutex::new(None);
 
-pub fn initialize_transcription(
-    app_handle: AppHandle,
-    transcription_accuracy: String,
-    speaker_language: String,
-    note_id: u64,
-) {
+pub fn initialize_transcription_hybrid_whisper(app_handle: AppHandle, note_id: u64) {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     if singleton.is_none() {
-        *singleton = Some(Transcription::new(
-            app_handle,
-            transcription_accuracy,
-            speaker_language,
-            note_id,
-        ));
+        *singleton = Some(TranscriptionHybridWhisper::new(app_handle, note_id));
     }
 }
 
-pub fn drop_transcription() {
+pub fn drop_transcription_hybrid_whisper() {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     *singleton = None;
 }
