@@ -233,6 +233,7 @@ impl TranslationJaHigh {
                 tools: None,
                 tool_choice: None,
                 logits_processors: None,
+                return_raw_logits: false,
             });
             self.translator
                 .get_sender()
