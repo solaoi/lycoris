@@ -534,7 +534,7 @@ dependencies = [
  "bitflags 2.5.0",
  "cexpr",
  "clang-sys",
- "itertools 0.12.1",
+ "itertools 0.11.0",
  "lazy_static",
  "lazycell",
  "log",
@@ -8961,8 +8961,9 @@ dependencies = [
 
 [[package]]
 name = "whisper-rs"
-version = "0.13.1"
-source = "git+https://github.com/tazz4843/whisper-rs.git?rev=dd0c3af#dd0c3af40874bc8c052b2c430b381593f9cfd719"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "40b6fc553156b521663bfa8e713e7ad58c7ca262d46de9998cd7f2e4de5ba0d9"
 dependencies = [
  "whisper-rs-sys",
 ]
@@ -8970,7 +8971,8 @@ dependencies = [
 [[package]]
 name = "whisper-rs-sys"
 version = "0.11.1"
-source = "git+https://github.com/tazz4843/whisper-rs.git?rev=dd0c3af#dd0c3af40874bc8c052b2c430b381593f9cfd719"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76bab42b2c319e3a1e0280137c59368072348d3277873c7588b6466a127dca58"
 dependencies = [
  "bindgen",
  "cfg-if",
