@@ -342,7 +342,7 @@ impl Action {
     }
 
     pub fn execute(&mut self) {
-        if self.token == "" {
+        if self.token.is_empty() {
             println!("whisper token is empty, so skipping...");
             return;
         }

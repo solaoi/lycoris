@@ -36,9 +36,9 @@ impl ChatOnline {
         }
     }
 
-    pub fn start(&mut self, stop_convert_rx: Receiver<()>, is_continuous: bool) {
+    pub fn start(&mut self, stop_convert_rx: Receiver<()>, use_no_vosk_queue_terminate_mode: bool) {
         while Self::convert(self).is_ok() {
-            if is_continuous {
+            if use_no_vosk_queue_terminate_mode {
                 let vosk_speech = self.sqlite.select_vosk(self.note_id);
                 if vosk_speech.is_err() {
                     self.app_handle
@@ -176,10 +176,10 @@ impl ChatOnline {
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
-        let post_body = if template != "" {
-            if functions != "" {
+        let post_body = if !template.is_empty() {
+            if !functions.is_empty() {
                 let func: Value = serde_json::from_str(functions).unwrap();
-                if function_call != "" {
+                if !function_call.is_empty() {
                     json!({
                     "model": model,
                     "temperature": temperature,
@@ -204,9 +204,9 @@ impl ChatOnline {
                 })
             }
         } else {
-            if functions != "" {
+            if !functions.is_empty() {
                 let func: Value = serde_json::from_str(functions).unwrap();
-                if function_call != "" {
+                if !function_call.is_empty() {
                     json!({
                       "model": model,
                       "temperature": temperature,
@@ -243,7 +243,7 @@ impl ChatOnline {
         let json_response: Value = response.json().await?;
 
         let response_text = if status == 200 {
-            if functions != "" {
+            if !functions.is_empty() {
                 let name = serde_json::to_string(
                     &json_response["choices"][0]["message"]["function_call"]["name"],
                 )
@@ -286,7 +286,7 @@ impl ChatOnline {
                 let result = self.sqlite.select_ai_resource();
                 let resource = if result.is_ok() {
                     let command = result.unwrap().replace("{{question}}", &question);
-                    if command == "" {
+                    if command.is_empty() {
                         "".to_string()
                     } else {
                         let result = std::process::Command::new("sh")
@@ -305,7 +305,7 @@ impl ChatOnline {
                 };
                 let result = self.sqlite.select_ai_template();
                 let template = if result.is_ok() {
-                    if resource == "" {
+                    if resource.is_empty() {
                         result.unwrap()
                     } else {
                         result
@@ -352,7 +352,7 @@ impl ChatOnline {
                     } else {
                         "".to_string()
                     };
-                    let output = if hook != "" {
+                    let output = if !hook.is_empty() {
                         let command = hook
                             .replace("{{resource}}", &resource)
                             .replace("{{answer}}", &answer)
@@ -370,7 +370,7 @@ impl ChatOnline {
                     } else {
                         "".to_string()
                     };
-                    let message = if output != "" {
+                    let message = if !output.is_empty() {
                         format!("Q. {}\nA. {}\nCLI. {}", question, answer, output)
                     } else {
                         format!("Q. {}\nA. {}", question, answer)

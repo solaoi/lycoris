@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.23"
+version = "0.9.24"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -53,8 +53,7 @@ mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.
 ] }
 tauri-plugin-clipboard = "1.1.4"
 sbv2_core = { version = "0.1.4", features = ["dynamic"] }
-# whisper-rs = { version = "0.11.1", features = ["metal"] }
-whisper-rs = { git = "https://github.com/tazz4843/whisper-rs.git", rev = "dd0c3af", features = ["metal"] }
+whisper-rs = { version = "0.13.2", features = ["metal"] }
 sherpa-rs = "0.5.1"
 
 [dependencies.tauri-plugin-sql]

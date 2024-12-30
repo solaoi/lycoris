@@ -37,9 +37,7 @@ use screencapturekit::{
 use vosk::Recognizer;
 
 use super::{
-    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
-    transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high,
-    writer::Writer,
+    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice, transcription_hybrid, transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high, writer::Writer
 };
 
 pub struct RecordDesktop {
@@ -281,6 +279,15 @@ impl RecordDesktop {
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }
+                            } else if transcription_accuracy_clone.starts_with("hybrid-transcript") {
+                                transcription_hybrid::initialize_transcription_hybrid(
+                                    app_handle_clone,
+                                    note_id,
+                                );
+                                let mut lock = transcription_hybrid::SINGLETON_INSTANCE.lock().unwrap();
+                                if let Some(singleton) = lock.as_mut() {
+                                    singleton.start(stop_convert_rx_clone, false);
+                                }
                             } else {
                                 transcription::initialize_transcription(
                                     app_handle_clone,
@@ -327,6 +334,7 @@ impl RecordDesktop {
             translation_ja_high::drop_translation_ja_high();
             transcription_online::drop_transcription_online();
             transcription_amivoice::drop_transcription_amivoice();
+            transcription_hybrid::drop_transcription_hybrid();
             chat_online::drop_chat_online();
         } else {
             drop(stop_convert_tx)
