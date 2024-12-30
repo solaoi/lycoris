@@ -33,9 +33,8 @@ tokio = { version = "1", features = ["full"] }
 futures-util = "0.3.30"
 # serve audio
 urlencoding = "2.1.3"
-# screencapturekit = "0.2.8"
-screencapturekit = { git = "https://github.com/doom-fish/screencapturekit-rs", rev = "3582a58"}
-core-media-rs = { git = "https://github.com/doom-fish/core-frameworks.git" }
+screencapturekit = "0.3.2"
+core-media-rs = "0.3.4"
 
 xcap = "0.0.14"
 # permission
