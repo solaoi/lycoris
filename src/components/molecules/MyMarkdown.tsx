@@ -106,7 +106,6 @@ const MyMarkdown = (props: MyMarkdownProps) => {
 
             if (block.className.includes("mermaid")) {
                 await mermaid.run({ nodes: [block as HTMLElement] });
-                block.classList.add("hover:border-base-300", "border-2", "border-transparent", "rounded-lg", "cursor-pointer");
             } else {
                 hljs.highlightBlock(block as HTMLElement);
                 block.classList.add("cursor-pointer", "w-full");

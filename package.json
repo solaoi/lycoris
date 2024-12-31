@@ -16,34 +16,34 @@
     "debug:rs": "RUST_BACKTRACE=1 tauri dev --verbose"
   },
   "dependencies": {
-    "@szhsin/react-menu": "^4.2.2",
+    "@szhsin/react-menu": "^4.2.3",
     "@tauri-apps/api": "^1.6.0",
     "dayjs": "^1.11.13",
-    "highlight.js": "^11.10.0",
+    "highlight.js": "^11.11.1",
     "html2canvas": "^1.4.1",
-    "markdown-to-jsx": "^7.5.0",
-    "mermaid": "^11.2.0",
+    "markdown-to-jsx": "^7.7.2",
+    "mermaid": "^11.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-h5-audio-player": "^3.9.3",
-    "react-medium-image-zoom": "^5.2.8",
-    "react-toastify": "^10.0.5",
+    "react-medium-image-zoom": "^5.2.13",
+    "react-toastify": "^11.0.2",
     "recoil": "^0.7.7",
     "tauri-plugin-clipboard-api": "1.1.4",
     "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release",
-    "zenn-content-css": "^0.1.155"
+    "zenn-content-css": "^0.1.158"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.6.1",
+    "@tauri-apps/cli": "^1.6.3",
     "@types/markdown-it": "^14.1.2",
-    "@types/react": "^18.3.4",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "daisyui": "^3.9.4",
-    "postcss": "^8.4.41",
-    "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.6"
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6"
   }
 }
