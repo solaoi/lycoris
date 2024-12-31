@@ -68,9 +68,10 @@ impl MyRecognizer {
                 if result.is_some() {
                     let text = result.unwrap().text;
                     if Self::is_correct_words(text) {
-                        notify_decoding_state_is_finalized_tx
-                            .send(text.to_string())
-                            .unwrap();
+                        if let Err(e) = notify_decoding_state_is_finalized_tx.send(text.to_string())
+                        {
+                            eprintln!("Failed to send final recognized text: {:?}", e);
+                        }
                     }
                 }
             }
