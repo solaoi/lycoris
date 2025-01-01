@@ -13,10 +13,11 @@ import { Download } from '../atoms/Download';
 type MyMarkdownProps = {
     content: string
     title?: string
+    minWidth?: string
 }
 
 const MyMarkdown = (props: MyMarkdownProps) => {
-    const { content, title = Date.now() } = props
+    const { content, title = Date.now(), minWidth } = props
     const rootRef = useRef<HTMLDivElement>(null);
 
     const [isOpen, setOpen] = useState(false);
@@ -146,7 +147,7 @@ const MyMarkdown = (props: MyMarkdownProps) => {
     }, [content]);
 
     return (
-        <div ref={rootRef} className='znc w-[692px]'>
+        <div ref={rootRef} className='znc w-full' style={minWidth ? { minWidth } : {}}>
             <Markdown
                 options={{
                     forceBlock: true,

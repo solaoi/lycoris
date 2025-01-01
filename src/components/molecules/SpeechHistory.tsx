@@ -58,7 +58,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                     <div className="flex flex-col items-start ml-5 cursor-pointer hover:border-base-300 border-2 border-transparent rounded-lg"
                                         onDoubleClick={(e) => { e.preventDefault(); setEditMemoId(i); }}>
                                         {editMemoId === null || editMemoId !== i ?
-                                            <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
+                                            <MyMarkdown minWidth="692px" content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
                                             : <textarea className="w-[692px] px-[4px] py-[2px] rounded-lg bg-base-200 focus:outline-none" rows={c.content.split("\n").length} defaultValue={c.content} autoFocus
                                                 onBlur={async (e) => {
                                                     const new_content = e.target.value;
