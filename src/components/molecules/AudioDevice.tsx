@@ -93,7 +93,7 @@ const AudioDevices = (): JSX.Element => {
     }
 
     return (
-        <div className="dropdown">
+        <div className="dropdown select-none">
             {isRecording ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{validAudioDevice(hasDesktopAudio, audioDevice)}</div>
                 <div>

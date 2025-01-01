@@ -71,7 +71,7 @@ const SmartVoice = (): JSX.Element => {
     }
 
     return (
-        <div className="dropdown">
+        <div className="dropdown select-none">
             <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }} >
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{selectedModel === null ? "スマート読み上げ" : mapModel(selectedModel)}</div>
                 <div>

@@ -26,7 +26,7 @@ const NoteDeleteButton = (props: NoteDeleteProps): JSX.Element => {
 
     return (
         <>
-            <button className={(hidden ? "" : "hidden ") + "btn gap-2 glass border border-solid border-neutral-300 text-secondary animate-spread hover:bg-white"} onClick={((e) => {
+            <button className={(hidden ? "" : "hidden ") + "btn gap-2 bg-white border border-solid border-neutral-300 text-secondary animate-spread hover:bg-white"} onClick={((e) => {
                 e.stopPropagation();
                 dialogRef.current?.showModal();
             })}>
