@@ -230,7 +230,7 @@ const NoteMain = (): JSX.Element => {
                             }} />
                         : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
                 </h1>
-                <div className="flex-none mr-2">
+                <div className="flex-none ml-1 mr-2">
                     {isTracing && tracingNote === selectedNote?.note_id ?
                         <TraceStopButton /> :
                         <TraceStartButton />}
