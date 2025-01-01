@@ -49,7 +49,7 @@ const SideMenu = (): JSX.Element => {
         invoke('delete_note_command', { noteId: note_id });
     }
     return (
-        <div className="flex justify-between border-r" style={{ width: "320px", flexFlow: "column", height: `calc(100vh - 64px)` }}>
+        <div className="flex justify-between border-r bg-base-100" style={{ width: "320px", flexFlow: "column", height: `calc(100vh - 64px)` }}>
             <div className="flex" style={{ flexFlow: "column" }}>
                 <div className="bg-white flex items-center justify-center select-none text-xl" style={{ height: "64px" }}>
                     <input type="text" placeholder="タイトル検索..." className="input input-bordered focus:outline-none" value={searchWord} onChange={e => setSearchWord(e.target.value)} />
