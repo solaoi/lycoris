@@ -9,6 +9,7 @@ import 'zenn-content-css';
 import { selectedNoteState } from '../../store/atoms/selectedNoteState'
 import { useState } from 'react'
 import { SuggestCard } from './SuggestCard'
+import DB from '../../lib/sqlite'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -58,7 +59,31 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                         onDoubleClick={(e) => { e.preventDefault(); setEditMemoId(i); }}>
                                         {editMemoId === null || editMemoId !== i ?
                                             <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
-                                            : <textarea rows={c.content.split("\n").length} value={c.content} autoFocus onBlur={() => { setEditMemoId(null) }} />}
+                                            : <textarea className="w-[692px] px-[4px] py-[2px] rounded-lg bg-base-200 focus:outline-none" rows={c.content.split("\n").length} defaultValue={c.content} autoFocus
+                                                onBlur={async (e) => {
+                                                    const new_content = e.target.value;
+                                                    if (c.content !== new_content) {
+                                                        if (new_content === "") {
+                                                            await DB.getInstance().then(db => db.deleteSpeech(c));
+                                                            setHistories((prev) => {
+                                                                return prev.filter(h => {
+                                                                    return h.id !== c.id
+                                                                });
+                                                            })
+                                                        } else {
+                                                            await DB.getInstance().then(db => db.updateSpeech({ ...c, content: new_content }));
+                                                            setHistories((prev) => {
+                                                                return prev.map(h => {
+                                                                    if (h.id === c.id) {
+                                                                        return { ...h, content: new_content };
+                                                                    } else { return h; }
+                                                                })
+                                                            })
+
+                                                        }
+                                                    }
+                                                    setEditMemoId(null);
+                                                }} />}
                                     </div>
                                 </div>}
                             {

@@ -146,7 +146,7 @@ const MyMarkdown = (props: MyMarkdownProps) => {
     }, [content]);
 
     return (
-        <div ref={rootRef} className='znc w-full'>
+        <div ref={rootRef} className='znc w-[692px]'>
             <Markdown
                 options={{
                     forceBlock: true,
