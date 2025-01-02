@@ -13,10 +13,11 @@ import { Download } from '../atoms/Download';
 type MyMarkdownProps = {
     content: string
     title?: string
+    minWidth?: string
 }
 
 const MyMarkdown = (props: MyMarkdownProps) => {
-    const { content, title = Date.now() } = props
+    const { content, title = Date.now(), minWidth } = props
     const rootRef = useRef<HTMLDivElement>(null);
 
     const [isOpen, setOpen] = useState(false);
@@ -106,7 +107,6 @@ const MyMarkdown = (props: MyMarkdownProps) => {
 
             if (block.className.includes("mermaid")) {
                 await mermaid.run({ nodes: [block as HTMLElement] });
-                block.classList.add("hover:border-base-300", "border-2", "border-transparent", "rounded-lg", "cursor-pointer");
             } else {
                 hljs.highlightBlock(block as HTMLElement);
                 block.classList.add("cursor-pointer", "w-full");
@@ -147,7 +147,7 @@ const MyMarkdown = (props: MyMarkdownProps) => {
     }, [content]);
 
     return (
-        <div ref={rootRef} className='znc w-full'>
+        <div ref={rootRef} className='znc w-full' style={minWidth ? { minWidth } : {}}>
             <Markdown
                 options={{
                     forceBlock: true,

@@ -177,58 +177,72 @@ impl ChatOnline {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
         let post_body = if !template.is_empty() {
-            if !functions.is_empty() {
-                let func: Value = serde_json::from_str(functions).unwrap();
-                if !function_call.is_empty() {
-                    json!({
-                    "model": model,
-                    "temperature": temperature,
-                    "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
-                    "functions": func,
-                    "function_call" : json!({"name": function_call})
-                    })
-                } else {
-                    json!({
-                    "model": model,
-                    "temperature": temperature,
-                    "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
-                    "functions": func,
-                    "function_call" : "auto"
-                    })
-                }
-            } else {
-                json!({
-                "model": model,
-                "temperature": temperature,
-                "messages": [{"role": "system", "content": template},{"role": "user", "content": question}]
-                })
-            }
-        } else {
-            if !functions.is_empty() {
-                let func: Value = serde_json::from_str(functions).unwrap();
-                if !function_call.is_empty() {
-                    json!({
-                      "model": model,
-                      "temperature": temperature,
-                      "messages": [{"role": "user", "content": question}],
-                      "functions": func,
-                      "function_call" : json!({"name": function_call})
-                    })
-                } else {
-                    json!({
-                      "model": model,
-                      "temperature": temperature,
-                      "messages": [{"role": "user", "content": question}],
-                      "functions": func,
-                      "function_call" : "auto"
-                    })
-                }
-            } else {
+            if model == "o1" || model == "o1-mini" || model == "o1-preview" {
                 json!({
                   "model": model,
-                  "temperature": temperature,
+                  "messages": [{"role": "assistant", "content": template},{"role": "user", "content": question}]
+                })
+            } else {
+                if !functions.is_empty() {
+                    let func: Value = serde_json::from_str(functions).unwrap();
+                    if !function_call.is_empty() {
+                        json!({
+                        "model": model,
+                        "temperature": temperature,
+                        "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
+                        "functions": func,
+                        "function_call" : json!({"name": function_call})
+                        })
+                    } else {
+                        json!({
+                        "model": model,
+                        "temperature": temperature,
+                        "messages": [{"role": "system", "content": template},{"role": "user", "content": question}],
+                        "functions": func,
+                        "function_call" : "auto"
+                        })
+                    }
+                } else {
+                    json!({
+                    "model": model,
+                    "temperature": temperature,
+                    "messages": [{"role": "system", "content": template},{"role": "user", "content": question}]
+                    })
+                }
+            }
+        } else {
+            if model == "o1" || model == "o1-mini" || model == "o1-preview" {
+                json!({
+                  "model": model,
                   "messages": [{"role": "user", "content": question}]
                 })
+            } else {
+                if !functions.is_empty() {
+                    let func: Value = serde_json::from_str(functions).unwrap();
+                    if !function_call.is_empty() {
+                        json!({
+                          "model": model,
+                          "temperature": temperature,
+                          "messages": [{"role": "user", "content": question}],
+                          "functions": func,
+                          "function_call" : json!({"name": function_call})
+                        })
+                    } else {
+                        json!({
+                          "model": model,
+                          "temperature": temperature,
+                          "messages": [{"role": "user", "content": question}],
+                          "functions": func,
+                          "function_call" : "auto"
+                        })
+                    }
+                } else {
+                    json!({
+                      "model": model,
+                      "temperature": temperature,
+                      "messages": [{"role": "user", "content": question}]
+                    })
+                }
             }
         };
 
@@ -243,7 +257,7 @@ impl ChatOnline {
         let json_response: Value = response.json().await?;
 
         let response_text = if status == 200 {
-            if !functions.is_empty() {
+            if !functions.is_empty() && model != "o1" && model != "o1-mini" && model != "o1-preview" {
                 let name = serde_json::to_string(
                     &json_response["choices"][0]["message"]["function_call"]["name"],
                 )

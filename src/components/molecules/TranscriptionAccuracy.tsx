@@ -67,7 +67,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
             case "online-amivoice":
                 return "AmiVoice";
             case "online-chat":
-                return "ChatGPT";
+                return "ChatGPT（一問一答）";
             case "hybrid-transcript":
                 return "Lycoris";
             case "small-translate-to-en":
@@ -92,7 +92,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const targetedTranscriptionModels = ["large-distil.en", "large-distil.ja", "reazonspeech"];
 
     return (
-        <div className="dropdown">
+        <div className="dropdown select-none">
             {((isRecording || isTracing) ||
                 // 追っかけが無効となるケースを列挙
                 // 1. ローカルにWhisperモデルがダウンロードされていない場合
@@ -397,7 +397,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
                             <li key="transcription-accuracy_online-chat">
                                 <label className="label inline-flex active:!bg-inherit">
                                     <input type="radio" name="trace-option" className="radio radio-accent" onChange={change} value="online-chat" checked={"online-chat" === transcriptionAccuracy} />
-                                    <a className="grow">ChatGPT</a>
+                                    <a className="grow">ChatGPT（一問一答）</a>
                                 </label>
                             </li>
                         </>}

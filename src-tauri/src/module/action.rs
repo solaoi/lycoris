@@ -131,8 +131,9 @@ impl Action {
         }
         prompt.push_str("\n回答の際は、上記の手順に従い、情報を適切に統合し、構造化された形で提供してください。次のユーザーの質問に直接答え、必要に応じて追加の洞察や説明を加えてください。");
 
+        // 将来的には、『assistant』roleではなく『developer』roleにする必要がある。現時点ではAPI側が未対応@2025/01/02
         messages.push(json!({
-            "role": "system",
+            "role": if model == "o1" || model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
             "content": prompt
         }));
         messages.push(json!({
@@ -143,11 +144,19 @@ impl Action {
         // for debugging
         // println!("messages: {:?}", messages);
 
-        let post_body = json!({
-          "model": model,
-          "temperature": temperature,
-          "messages": messages
-        });
+        // 現時点ではAPI側がtemparatureパラメータに未対応@2025/01/02
+        let post_body = if model == "o1" || model == "o1-mini" || model == "o1-preview" {
+            json!({
+              "model": model,
+              "messages": messages
+            })
+        } else {
+            json!({
+                "model": model,
+                "temperature": temperature,
+                "messages": messages
+              })
+        };
 
         let response = client
             .post(url)
@@ -313,7 +322,7 @@ impl Action {
         });
 
         let post_body = json!({
-          "model": "gpt-4o-2024-08-06",
+          "model": "gpt-4o",
           "temperature": temperature,
           "messages": messages,
           "response_format": response_format
