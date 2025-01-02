@@ -1,25 +1,16 @@
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import { getVersion } from '@tauri-apps/api/app';
 import { featureState } from "../store/atoms/featureState"
 import { selectedNoteState } from "../store/atoms/selectedNoteState"
 import { AudioDevices } from "./molecules/AudioDevice"
 import { SpeakerLanguage } from "./molecules/SpeakerLanguage"
 import { TranscriptionAccuracy } from "./molecules/TranscriptionAccuracy"
-import { useEffect, useState } from "react";
 import { SmartVoice } from "./molecules/SmartVoice";
 import { modelStyleBertVits2DownloadedState } from "../store/atoms/modelStyleBertVits2DownloadedState";
+import { MacosControls } from "./molecules/MacosControls";
 
 const Header = (): JSX.Element => {
     const setFeature = useSetRecoilState(featureState)
     const setSelectedNote = useSetRecoilState(selectedNoteState);
-    const [appVersion, setAppVersion] = useState<string | null>(null);
-    useEffect(() => {
-        const fetchVersion = async () => {
-            const version = await getVersion();
-            setAppVersion(version);
-        };
-        fetchVersion();
-    }, []);
 
     const downloadedBaseModels = useRecoilValue(modelStyleBertVits2DownloadedState);
     const is_base_downloaded = downloadedBaseModels.filter(m => m === "style-bert-vits2").length > 0
@@ -27,11 +18,8 @@ const Header = (): JSX.Element => {
     return (
         <header className="sticky top-0 z-10" style={{ minWidth: "770px", height: "64px" }}>
             <div className="navbar bg-base-200">
-                <div className="flex flex-1 items-baseline select-none">
-                    <div className="flex flex-col items-end">
-                        <a className="ml-2 font-bold text-xl text-primary" href="https://github.com/solaoi/lycoris" target="_blank">Lycoris</a>
-                        <p className="text-xs text-slate-500 cursor-default">v{appVersion}</p>
-                    </div>
+                <div data-tauri-drag-region className="flex flex-1 select-none items-start" style={{ height: "calc(64px - 1rem)" }}>
+                    <MacosControls />
                 </div>
                 <div className="flex-none mr-1">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">

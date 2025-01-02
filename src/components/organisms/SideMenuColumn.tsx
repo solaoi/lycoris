@@ -29,7 +29,7 @@ const SideMenuColumn = (props: SideMenuColumnProps): JSX.Element => {
 
     return (
         <div
-            className={(selectedNote?.note_id === note.id ? "bg-base-200" : "bg-white") + " flex justify-between cursor-pointer items-center select-none border-t h-24 p-5 hover:bg-base-300"}
+            className={(selectedNote?.note_id === note.id ? "bg-base-200" : "bg-white") + " flex justify-between cursor-pointer items-center select-none border-t h-20 p-5 hover:bg-base-300 break-all"}
             style={isDeleted ? {
                 animation: "fadeOutUp .2s ease-out forwards"
             } : isAdded ? {

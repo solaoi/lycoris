@@ -16,6 +16,9 @@
       "protocol": {
         "asset": true,
         "assetScope": [ "**" ]
+      },
+      "window": {
+        "all": true
       }
     },
     "bundle": {
@@ -52,21 +55,24 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: asset: https://asset.localhost; media-src blob: stream: https://stream.localhost asset: https://asset.localhost; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; img-src 'self' data: http: https: asset: https://asset.localhost; media-src blob: stream: https://stream.localhost asset: https://asset.localhost; style-src 'self' 'unsafe-inline'"
     },
     "updater": {
       "active": false
     },
     "windows": [
       {
+        "transparent": true,
+        "decorations": false,
+        "acceptFirstMouse": true,
         "fullscreen": false,
         "width": 1180,
         "height": 768,
         "minWidth": 1180,
         "minHeight": 384,
-        "resizable": true,
-        "title": "Lycoris"
+        "resizable": true
       }
-    ]
+    ],
+    "macOSPrivateApi": true
   }
 }

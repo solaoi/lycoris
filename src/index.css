@@ -7,10 +7,12 @@ html {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    background-color: transparent !important;
 }
 
 body {
     overflow-y: clip;
+    border-radius: 10px;
 }
 
 @keyframes fadeOutUp {
@@ -60,6 +62,7 @@ body {
 .znc pre {
     width: 100%;
     margin: 1.5rem 0!important;
+    background-color: #bfbfbf;
 }
 
 .znc pre:has(.lang-mermaid) {
@@ -105,4 +108,19 @@ body {
 
 .chat-bubble:has(.suggest-card) {
     width: fit-content;
+}
+
+main {
+    background-color: hsl(var(--b1));
+    ::-webkit-scrollbar {
+        width: 28px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: hsl(var(--bc) / 0.1);
+        border-radius: 14px;
+        border: 6px solid hsl(var(--b1) / var(--tw-bg-opacity, 1));
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--bc) / 0.2);
+    }
 }

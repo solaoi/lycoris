@@ -24,7 +24,7 @@ const sqliteEffect: (note_id:number) => AtomEffect<SpeechHistoryType[]> =
           await loadPersisted();
         } else {
           const old = oldValue as SpeechHistoryType[];
-          if (old.length !== newValue.length) {
+          if (old.length < newValue.length) {
             const current = newValue[newValue.length - 1];
             if (current.speech_type === "memo" || current.speech_type === "action"){
               await db.saveSpeech({...current, note_id}).then(async()=>{

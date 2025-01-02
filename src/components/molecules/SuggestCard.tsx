@@ -97,7 +97,7 @@ const SuggestCard = ({ id, active, suggestions, update }: SuggestCardProps) => {
                             {isAudioLoading("neutral") ?
                                 <span className="loading loading-spinner loading-md"></span>
                                 :
-                                <button className={"btn gap-2 glass border border-solid border-neutral-300 text-primary" + (active === "neutral" ? "" : " btn-disabled")} onClick={playAudio}>
+                                <button className={"btn gap-2 bg-white border border-solid border-neutral-300 text-primary" + (active === "neutral" ? "" : " btn-disabled")} onClick={playAudio}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
                                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
                                     </svg>
@@ -128,7 +128,7 @@ const SuggestCard = ({ id, active, suggestions, update }: SuggestCardProps) => {
                             {isAudioLoading("positive") ?
                                 <span className="loading loading-spinner loading-md"></span>
                                 :
-                                <button className={"btn gap-2 glass border border-solid border-neutral-300 text-primary" + (active === "positive" ? "" : " btn-disabled")} onClick={playAudio}>
+                                <button className={"btn gap-2 bg-white border border-solid border-neutral-300 text-primary" + (active === "positive" ? "" : " btn-disabled")} onClick={playAudio}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
                                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
                                     </svg>
@@ -159,7 +159,7 @@ const SuggestCard = ({ id, active, suggestions, update }: SuggestCardProps) => {
                             {isAudioLoading("negative") ?
                                 <span className="loading loading-spinner loading-md"></span>
                                 :
-                                <button className={"btn gap-2 glass border border-solid border-neutral-300 text-primary" + (active === "negative" ? "" : " btn-disabled")} onClick={playAudio}>
+                                <button className={"btn gap-2 bg-white border border-solid border-neutral-300 text-primary" + (active === "negative" ? "" : " btn-disabled")} onClick={playAudio}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
                                         <path d="M6.3 2.84A1.5 1.5 0 0 0 4 4.11v11.78a1.5 1.5 0 0 0 2.3 1.27l9.344-5.891a1.5 1.5 0 0 0 0-2.538L6.3 2.841Z" />
                                     </svg>

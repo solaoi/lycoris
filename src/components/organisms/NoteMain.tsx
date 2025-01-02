@@ -205,7 +205,7 @@ const NoteMain = (): JSX.Element => {
     }, []);
 
     return (<>
-        <div className='bg-white'>
+        <div className="bg-white select-none">
             <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
                 <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
                     onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
@@ -230,7 +230,7 @@ const NoteMain = (): JSX.Element => {
                             }} />
                         : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
                 </h1>
-                <div className="flex-none mr-2">
+                <div className="flex-none ml-1 mr-2">
                     {isTracing && tracingNote === selectedNote?.note_id ?
                         <TraceStopButton /> :
                         <TraceStartButton />}
@@ -317,7 +317,7 @@ const NoteMain = (): JSX.Element => {
                     </button>
                     <div className="w-20 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-4
-                        group-hover:visible absolute text-center">ダウンロード
+                        group-hover:visible absolute text-center z-10">ダウンロード
                     </div>
                 </div>
             </div>

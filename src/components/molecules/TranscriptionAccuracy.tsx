@@ -92,7 +92,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const targetedTranscriptionModels = ["large-distil.en", "large-distil.ja", "reazonspeech"];
 
     return (
-        <div className="dropdown">
+        <div className="dropdown select-none">
             {((isRecording || isTracing) ||
                 // 追っかけが無効となるケースを列挙
                 // 1. ローカルにWhisperモデルがダウンロードされていない場合
