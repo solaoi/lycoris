@@ -313,7 +313,7 @@ impl Action {
         });
 
         let post_body = json!({
-          "model": "gpt-4o-2024-08-06",
+          "model": "gpt-4o",
           "temperature": temperature,
           "messages": messages,
           "response_format": response_format

@@ -113,7 +113,7 @@ impl TranscriptionHybridOnline {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
         let mut messages: Vec<Value> = Vec::new();
-        let system_prompt = "あなたの役割は、ReazonSpeechとWhisperの出力を統合して「正確で読みやすい文字起こし」を作成することです。
+        let system_prompt = String::from("あなたの役割は、ReazonSpeechとWhisperの出力を統合して「正確で読みやすい文字起こし」を作成することです。
 
 ### 目的
 - **正確性の確保**：発話内容を正確に伝えます。
@@ -125,12 +125,18 @@ impl TranscriptionHybridOnline {
 - **文脈と推測の活用**：文脈から適切な言葉を推測し、誤認識を修正してください。
 - **用語の一貫性**：同じ用語や表現は一貫して使用してください。
 - **自然な日本語表現**：文法的に正しく、自然な日本語になるように修正してください。
+- **途中で途切れた部分の明示**：発話の途中で始まったり、途中で終わっている場合は、「...」を挿入して途切れていることを明示してください。
+") +
+if !latest_speeches.is_empty() {"- **会話履歴の活用**：`history`（timestampとcontent）を必要に応じて参照し、誤認識の修正や表現の調整を行ってください。"}
+else {""} + "
 
 ### 統合手順
 
 1. **テキストの確定**
    - ReazonSpeechの出力をベースに発話内容を確定します。
-   - 必要に応じてWhisperの出力や文脈を参考に、内容を補完します。
+" +
+if !latest_speeches.is_empty() {"   - 必要に応じてWhisperの出力や文脈（`history`）を参考に、内容を補完します。"}
+else {"   - 必要に応じてWhisperの出力を参考に、内容を補完します。"} + "
 
 2. **誤認識の修正**
    - 文脈や一般知識を活用し、誤った表現を正しく修正します。特に専門用語や固有名詞に注意してください。
@@ -140,6 +146,7 @@ impl TranscriptionHybridOnline {
 
 4. **表現の調整**
    - 冗長な表現を避け、自然で簡潔な文章に整えます。
+   - 途中から始まっている発話や、途中で終わっている発話があれば「...」を挿入して、発言の断片を示します。
 
 5. **最終チェック**
    - 全体を見直し、一貫性と正確さ、自然な流れを確認します。
@@ -150,7 +157,7 @@ impl TranscriptionHybridOnline {
 {
   \"integrated_transcription\": \"統合された文字起こし結果をここに挿入\"
 }
-```".to_string();
+```";
 
         messages.push(json!({
             "role": "system",
@@ -186,7 +193,7 @@ impl TranscriptionHybridOnline {
         });
 
         let post_body = json!({
-          "model": "gpt-4o-2024-08-06",
+          "model": "gpt-4o",
           "temperature": temperature,
           "messages": messages,
           "response_format": response_format

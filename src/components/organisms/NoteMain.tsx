@@ -317,7 +317,7 @@ const NoteMain = (): JSX.Element => {
                     </button>
                     <div className="w-20 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-4
-                        group-hover:visible absolute text-center">ダウンロード
+                        group-hover:visible absolute text-center z-10">ダウンロード
                     </div>
                 </div>
             </div>
