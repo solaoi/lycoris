@@ -37,7 +37,7 @@ const Speech = (props: SpeechProps): JSX.Element => {
                 onClick={() => setHover(true)}
                 ref={targetRef} >
                 <div className="w-16 pl-2 flex-none">{date}</div>
-                <div style={{ paddingTop: "0.5rem", paddingRight: "10px" }}>
+                <div className="pt-2 pr-[10px]" >
                     <svg width="8" height="8" viewBox="0, 0, 8, 8" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="4" cy="4" r="3.6" opacity="0.6" {...(model !== "vosk" ? { fill: "#10b981" } : {})} />
                     </svg>

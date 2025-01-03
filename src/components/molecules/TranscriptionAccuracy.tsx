@@ -92,7 +92,7 @@ const TranscriptionAccuracy = (): JSX.Element => {
     const targetedTranscriptionModels = ["large-distil.en", "large-distil.ja", "reazonspeech"];
 
     return (
-        <div className="dropdown select-none">
+        <div className="dropdown">
             {((isRecording || isTracing) ||
                 // 追っかけが無効となるケースを列挙
                 // 1. ローカルにWhisperモデルがダウンロードされていない場合
@@ -108,18 +108,18 @@ const TranscriptionAccuracy = (): JSX.Element => {
                     // 6. ローカルにWhisperLargeモデルがダウンロードされていない場合 or ローカルにHonyaku13Bモデルがダウンロードされていない場合 or ダウンロードされていても、話し手の言語が日本語の場合
                     !(downloadedModels.includes("large") && downloadedModelsHonyaku13B.length !== 0 && !(speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))) &&
                     // 7. AmiVoiceのAPIキーが設定されていない場合 or 設定されていても、話し手の言語が日本語以外の場合
-                    !(settingKeyAmivoice !== "" && (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))))) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+                    !(settingKeyAmivoice !== "" && (speakerLanguage?.startsWith("ja") || speakerLanguage?.startsWith("small-ja"))))) ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法を選択" : mapModel(transcriptionAccuracy)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                         <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                     </svg>
                 </div>
-                <div className="opacity-0 w-24 invisible rounded text-[12px] 
+                <div className="w-24 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute ">追っかけ方法
+                        group-hover:visible absolute ">追っかけ方法
                 </div>
-            </label> : <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
+            </label> : <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{transcriptionAccuracy === null ? "追っかけ方法" : mapModel(transcriptionAccuracy)}</div>
                 <div>
@@ -127,9 +127,9 @@ const TranscriptionAccuracy = (): JSX.Element => {
                         <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                     </svg>
                 </div>
-                <div className="opacity-0 w-24 invisible rounded text-[12px] 
+                <div className="w-24 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute ">追っかけ方法
+                        group-hover:visible absolute ">追っかけ方法
                 </div>
             </label>}
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-60"

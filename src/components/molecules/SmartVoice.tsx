@@ -71,17 +71,17 @@ const SmartVoice = (): JSX.Element => {
     }
 
     return (
-        <div className="dropdown select-none">
-            <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }} >
+        <div className="dropdown">
+            <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }} >
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{selectedModel === null ? "スマート読み上げ" : mapModel(selectedModel)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                         <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                     </svg>
                 </div>
-                <div className="opacity-0 w-28 invisible rounded text-[12px] 
+                <div className="w-28 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute ">スマート読み上げ
+                        group-hover:visible absolute ">スマート読み上げ
                 </div>
             </label>
             <ul tabIndex={0} className="dropdown-content menu rounded-box w-60"

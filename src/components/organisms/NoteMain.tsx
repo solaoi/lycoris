@@ -205,9 +205,9 @@ const NoteMain = (): JSX.Element => {
     }, []);
 
     return (<>
-        <div className="bg-white select-none">
-            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden" style={{ height: "64px" }} >
-                <h1 className="overflow-hidden select-none text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
+        <div className="bg-white">
+            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden h-[64px]" >
+                <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
                     onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                     {editTitle ?
                         <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
@@ -241,7 +241,7 @@ const NoteMain = (): JSX.Element => {
                 <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
                 <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
             </div>
-            <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between" style={{ height: "32px" }}>
+            <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px]" >
                 <FilterTabs />
                 <div className="group mr-4">
                     <button className="text-slate-500 hover:text-slate-800" onClick={async () => {

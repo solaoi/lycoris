@@ -12,7 +12,7 @@ const ScreenshotFilterButton = (): JSX.Element => {
     }
 
     return (
-        <button className={`select-none badge badge-md gap-2 text-white border-none ${filterTarget === "screenshot" ? "bg-orange-900" : "bg-orange-400"}`} onClick={click}>
+        <button className={`badge badge-md gap-2 text-white border-none ${filterTarget === "screenshot" ? "bg-orange-900" : "bg-orange-400"}`} onClick={click}>
             <svg width="8" height="8" viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg">
                 <polygon points="4,0 8,4 4,8 0,4" style={{ "fill": "white" }} />
             </svg>
