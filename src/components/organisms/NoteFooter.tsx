@@ -135,7 +135,7 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             }
             {!isMemo && targetAction === "発話サジェスト" &&
                 <div className={"flex-1 flex flex-col mr-2 relative h-[5.5rem]"}>
-                    <div className="rounded-2xl flex-1 w-full bg-base-200 pt-2 pl-3 cursor-default bg-white">
+                    <div className="rounded-2xl flex-1 w-full pt-2 pl-3 cursor-default bg-white">
                         <p className='font-medium text-sm'>アシスタントが最適な発話をサジェスト</p>
                         <p className='text-xs'>ボタン1つで状況に応じた3つの発話を提案</p>
                         <div className='flex mt-2 text-sm'>

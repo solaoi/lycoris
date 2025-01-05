@@ -31,6 +31,13 @@ export default class DB {
     )
   }
 
+  public async resetAction(speech: SpeechHistoryType) {
+    await this.db.execute(
+      'UPDATE speeches SET content_2 = null WHERE id = $1',
+      [speech.id]
+    )
+  }
+
   public async updateSuggest(id: number, active: string) {
     await this.db.execute(
       'UPDATE speeches SET content = $1 WHERE id = $2',
