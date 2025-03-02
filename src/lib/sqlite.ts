@@ -31,10 +31,10 @@ export default class DB {
     )
   }
 
-  public async resetAction(speech: SpeechHistoryType) {
+  public async resetAction(speech_id: number) {
     await this.db.execute(
       'UPDATE speeches SET content_2 = null WHERE id = $1',
-      [speech.id]
+      [speech_id]
     )
   }
 

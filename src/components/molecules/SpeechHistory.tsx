@@ -15,6 +15,7 @@ import { ArrowPath } from '../atoms/ArrowPath'
 import clipboard from "tauri-plugin-clipboard-api";
 import { toast } from 'react-toastify'
 import { invoke } from '@tauri-apps/api'
+import { ToolCard } from './ToolCard'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -95,28 +96,28 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                 c.speech_type === "action"
                                 && <div className='flex py-2' key={"action_" + i}>
                                     <div className="w-16 pl-2 flex-none">{date}</div>
-                                    <div className="card w-4/5 bg-base-300 shadow-xl ml-5">
-                                        <div className="card-body">
+                                    <div className="card w-4/5 ml-5">
+                                        <div className="card-body bg-white/60 drop-shadow-md rounded-lg">
                                             {c.action_type === "chat" &&
                                                 <>
                                                     <div className="chat chat-start">
-                                                        <div className="flex chat-bubble bg-white text-slate-500">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm">
                                                             <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
                                                         </div>
                                                     </div>
                                                     <div className="chat chat-end">
-                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full relative">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full relative shadow-sm">
                                                             {c.content_2 ?
                                                                 <>
                                                                     <MyMarkdown content={c.content_2} title={`${selectedNote?.note_title.trim()}_action-end_${i}`} />
-                                                                    <div className='flex gap-2 absolute left-[16px] bottom-[-1.2rem] bg-white border-4 border-base-300 rounded-2xl px-4 py-[2px] text-gray-400 text-sm'>
+                                                                    <div className='flex gap-2 absolute left-[16px] bottom-[-1.2rem] bg-white border-2 border-gray-200/60 rounded-2xl px-4 py-[2px] text-gray-400 text-sm'>
                                                                         <button className='flex items-center hover:text-gray-500' onClick={() => { if (c.content_2) { clipboard.writeText(c.content_2); toast.success("コピーしました") } }}>
                                                                             <DocumentDuplicate />
                                                                             <p className='ml-[2px]'>コピー</p>
                                                                         </button>
                                                                         <button className='flex items-center hover:text-gray-500' onClick={async () => {
                                                                             toast.success("リトライしました");
-                                                                            await DB.getInstance().then(db => db.resetAction(c));
+                                                                            await DB.getInstance().then(db => db.resetAction(c.id!));
                                                                             setHistories((prev) => {
                                                                                 return prev.map(h => {
                                                                                     if (h.id === c.id) {
@@ -140,7 +141,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                             }
                                             {c.action_type === "suggest" &&
                                                 <div className="chat chat-start">
-                                                    <div className="flex chat-bubble bg-white text-slate-500">
+                                                    <div className="flex chat-bubble bg-white text-slate-500 shadow-sm">
                                                         {c.content_2 ?
                                                             <SuggestCard
                                                                 id={c.id!}
@@ -159,6 +160,49 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                                         }
                                                     </div>
                                                 </div>
+                                            }
+                                            {c.action_type === "tool" &&
+                                                <>
+                                                    <div className="chat chat-start">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm">
+                                                            <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="chat chat-end">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full relative shadow-sm">
+                                                            {c.content_2 ?
+                                                                <ToolCard
+                                                                    id={c.id!}
+                                                                    tool_results={c.content_2}
+                                                                    note_id={selectedNote?.note_id}
+                                                                    note_title={selectedNote?.note_title || ""}
+                                                                    clear={
+                                                                        (id) => setHistories((prev) => {
+                                                                            return prev.map(h => {
+                                                                                if (h.id === id) {
+                                                                                    return { ...h, content_2: undefined };
+                                                                                } else { return h; }
+                                                                            })
+                                                                        })
+                                                                    }
+                                                                    updateToolResults={
+                                                                        (id: number, results: string) => {
+                                                                            setHistories((prev) => {
+                                                                                return prev.map(h => {
+                                                                                    if (h.id === id) {
+                                                                                        return { ...h, content_2: results };
+                                                                                    }
+                                                                                    return h;
+                                                                                });
+                                                                            });
+                                                                        }}
+                                                                />
+                                                                :
+                                                                <span className="loading loading-dots loading-sm"></span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </>
                                             }
                                         </div>
                                     </div>

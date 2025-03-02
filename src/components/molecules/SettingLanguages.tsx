@@ -12,7 +12,7 @@ const SettingLanguages = (): JSX.Element => {
     }
 
     return (
-        <select className="select focus:outline-none pl-1 pr-0 w-32" name="speaker-languages" onChange={change} >
+        <select className="select focus:outline-none pl-1 pr-0 w-32 bg-transparent" name="speaker-languages" onChange={change} >
             {settingLanguages?.map((language, i) => (
                 <option key={"setting-language" + i} value={language} selected={language === settingLanguage}>{language}</option>
             ))}

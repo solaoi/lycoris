@@ -4,6 +4,7 @@ import { featureState } from "../../store/atoms/featureState";
 import { selectedNoteState } from "../../store/atoms/selectedNoteState";
 import { NoteType } from "../../type/Note.type";
 import { NoteDeleteButton } from "../molecules/NoteDeleteButton";
+import { showExecutedToolsState } from "../../store/atoms/showExecutedToolsState";
 
 type SideMenuColumnProps = {
     note: NoteType
@@ -16,6 +17,7 @@ const SideMenuColumn = (props: SideMenuColumnProps): JSX.Element => {
     const { note, deleteAction, isAdded, setAdded } = props;
     const [selectedNote, setSelectedNote] = useRecoilState(selectedNoteState);
     const setFeature = useSetRecoilState(featureState);
+    const setShowExecutedTools = useSetRecoilState(showExecutedToolsState);
     const [isHover, setHover] = useState(false);
     const [isDeleted, setDeleted] = useState(false);
     const animateAction = () => {
@@ -36,7 +38,7 @@ const SideMenuColumn = (props: SideMenuColumnProps): JSX.Element => {
                 animation: "fadeInDown .1s ease-in forwards"
             } : {}}
             onClick={() => {
-                setFeature("note"); setAdded(false); setSelectedNote({ note_id: note.id!, note_title: note.note_title })
+                setShowExecutedTools(false); setFeature("note"); setAdded(false); setSelectedNote({ note_id: note.id!, note_title: note.note_title })
             }}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}

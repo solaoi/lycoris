@@ -12,7 +12,7 @@ const SettingProcesses = (): JSX.Element => {
     }
 
     return (
-        <select className="select focus:outline-none pl-1 pr-0 w-44" name="processes" onChange={change} >
+        <select className="select focus:outline-none pl-1 pr-0 w-44 bg-transparent" name="processes" onChange={change} >
             {settingProcesses?.map((process, i) => (
                 <option key={"setting-process" + i} value={process} selected={process === settingProcess}>{process}</option>
             ))}

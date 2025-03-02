@@ -15,14 +15,16 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
     const { titleRef } = props;
     const inputEl = useRef<HTMLTextAreaElement>(null)
     const [inputValue, setInputValue] = useState("")
-    const inputActionEl = useRef<HTMLTextAreaElement>(null)
-    const [inputActionValue, setInputActionValue] = useState("")
+    const inputActionChatEl = useRef<HTMLTextAreaElement>(null)
+    const inputActionToolEl = useRef<HTMLTextAreaElement>(null)
+    const [inputActionChatValue, setInputActionChatValue] = useState("")
+    const [inputActionToolValue, setInputActionToolValue] = useState("")
     const [isMemo, setIsMemo] = useState(true)
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"))
     const selectedNote = useRecoilValue(selectedNoteState)
     const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
     const targetAction = useRecoilValue(actionState)
-    const update = (type: "memo" | "action", action_type?: "chat" | "suggest") => {
+    const update = (type: "memo" | "action", action_type?: "chat" | "suggest" | "tool") => {
         if (type === "memo") {
             if (inputValue === "") {
                 return
@@ -42,7 +44,7 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             setInputValue("")
         } else if (type === "action") {
             if (action_type === "chat") {
-                if (inputActionValue === "") {
+                if (inputActionChatValue === "") {
                     return
                 }
                 setHistories(prev =>
@@ -50,15 +52,15 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
                         speech_type: "action",
                         action_type: "chat",
                         created_at_unixtime: Math.floor(new Date().getTime() / 1000),
-                        content: inputActionValue,
+                        content: inputActionChatValue,
                         wav: "",
                         model: "manual",
                         model_description: "manual",
                         note_id: selectedNote!.note_id
                     }]
                 )
-                inputActionEl.current?.focus();
-                setInputActionValue("")
+                inputActionChatEl.current?.focus();
+                setInputActionChatValue("")
             } else if (action_type === "suggest") {
                 setHistories(prev =>
                     [...prev, {
@@ -72,36 +74,61 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
                         note_id: selectedNote!.note_id
                     }]
                 )
+            } else if (action_type === "tool") {
+                if (inputActionToolValue === "") {
+                    return
+                }
+                setHistories(prev =>
+                    [...prev, {
+                        speech_type: "action",
+                        action_type: "tool",
+                        created_at_unixtime: Math.floor(new Date().getTime() / 1000),
+                        content: inputActionToolValue,
+                        wav: "",
+                        model: "manual",
+                        model_description: "manual",
+                        note_id: selectedNote!.note_id
+                    }]
+                )
+                inputActionToolEl.current?.focus();
+                setInputActionToolValue("")
             }
         }
     };
-    const clear = (type: "memo" | "action", e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const clear = (type: "memo" | "action", action_type: undefined | "chat" | "tool", e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && e.currentTarget.value === "\n") {
             if (type === "memo") {
                 setInputValue("")
             } else if (type === "action") {
-                setInputActionValue("")
+                if (action_type === "chat") {
+                    setInputActionChatValue("")
+                } else {
+                    setInputActionToolValue("")
+                }
             }
         }
     }
-    const enter = async (type: "memo" | "action", e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const enter = async (type: "memo" | "action", action_type: undefined | "chat" | "tool", e: KeyboardEvent<HTMLTextAreaElement>) => {
         if (!(e.shiftKey && e.key === 'Enter')) {
             return
         }
-        update(type, type === "action" ? "chat" : undefined);
+        update(type, action_type);
     }
 
     useEffect(() => {
         if (inputEl.current && (document.activeElement !== titleRef.current)) {
             inputEl.current.focus();
         }
-        if (inputActionEl.current && (document.activeElement !== titleRef.current)) {
-            inputActionEl.current.focus();
+        if (inputActionChatEl.current && (document.activeElement !== titleRef.current)) {
+            inputActionChatEl.current.focus();
+        }
+        if (inputActionToolEl.current && (document.activeElement !== titleRef.current)) {
+            inputActionToolEl.current.focus();
         }
     }, [selectedNote]);
 
     return (
-        <div className="ml-[-1.25rem] fixed bottom-0 right-0 mb-3 py-2 px-2 mr-16 flex items-center rounded-2xl w-7/12 h-[7.5rem] bg-base-200 drop-shadow-md">
+        <div className="ml-[-1.25rem] fixed bottom-0 right-0 mb-3 py-2 px-2 mr-16 flex items-center rounded-2xl w-7/12 h-[7.5rem] bg-white/80 drop-shadow-md">
             <div className="tabs tabs-boxed bg-base-100 absolute top-[-16px] left-2 border">
                 <a className={"tab tab-xs" + (isMemo ? " tab-active" : "")}
                     onClick={() => { setIsMemo(true); }}
@@ -112,7 +139,7 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             </div>
             {isMemo && <>
                 <div className={"flex-1 flex flex-col mr-2 relative"}>
-                    <textarea value={inputValue} rows={3} ref={inputEl} placeholder="書き留めたいこと…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter("memo", e)} onKeyUp={e => clear("memo", e)} onChange={(e) => setInputValue(e.target.value)} />
+                    <textarea value={inputValue} rows={3} ref={inputEl} placeholder="書き留めたいこと…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter("memo", undefined, e)} onKeyUp={e => clear("memo", undefined, e)} onChange={(e) => setInputValue(e.target.value)} />
                     <button disabled={inputValue === ""} className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn bg-white border border-solid border-neutral-300 text-primary" onClick={() => update("memo")}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                             <path fillRule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clipRule="evenodd" />
@@ -125,8 +152,8 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             </>}
             {!isMemo && targetAction === "チャット" &&
                 <div className={"flex-1 flex flex-col mr-2 relative"}>
-                    <textarea value={inputActionValue} rows={3} ref={inputActionEl} placeholder="今回の記録を活用し、アシスタントにやってもらいたいこと…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter("action", e)} onKeyUp={e => clear("action", e)} onChange={(e) => setInputActionValue(e.target.value)} />
-                    <button disabled={inputActionValue === ""} className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn bg-white border border-solid border-neutral-300 text-primary" onClick={() => update("action", "chat")}>
+                    <textarea value={inputActionChatValue} rows={3} ref={inputActionChatEl} placeholder="今回の記録を活用し、アシスタントにやってもらいたいこと…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter("action", "chat", e)} onKeyUp={e => clear("action", "chat", e)} onChange={(e) => setInputActionChatValue(e.target.value)} />
+                    <button disabled={inputActionChatValue === ""} className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn bg-white border border-solid border-neutral-300 text-primary" onClick={() => update("action", "chat")}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                             <path fillRule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clipRule="evenodd" />
                         </svg>
@@ -162,6 +189,16 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
                     <button className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn bg-white border border-solid border-neutral-300 text-primary" onClick={() => update("action", "suggest")}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
                             <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97ZM6.75 8.25a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 0 1.5h-9a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H7.5Z" clipRule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            }
+            {!isMemo && targetAction === "ツール" &&
+                <div className={"flex-1 flex flex-col mr-2 relative"}>
+                    <textarea value={inputActionToolValue} rows={3} ref={inputActionToolEl} placeholder="今回の記録とツールを活用し、アシスタントにやってもらいたいこと…" className="scrollbar-transparent pr-16 resize-none leading-6 rounded-2xl flex-1 w-full textarea textarea-bordered bg-white focus:outline-none" onKeyDown={e => enter("action", "tool", e)} onKeyUp={e => clear("action", "tool", e)} onChange={(e) => setInputActionToolValue(e.target.value)} />
+                    <button disabled={inputActionToolValue === ""} className="w-12 h-12 absolute bottom-0 right-0 mb-5 mr-2 btn bg-white border border-solid border-neutral-300 text-primary" onClick={() => update("action", "tool")}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                            <path fillRule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clipRule="evenodd" />
                         </svg>
                     </button>
                 </div>

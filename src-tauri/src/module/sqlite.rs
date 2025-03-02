@@ -1,7 +1,10 @@
 use crate::BUNDLE_IDENTIFIER;
 use rusqlite::{params, Connection};
-use std::path::PathBuf;
+use serde_json::Value;
+use std::{collections::HashMap, path::PathBuf};
 use tauri::api::path::data_dir;
+
+use super::mcp_host::ToolConfig;
 
 pub struct Sqlite {
     conn: Connection,
@@ -53,6 +56,29 @@ pub struct Permission {
     pub model: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ToolExecutionCmd {
+    pub call_id: String,
+    pub args: Value,
+    pub name: String,
+    pub method: String,
+    pub description: String,
+    pub result: Option<String>,
+}
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ToolExecution {
+    pub is_required_user_permission: bool,
+    pub content: String,
+    pub cmds: Vec<ToolExecutionCmd>,
+}
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ToolExecutionWrapper {
+    pub id: u16,
+    pub note_id: u64,
+    pub content: String,
+    pub tool_execution: ToolExecution,
+}
+
 impl Sqlite {
     pub fn new() -> Self {
         let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
@@ -61,6 +87,95 @@ impl Sqlite {
         println!("{}", conn.is_autocommit());
         conn.pragma_update(None, "foreign_keys", true).unwrap();
         Self { conn }
+    }
+
+    pub fn select_all_tools(&self) -> Result<HashMap<String, ToolConfig>, rusqlite::Error> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT name, command, args, env FROM tools")
+            .unwrap();
+        let results = stmt
+            .query_map(params![], |row| {
+                Ok((
+                    row.get_unwrap(0),
+                    ToolConfig {
+                        command: row.get_unwrap(1),
+                        args: serde_json::from_str(&row.get_unwrap::<_, String>(2))
+                            .unwrap_or_default(),
+                        env: serde_json::from_str(&row.get_unwrap::<_, String>(3))
+                            .unwrap_or_default(),
+                    },
+                ))
+            })
+            .unwrap()
+            .collect::<Result<HashMap<String, ToolConfig>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn select_tool(&self, speech_id: u64) -> Result<ToolExecutionWrapper, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT id, note_id, content, content_2 FROM speeches WHERE id = ?1",
+            params![speech_id],
+            |row| {
+                let id: u16 = row.get_unwrap(0);
+                let note_id: u64 = row.get_unwrap(1);
+                let content: String = row.get_unwrap(2);
+                let content_2: String = row.get_unwrap(3);
+
+                let tool_execution: ToolExecution =
+                    serde_json::from_str(&content_2).map_err(|e| {
+                        rusqlite::Error::FromSqlConversionFailure(
+                            0,
+                            rusqlite::types::Type::Text,
+                            Box::new(e),
+                        )
+                    })?;
+
+                Ok(ToolExecutionWrapper {
+                    id,
+                    note_id,
+                    content,
+                    tool_execution,
+                })
+            },
+        );
+    }
+
+    pub fn update_tool_execution(
+        &self,
+        speech_id: u64,
+        tool_execution: &ToolExecution,
+    ) -> Result<(), rusqlite::Error> {
+        let content = serde_json::to_string(tool_execution).map_err(|e| {
+            rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+        })?;
+
+        self.conn.execute(
+            "UPDATE speeches SET content_2 = ?1 WHERE id = ?2",
+            params![content, speech_id],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn insert_tool(
+        &self,
+        name: String,
+        command: String,
+        args: String,
+        env: String,
+    ) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "INSERT INTO tools (name, command, args, env) VALUES (?1, ?2, ?3, ?4)",
+            params![name, command, args, env],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn delete_tool(&self, tool_name: String) -> Result<usize, rusqlite::Error> {
+        self.conn
+            .execute("DELETE FROM tools WHERE name = ?1", params![tool_name])
     }
 
     pub fn select_all_speeches_by(&self, note_id: u64) -> Result<Vec<Speech>, rusqlite::Error> {
@@ -446,5 +561,31 @@ impl Sqlite {
     pub fn delete_speeches_by(&self, note_id: u64) -> Result<usize, rusqlite::Error> {
         self.conn
             .execute("DELETE FROM speeches WHERE note_id = ?1", params![note_id])
+    }
+
+    pub fn ensure_tools_table_exists(&self) -> Result<(), rusqlite::Error> {
+        // テーブルが存在するか確認
+        let exists: bool = self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='tools')",
+            [],
+            |row| row.get(0),
+        )?;
+
+        // 存在しなければ作成
+        if !exists {
+            println!("Creating tools table...");
+            self.conn.execute(
+                "CREATE TABLE tools (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    command TEXT,
+                    args TEXT,
+                    env TEXT
+                )",
+                [],
+            )?;
+        }
+
+        Ok(())
     }
 }

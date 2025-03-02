@@ -6,7 +6,7 @@ const ActionSet = (): JSX.Element => {
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
     const [targetAction, setTargetAction] = useRecoilState(actionState)
-    const actions = ["チャット", "発話サジェスト"]
+    const actions = ["チャット", "発話サジェスト", "ツール"]
     const [toggle, setToggle] = useState(false)
 
     const change = (actionName: string) => {
