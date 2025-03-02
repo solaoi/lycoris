@@ -126,7 +126,17 @@ const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => 
                     </svg>
                     サーバを追加</button>
             </div>
-            <dialog ref={dialogRef} className="modal cursor-default" onClick={e => e.stopPropagation()}>
+            <dialog
+                ref={dialogRef}
+                className="modal cursor-default"
+                onClick={e => {
+                    e.stopPropagation();
+                    if (e.target === dialogRef.current) {
+                        setContent(""); setConnecting(false);
+                        dialogRef.current?.close();
+                    }
+                }}
+            >
                 <div className="modal-box">
                     <h3 className="font-bold text-lg">MCPサーバの追加</h3>
                     <div className="flex flex-col mt-4">

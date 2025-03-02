@@ -1,17 +1,18 @@
-import { toast } from "react-toastify";
-import { MyMarkdown } from "./MyMarkdown";
-import DB from "../../lib/sqlite";
-import { DocumentDuplicate } from "../atoms/DocumentDuplicate";
 import { clipboard, invoke } from "@tauri-apps/api";
+import { useRef, useState } from "react";
+import { useRecoilState } from "recoil";
+import { toast } from "react-toastify";
+
+import DB from "../../lib/sqlite";
+import { showExecutedToolsState } from "../../store/atoms/showExecutedToolsState";
 import { ArrowPath } from "../atoms/ArrowPath";
 import { Check } from "../atoms/Check";
-import { InformationCircle } from "../atoms/InformationCircle";
-import { useRef, useState } from "react";
-import { ChevronRight } from "../atoms/ChevronRight";
-import { ChevronDown } from "../atoms/ChevronDown";
 import { CheckBadge } from "../atoms/CheckBadge";
-import { useRecoilState } from "recoil";
-import { showExecutedToolsState } from "../../store/atoms/showExecutedToolsState";
+import { ChevronDown } from "../atoms/ChevronDown";
+import { ChevronRight } from "../atoms/ChevronRight";
+import { DocumentDuplicate } from "../atoms/DocumentDuplicate";
+import { InformationCircle } from "../atoms/InformationCircle";
+import { MyMarkdown } from "./MyMarkdown";
 
 type ToolCardProps = {
     id: number,
@@ -24,11 +25,10 @@ type ToolCardProps = {
 
 const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResults }: ToolCardProps) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
-    const dialogExecutedRef = useRef<HTMLDialogElement>(null);
     const [dialogName, setDialogName] = useState<string>("");
     const [dialogMethod, setDialogMethod] = useState<string>("");
     const [dialogDescription, setDialogDescription] = useState<string>("");
-    const [showExecuted, setShowExecuted] = useState(false);
+    const [showExecuted, setShowExecuted] = useRecoilState(showExecutedToolsState);
     const obj = (() => {
         try {
             return JSON.parse(tool_results) as { "is_required_user_permission": boolean, "content": string | null, "cmds": { "call_id": string, "args": Object, "name": string, "method": string, "description": string, "result": string | null }[] }
@@ -40,7 +40,7 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
         return <div>ツールの呼び出しに失敗しました。</div>
     }
     const { is_required_user_permission, content, cmds } = obj;
-    const [isExecuted, setIsExecuted] = useRecoilState(showExecutedToolsState);
+    const [isExecuted, setIsExecuted] = useState(false);
     const executedTools = cmds.filter(cmd => cmd.result != null).length;
     const hasExecutedTools = executedTools > 0;
 
@@ -217,9 +217,16 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     <button className={'flex items-center text-primary hover:text-primary-focus' + (isExecuted ? " opacity-50" : "")} disabled={isExecuted} onClick={async () => {
                         toast.success("ツールを実行しました");
                         setIsExecuted(true);
-                        const result = await invoke('execute_mcp_tool_feature_command', { speechId: id });
-                        updateToolResults(id, JSON.stringify(result));
-                        setIsExecuted(false);
+
+                        try {
+                            const result = await invoke('execute_mcp_tool_feature_command', { speechId: id });
+                            updateToolResults(id, JSON.stringify(result));
+                        } catch (error) {
+                            console.error("ツール実行エラー:", error);
+                            toast.error("ツールの実行に失敗しました");
+                        } finally {
+                            setIsExecuted(false);
+                        }
                     }}>
                         <Check />
                         <p className='ml-[2px]'>実行</p>
@@ -239,7 +246,16 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     <p className='ml-[2px]'>リトライ</p>
                 </button>
             </div>
-            <dialog ref={dialogRef} className="modal cursor-default" onClick={e => e.stopPropagation()}>
+            <dialog
+                ref={dialogRef}
+                className="modal cursor-default"
+                onClick={e => {
+                    e.stopPropagation();
+                    if (e.target === dialogRef.current) {
+                        dialogRef.current?.close();
+                    }
+                }}
+            >
                 <div className="modal-box">
                     <h3 className="font-bold text-lg flex items-center gap-2">
                         <InformationCircle />
