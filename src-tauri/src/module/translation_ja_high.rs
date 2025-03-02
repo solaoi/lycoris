@@ -3,9 +3,10 @@ use super::{sqlite::Sqlite, transcriber::Transcriber};
 use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use mistralrs::{
-    Constraint, DefaultSchedulerMethod, Device, DeviceMapMetadata, MistralRs, MistralRsBuilder,
-    ModelDType, NormalLoaderBuilder, NormalLoaderType, NormalRequest, NormalSpecificConfig,
-    Request, RequestMessage, ResponseOk, SamplingParams, SchedulerConfig, TokenSource,
+    AutoDeviceMapParams, Constraint, DefaultSchedulerMethod, Device, DeviceMapSetting, MistralRs,
+    MistralRsBuilder, ModelDType, NormalLoaderBuilder, NormalLoaderType, NormalRequest,
+    NormalSpecificConfig, Request, RequestMessage, ResponseOk, SamplingParams, SchedulerConfig,
+    TokenSource,
 };
 use samplerate_rs::{convert, ConverterType};
 use std::{
@@ -48,6 +49,8 @@ impl TranslationJaHigh {
                     "{}/Honyaku-13b-q4_0.uqff",
                     model_path
                 ))),
+                imatrix: None,
+                calibration_file: None,
             },
             None,
             None,
@@ -62,7 +65,7 @@ impl TranslationJaHigh {
                 &ModelDType::Auto,
                 &Device::new_metal(0).unwrap(),
                 false,
-                DeviceMapMetadata::dummy(),
+                DeviceMapSetting::Auto(AutoDeviceMapParams::default_text()),
                 None,
                 None,
             )
@@ -220,7 +223,7 @@ impl TranslationJaHigh {
                 messages: RequestMessage::Completion {
                     text: prompt,
                     echo_prompt: false,
-                    best_of: 1,
+                    best_of: Some(1),
                 },
                 sampling_params: SamplingParams::deterministic(),
                 response: tx,

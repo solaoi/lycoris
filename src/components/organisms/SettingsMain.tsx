@@ -584,9 +584,6 @@ const SettingsMain = (): JSX.Element => {
                                                     <div className="badge bg-slate-400 text-white">reazonspeech-k2-v2</div>
                                                     <div className="badge bg-slate-400 text-white ml-1">1.3 GB</div>
                                                 </div>
-                                                <p className="text-sm">
-                                                    ※ 追っかけ開始が遅い代わりに、高速な文字起こしを行います。
-                                                </p>
                                             </div>
                                             <ModelDownloadReazonSpeechButton />
                                         </div>
@@ -617,7 +614,7 @@ const SettingsMain = (): JSX.Element => {
                                                     <div className="badge bg-slate-400 text-white ml-1">7.1 GB</div>
                                                 </div>
                                                 <p className="text-sm">
-                                                    ※ メモリ解放されないバグのため、利用後にアプリ再起動が必要。
+                                                    ※ 『追っかけ再開』時のみ有効。また利用後にアプリの再起動が必要です。
                                                 </p>
                                             </div>
                                             <ModelDownloadHonyaku13BButton />
