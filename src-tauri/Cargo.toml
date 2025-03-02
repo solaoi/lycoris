@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.26"
+version = "0.9.27"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -11,20 +11,20 @@ rust-version = "1.83"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.5", features = [] }
+tauri-build = { version = "1.5.6", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.8.1", features = [ "macos-private-api", "api-all"] }
+tauri = { version = "1.8.2", features = [ "macos-private-api", "api-all"] }
 vosk = "0.2.0"
 # cpal 0.15.3 has a bug that causes the app to crash on macOS with coreaudio-rs
 cpal = "0.14.1"
 dasp = "0.11"
 unicode-segmentation = "1.12.0"
-once_cell = "1.20.2"
+once_cell = "1.20.3"
 crossbeam-channel = "0.5.14"
-chrono = "0.4.39"
+chrono = "0.4.40"
 hound = "3.5.1"
 rusqlite = "0.32.1"
 samplerate-rs = "0.1.0"
@@ -34,26 +34,26 @@ tokio = { version = "1", features = ["full"] }
 futures-util = "0.3.31"
 # serve audio
 urlencoding = "2.1.3"
-screencapturekit = "0.3.2"
+screencapturekit = "0.3.5"
 core-media-rs = "0.3.4"
 
-xcap = "0.2.0"
+xcap = "0.4.0"
 # permission
 macos-accessibility-client = "0.0.1"
 core-graphics = "0.24.0"
 objc = "0.2"
 objc-foundation = "0.1"
 objc_id = "0.1"
-ct2rs = { version = "0.9.5", features = ["accelerate"] }
-mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.3.4", features = [
+ct2rs = { version = "0.9.6", features = ["accelerate"] }
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.4.0", features = [
     "metal",
 ] }
 tauri-plugin-clipboard = "1.1.4"
 sbv2_core = { version = "0.1.4", features = ["dynamic"] }
 whisper-rs = { version = "0.13.2", features = ["metal"] }
-sherpa-rs = "0.5.1"
+sherpa-rs = "0.6.6"
 mcp-sdk = { git="https://github.com/solaoi/mcp-sdk", rev="c7e06ce40156fbe23911379e48268eb9543f8acc" }
-which = "7.0.1"
+which = "7.0.2"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
 
 [dependencies.tauri-plugin-sql]

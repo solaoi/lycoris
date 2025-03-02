@@ -48,10 +48,8 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
         <div className="tool-card w-full">
             {is_required_user_permission ?
                 <div>
-                    <div className="mb-3" style={{ overflowWrap: "anywhere" }}>
-                        {content}
-                    </div>
-                    <div>
+                    <MyMarkdown content={content || ""} title={`${note_title.trim()}_action-start_${id}`} />
+                    <div className="mt-2">
                         {cmds.filter(cmd => cmd.result == null).map(({ call_id, args, name, method, description }) => {
                             return (
                                 <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow">
