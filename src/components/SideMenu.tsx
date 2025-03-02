@@ -49,9 +49,9 @@ const SideMenu = (): JSX.Element => {
         invoke('delete_note_command', { noteId: note_id });
     }
     return (
-        <div className="flex justify-between border-r bg-base-100" style={{ width: "320px", flexFlow: "column", height: `calc(100vh - 64px)` }}>
+        <div className="flex justify-between border-r bg-base-100 w-[320px]" style={{ flexFlow: "column", height: `calc(100vh - 64px)` }}>
             <div className="flex" style={{ flexFlow: "column" }}>
-                <div className="bg-base-100 flex items-center justify-center select-none text-xl h-[48px]">
+                <div className="bg-base-100 flex items-center justify-center text-xl h-[48px]">
                     <button type="button" className="bg-base-200 hover:bg-base-300 focus:outline-none rounded-lg px-2 py-1"
                         onClick={() => {
                             setNotes(prev => {

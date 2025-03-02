@@ -3,14 +3,17 @@
     windows_subsystem = "windows"
 )]
 
+use serde_json::Value;
 use tauri::{
     http::{HttpRange, ResponseBuilder},
     AppHandle, Manager, PathResolver, State, Window,
 };
 use tauri_plugin_sql::{Migration, MigrationKind};
+use tokio::runtime::Runtime;
 
 use std::{
     cmp::min,
+    collections::HashMap,
     env,
     io::{Read, Seek, SeekFrom},
     path::PathBuf,
@@ -23,7 +26,7 @@ use urlencoding::decode;
 
 mod module;
 use module::{
-    action,
+    action::{self, request_gpt_tool},
     chat_online::ChatOnline,
     deleter::NoteDeleter,
     device::{self, Device},
@@ -32,6 +35,10 @@ use module::{
         sbv2_voice::StyleBertVits2VoiceModelDownloader, vosk::VoskModelDownloader,
         whisper::WhisperModelDownloader,
     },
+    mcp_host::{
+        self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
+        test_tool_connection, MCPHost, ToolConnectTestRequest,
+    },
     model_type_sbv2::ModelTypeStyleBertVits2,
     model_type_vosk::ModelTypeVosk,
     model_type_whisper::ModelTypeWhisper,
@@ -39,6 +46,7 @@ use module::{
     record::Record,
     record_desktop::RecordDesktop,
     screenshot::{self, AppWindow},
+    sqlite::{Sqlite, ToolExecution},
     synthesizer::{self, Synthesizer},
     transcription::{TraceCompletion, Transcription},
     transcription_amivoice::TranscriptionAmivoice,
@@ -52,6 +60,10 @@ use module::{
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
 struct SynthesizeState(Arc<Mutex<Option<Synthesizer>>>);
+
+struct MCPHostState(Arc<Mutex<Option<MCPHost>>>);
+struct RuntimeState(Arc<Runtime>);
+struct ToolsState(HashMap<String, Vec<Value>>);
 
 const BUNDLE_IDENTIFIER: &str = "blog.aota.Lycoris";
 
@@ -205,18 +217,26 @@ fn has_microphone_permission_command(window: Window) -> bool {
 }
 
 #[tauri::command]
-fn execute_action_command(app_handle: AppHandle, note_id: u64) {
-    std::thread::spawn(move || {
+async fn execute_action_command(
+    tools_state: State<'_, ToolsState>,
+    app_handle: AppHandle,
+    note_id: u64,
+) -> Result<(), String> {
+    let tools = tools_state.0.clone();
+
+    tokio::task::spawn_blocking(move || {
         if action::initialize_action(app_handle, note_id) {
             let mut lock = action::SINGLETON_INSTANCE.lock().unwrap();
             if let Some(singleton) = lock.as_mut() {
-                singleton.execute();
+                singleton.execute(tools);
             }
         } else {
             println!("Action is already initialized and executing. Skipping.");
         }
         action::drop_action();
     });
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -354,6 +374,140 @@ fn stop_trace_command(state: State<'_, RecordState>, app_handle: AppHandle) {
     }
 }
 
+#[tauri::command]
+async fn test_mcp_tool_command(
+    tool_connect_test_request: ToolConnectTestRequest,
+) -> Result<bool, String> {
+    tokio::task::spawn_blocking(move || {
+        let runtime = tokio::runtime::Runtime::new()
+            .map_err(|e| format!("Failed to create runtime: {}", e))?;
+
+        runtime.block_on(async {
+            match test_tool_connection(&tool_connect_test_request).await {
+                Ok(result) => Ok(result),
+                Err(e) => {
+                    eprintln!("Tool connection test failed: {}", e);
+                    Err(e.to_string())
+                }
+            }
+        })
+    })
+    .await
+    .map_err(|e| format!("Task execution failed: {}", e))?
+}
+
+#[tauri::command]
+async fn add_mcp_config_command(config: mcp_host::Config) -> Result<(), String> {
+    add_mcp_config(config).await
+}
+
+#[tauri::command]
+fn delete_mcp_config_command(tool_names: Vec<String>) -> Result<(), String> {
+    delete_mcp_config(tool_names)
+}
+
+#[tauri::command]
+fn get_mcp_tools_command() -> Result<Vec<String>, String> {
+    get_mcp_tools()
+}
+
+#[tauri::command]
+async fn get_mcp_tool_features_command(
+    runtime_state: State<'_, RuntimeState>,
+    state: State<'_, MCPHostState>,
+    tool_name: String,
+) -> Result<Vec<Value>, String> {
+    let runtime = runtime_state.0.clone();
+    let state_clone = state.0.clone();
+
+    tokio::task::spawn_blocking(move || {
+        runtime.block_on(async move {
+            let host = {
+                let lock = state_clone.lock().unwrap();
+                match &*lock {
+                    Some(host) => host.clone(),
+                    None => return Err("MCPHost not initialized".to_string()),
+                }
+            };
+
+            host.get_tool_features(&tool_name)
+                .await
+                .map_err(|e| e.to_string())
+        })
+    })
+    .await
+    .map_err(|e| format!("Runtime error: {}", e))?
+}
+
+#[tauri::command]
+async fn execute_mcp_tool_feature_command(
+    runtime_state: State<'_, RuntimeState>,
+    state: State<'_, MCPHostState>,
+    tools_state: State<'_, ToolsState>,
+    speech_id: u64,
+) -> Result<ToolExecution, String> {
+    let runtime = runtime_state.0.clone();
+    let state_clone = state.0.clone();
+    let tools_clone = tools_state.0.clone();
+    tokio::task::spawn_blocking(move || {
+        runtime.block_on(async move {
+            let host = {
+                let lock = state_clone.lock().unwrap();
+                match &*lock {
+                    Some(host) => host.clone(),
+                    None => return Err("MCPHost not initialized".to_string()),
+                }
+            };
+            let sqlite = Sqlite::new();
+            let tool_execution_wrapper = sqlite.select_tool(speech_id).unwrap();
+            let tool_execution = tool_execution_wrapper.tool_execution;
+            let mut updated_cmds = Vec::new();
+            for mut cmd in tool_execution.cmds {
+                if cmd.result.is_some() && !cmd.result.clone().unwrap().is_empty() {
+                    updated_cmds.push(cmd);
+                    continue;
+                }
+                let host = host.clone();
+                let tool_args = cmd.args.clone();
+
+                let result = host
+                    .execute_tool_feature(&cmd.name, &cmd.method, tool_args)
+                    .await
+                    .map_err(|e| e.to_string());
+                cmd.result = match result {
+                    Ok(value) => {
+                        if let Some(content) = value.get("content") {
+                            Some(content.to_string())
+                        } else {
+                            Some(value.to_string())
+                        }
+                    }
+                    Err(err) => Some(format!("Error: {}", err)),
+                };
+                updated_cmds.push(cmd);
+            }
+
+            let id = tool_execution_wrapper.id;
+            let note_id = tool_execution_wrapper.note_id;
+            let question = tool_execution_wrapper.content;
+            let contents = sqlite.select_contents_by(note_id, id).unwrap();
+            let token = sqlite.select_whisper_token().unwrap();
+            let result =
+                request_gpt_tool(tools_clone, question, contents, token, Some(updated_cmds))
+                    .await
+                    .unwrap();
+
+            sqlite
+                .update_tool_execution(speech_id, &result)
+                .map_err(|e| format!("Failed to update database: {}", e))?;
+
+            Ok(result)
+        })
+    })
+    .await
+    .map_err(|e| format!("Runtime error: {}", e))?
+}
+
 fn set_ort_env(path_resolver: &PathResolver) {
     let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
 
@@ -366,6 +520,8 @@ fn set_ort_env(path_resolver: &PathResolver) {
 }
 
 fn main() {
+    let _ = fix_path_env::fix();
+
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
             let raw_path = request.uri().replace("stream://localhost", "");
@@ -425,6 +581,32 @@ fn main() {
         )
         .setup(|app| {
             set_ort_env(&app.path_resolver());
+
+            let runtime = Arc::new(Runtime::new().expect("Failed to create Tokio runtime"));
+            app.manage(RuntimeState(runtime.clone()));
+            app.manage(MCPHostState(Arc::new(Mutex::new(None))));
+            let app_handle = app.handle();
+            runtime.block_on(async {
+                let sqlite = Sqlite::new();
+                if let Err(e) = sqlite.ensure_tools_table_exists() {
+                    eprintln!("Failed to ensure tools table exists: {:?}", e);
+                    return;
+                }
+
+                match initialize_mcp_host(app_handle.clone()).await {
+                    Ok(host) => {
+                        let tools = host.get_all_tool_features().await.unwrap();
+                        app_handle.manage(ToolsState(tools));
+                        if let Some(state) = app_handle.try_state::<MCPHostState>() {
+                            let mut lock = state.0.lock().unwrap();
+                            *lock = Some(host);
+                            println!("MCPHost initialized successfully");
+                        }
+                    }
+                    Err(e) => eprintln!("Failed to initialize MCPHost: {:?}", e),
+                }
+            });
+
             Ok(())
         })
         .manage(RecordState(Default::default()))
@@ -455,6 +637,12 @@ fn main() {
             stop_command,
             start_trace_command,
             stop_trace_command,
+            test_mcp_tool_command,
+            add_mcp_config_command,
+            get_mcp_tools_command,
+            get_mcp_tool_features_command,
+            delete_mcp_config_command,
+            execute_mcp_tool_feature_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

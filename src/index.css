@@ -45,9 +45,12 @@ body {
     display: none;
 }
 
+.chat-start .znc ul,ol,p+p,blockquote,table,h1,h2,h3,h4,h5,h6 {
+    margin: 0!important;
+}
+
 .znc ul,ol,p+p,blockquote,table,h1,h2,h3,h4,h5,h6 {
     width: 100%;
-    margin: 0!important;
 }
 
 .znc hr {
@@ -61,12 +64,16 @@ body {
 
 .znc pre {
     width: 100%;
-    margin: 1.5rem 0!important;
     background-color: #bfbfbf;
+    white-space: pre-wrap;
 }
 
 .znc pre:has(.lang-mermaid) {
     background-color: initial;
+}
+
+.szh-menu {
+    padding: 0;
 }
 
 .szh-menu-container ul {
@@ -108,6 +115,14 @@ body {
 
 .chat-bubble:has(.suggest-card) {
     width: fit-content;
+}
+
+.settings .menu li > *:not(ul):not(.menu-title):not(details):active,
+.menu li > *:not(ul):not(.menu-title):not(details).active,
+.menu li > details > summary:active {
+    color: hsl(var(--bc));
+    background-color: hsl(var(--b1));
+    cursor: default;
 }
 
 main {

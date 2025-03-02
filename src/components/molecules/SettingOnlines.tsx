@@ -12,7 +12,7 @@ const SettingOnlines = (): JSX.Element => {
     }
 
     return (
-        <select className="select focus:outline-none pl-1 pr-0 w-32" name="onlines" onChange={change} >
+        <select className="select focus:outline-none pl-1 pr-0 w-32 bg-transparent" name="onlines" onChange={change} >
             {settingOnlines?.map((online, i) => (
                 <option key={"setting-online" + i} value={online} selected={online === settingOnline}>{online}</option>
             ))}

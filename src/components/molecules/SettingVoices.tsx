@@ -12,7 +12,7 @@ const SettingVoices = (): JSX.Element => {
     }
 
     return (
-        <select className="select focus:outline-none pl-1 pr-0 w-44" name="voices" onChange={change} >
+        <select className="select focus:outline-none pl-1 pr-0 w-44 bg-transparent" name="voices" onChange={change} >
             {settingVoices?.map((voice, i) => (
                 <option key={"setting-process" + i} value={voice} selected={voice === settingVoice}>{voice}</option>
             ))}

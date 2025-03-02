@@ -10,7 +10,7 @@ function App() {
   return (
     <RecoilRoot>
       <Header />
-      <div style={{ display: "flex" }}>
+      <div className="flex select-none">
         <SideMenu />
         <Main />
         <ToastContainer/>

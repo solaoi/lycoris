@@ -51,7 +51,7 @@ const AppWindow = (): JSX.Element => {
             <div className="dropdown dropdown-top" onClick={() =>
                 setIsDesktopAudioToggled(!isDesktopAudioToggled)
             }>
-                <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
+                <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
                 >
                     <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{(targetApp === null || targetWindow === null) ? "撮影する画面を選択" : `${targetApp} / ${targetWindow.title}`}</div>
                     <div>
@@ -59,9 +59,9 @@ const AppWindow = (): JSX.Element => {
                             <path fillRule="evenodd" d="M9.47 6.47a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L10 8.06l-3.72 3.72a.75.75 0 0 1-1.06-1.06l4.25-4.25Z" clipRule="evenodd" />
                         </svg>
                     </div>
-                    <div className="opacity-0 w-24 invisible rounded text-[12px] 
+                    <div className="w-24 invisible rounded text-[12px] 
                     font-bold text-white py-1 bg-slate-600 top-[-1.25rem] left-4 z-10
-                    group-hover:visible opacity-100 absolute">撮影する画面
+                    group-hover:visible absolute">撮影する画面
                     </div>
                 </label>
                 {hasPermissionScreenCapture && <div tabIndex={0} className="p-0 dropdown-content menu rounded-box w-[15.5rem] bg-white join join-vertical"

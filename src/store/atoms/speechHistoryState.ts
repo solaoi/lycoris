@@ -30,6 +30,7 @@ const sqliteEffect: (note_id:number) => AtomEffect<SpeechHistoryType[]> =
               await db.saveSpeech({...current, note_id}).then(async()=>{
                 await loadPersisted();
                 if (current.speech_type === "action") {
+                  console.log(`execute_action_command: ${current.note_id}`);
                   invoke('execute_action_command', { noteId: current.note_id })
                 }
             });
