@@ -10,7 +10,7 @@ const Main = (): JSX.Element => {
     const feature = useRecoilValue(featureState)
 
     return (
-        <main style={{ minWidth: "450px", width: "100%", flex: 1 }}>
+        <main className="w-full flex-1 min-w-[450px]">
             {feature === "note" && (selectedNote === null ? <LogoMain /> : <NoteMain />)}
             {feature === "settings" && <SettingsMain />}
         </main>

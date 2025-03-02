@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Lycoris",
-    "version": "0.9.25"
+    "version": "0.9.26"
   },
   "tauri": {
     "allowlist": {

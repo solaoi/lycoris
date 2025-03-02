@@ -1,7 +1,7 @@
 export type SpeechHistoryType = {
     id? : number;
     speech_type: "speech" | "memo" | "screenshot" | "action";
-    action_type?: "chat" | "suggest";
+    action_type?: "chat" | "suggest" | "tool";
     created_at_unixtime: number;
     content: string;
     content_2?: string;

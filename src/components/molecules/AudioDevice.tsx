@@ -93,19 +93,19 @@ const AudioDevices = (): JSX.Element => {
     }
 
     return (
-        <div className="dropdown select-none">
-            {isRecording ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
+        <div className="dropdown">
+            {isRecording ? <label tabIndex={0} className="group normal-case btn w-52 flex justify-between btn-disabled text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}>
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{validAudioDevice(hasDesktopAudio, audioDevice)}</div>
                 <div>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
                         <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                     </svg>
                 </div>
-                <div className="opacity-0 w-24 invisible rounded text-[12px] 
+                <div className="w-24 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute">利用する音源
+                        group-hover:visible absolute">利用する音源
                 </div>
-            </label> : <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between" style={{ color: "inherit", backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
+            </label> : <label ref={dropdownRef} onMouseDown={e => checkAndCloseDropDown(e.currentTarget)} tabIndex={0} className="group normal-case btn w-52 flex justify-between text-inherit" style={{ backgroundColor: "hsl(var(--b1) / var(--tw-bg-opacity))", border: "1px solid hsl(var(--bc) / 0.2)" }}
             >
                 <div className="w-36 text-left overflow-x-hidden whitespace-nowrap text-ellipsis">{validAudioDevice(hasDesktopAudio, audioDevice)}</div>
                 <div>
@@ -113,9 +113,9 @@ const AudioDevices = (): JSX.Element => {
                         <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
                     </svg>
                 </div>
-                <div className="opacity-0 w-24 invisible rounded text-[12px] 
+                <div className="w-24 invisible rounded text-[12px] 
                         font-bold text-white py-1 bg-slate-600 top-12 left-4
-                        group-hover:visible opacity-100 absolute ">利用する音源
+                        group-hover:visible absolute ">利用する音源
                 </div>
             </label>}
             <ul tabIndex={0} className="dropdown-content menu rounded-box"
@@ -155,8 +155,7 @@ const AudioDevices = (): JSX.Element => {
                                 </label>
                             </div>
                         </li>
-                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent"
-                            style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+                        {showAudioSource && <ul className="max-h-56 overflow-y-scroll rounded-box scrollbar-transparent rounded-t-none" >
                             {audioDevices.map((device, i) => (
                                 <li key={"audio-device_" + i}>
                                     <label className="label inline-flex active:!bg-inherit">

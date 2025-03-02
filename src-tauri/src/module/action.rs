@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::{collections::HashMap, sync::Mutex};
 
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE},
@@ -7,7 +7,7 @@ use reqwest::{
 use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
-use super::sqlite::{Content, Sqlite};
+use super::sqlite::{Content, Sqlite, ToolExecution, ToolExecutionCmd};
 use tokio::runtime::Runtime;
 
 pub struct Action {
@@ -27,6 +27,7 @@ impl Action {
         let model = sqlite
             .select_ai_model()
             .unwrap_or_else(|_| "gpt-4o-mini".to_string());
+
         Self {
             runtime,
             app_handle,
@@ -152,10 +153,10 @@ impl Action {
             })
         } else {
             json!({
-                "model": model,
-                "temperature": temperature,
-                "messages": messages
-              })
+              "model": model,
+              "temperature": temperature,
+              "messages": messages
+            })
         };
 
         let response = client
@@ -350,7 +351,7 @@ impl Action {
         Ok(response_text)
     }
 
-    pub fn execute(&mut self) {
+    pub fn execute(&mut self, tools: HashMap<String, Vec<Value>>) {
         if self.token.is_empty() {
             println!("whisper token is empty, so skipping...");
             return;
@@ -440,6 +441,43 @@ impl Action {
                                             }
                                         }
                                     }
+                                    "tool" => {
+                                        match request_gpt_tool(
+                                            tools.clone(),
+                                            action.content,
+                                            contents,
+                                            self.token.clone(),
+                                            None,
+                                        )
+                                        .await
+                                        {
+                                            Ok(answer) => {
+                                                match self.sqlite.update_action_content_2(
+                                                    action.id,
+                                                    serde_json::to_string(&answer).unwrap(),
+                                                ) {
+                                                    Ok(result) => {
+                                                        let _ = self
+                                                            .app_handle
+                                                            .emit_all("actionExecuted", result);
+                                                    }
+                                                    Err(e) => {
+                                                        println!(
+                                                            "Error updating action content_2: {:?}",
+                                                            e
+                                                        );
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            Err(_) => {
+                                                println!(
+                                                    "gpt api is temporarily failed, so skipping..."
+                                                );
+                                                break;
+                                            }
+                                        }
+                                    }
                                     &_ => {
                                         println!("Unsupported action type, so skipping...");
                                         break;
@@ -491,4 +529,247 @@ pub fn drop_action() {
         let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
         *singleton = None;
     }
+}
+
+pub async fn request_gpt_tool(
+    tools: HashMap<String, Vec<Value>>,
+    question: String,
+    contents: Vec<Content>,
+    token: String,
+    executed_cmds: Option<Vec<ToolExecutionCmd>>,
+) -> Result<ToolExecution, Box<dyn std::error::Error>> {
+    let model = "gpt-4o";
+    let url = "https://api.openai.com/v1/chat/completions";
+    let temperature = 0;
+
+    let client = Client::new();
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("Bearer {}", token))?,
+    );
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+    let mut messages: Vec<Value> = Vec::new();
+    let mut prompt = "あなたは優秀なAIアシスタントです。
+提供される情報を統合し、必要に応じてツールも活用して、ユーザーの最終的な質問に対して実用的で具体的な回答を提供することが、あなたの役割です。
+以下の手順に従って処理を行ってください：
+
+1. 情報の分析：
+a) 文字起こし (:::transcription で囲まれた部分)：会話の主要な内容と流れを把握します。
+b) メモ (:::note で囲まれた部分)：文脈や補足情報として扱います。
+c) 過去のAIとのQ&A (:::assistant で囲まれた部分)：関連する追加情報として考慮します。
+2. ツールの要否判断：
+- 既存の情報や一般知識で解決できるかを判断し、ツールの利用が適切かどうかを判断します。
+3. ツールの活用：
+- 与えられたツールの一覧から、ユーザーの最終的な質問に対して必要なツールを選択します。
+- ツールの使用結果が英語で提供される場合、必要に応じて日本語に翻訳・要約します。
+- ツールの使用結果が期待通りでない場合：
+a) 他の適切なツールがないか検討します。
+b) 他に適切なツールがない、または全て期待通りの結果が得られない場合は、その旨を明確に伝えます。
+
+以下に提供される情報を上記の手順に従って分析し、次のユーザーの質問に答えてください：
+
+".to_string();
+    let mut current_type = String::new();
+    let mut current_content = String::new();
+
+    for content in contents.iter() {
+        match content.speech_type.as_str() {
+            "action" => {
+                if !current_content.is_empty() {
+                    prompt.push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+                    current_content.clear();
+                }
+                if content.action_type == "suggest" {
+                    prompt.push_str(&format!(
+                            ":::assistant\n[query]\n次の発言者のための3つの発話サジェストとその理由を生成してください。\n[answer] {}\n{}\n:::\n",
+                            content.content, content.content_2
+                        ));
+                } else {
+                    prompt.push_str(&format!(
+                        ":::assistant\n[query]\n{}\n[answer]\n{}\n:::\n",
+                        content.content, content.content_2
+                    ));
+                }
+            }
+            "speech" | _ => {
+                let speech_type = if content.speech_type == "speech" {
+                    "transcription"
+                } else if content.speech_type == "memo" {
+                    "note"
+                } else {
+                    // "screenshot"
+                    "note"
+                };
+                if speech_type != current_type && !current_content.is_empty() {
+                    prompt.push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+                    current_content.clear();
+                }
+                current_type = speech_type.to_string();
+                current_content.push_str(&content.content);
+                current_content.push('\n');
+            }
+        }
+    }
+
+    if !current_content.is_empty() {
+        prompt.push_str(&format!(":::{}\n{}\n:::\n", current_type, current_content));
+    }
+    prompt.push_str("\n回答の際は、上記の手順に従い、情報を適切に統合し、必要に応じてツールを使用するか、次のユーザーの質問に直接応えてください。");
+
+    messages.push(json!({
+        "role": "system",
+        "content": prompt
+    }));
+    messages.push(json!({
+        "role": "user",
+        "content": question
+    }));
+
+    if let Some(cmds) = executed_cmds.clone() {
+        messages.push(json!({
+            "role": "assistant",
+            "content": null,
+            "tool_calls": cmds.iter().map(|cmd| {
+                json!({
+                    "id": cmd.call_id,
+                    "type": "function",
+                    "function": {
+                        "name": format!("{}_{}", cmd.name, cmd.method),
+                        "arguments": cmd.args.to_string()
+                    }
+                })
+            }).collect::<Vec<Value>>()
+        }));
+        for cmd in cmds {
+            if let Some(result) = cmd.result {
+                messages.push(json!({
+                    "tool_call_id": cmd.call_id,
+                    "role": "tool",
+                    "content": result
+                }));
+            }
+        }
+    }
+
+    // for debugging
+    // println!("messages: {:?}", messages);
+
+    let available_tools: Vec<Value> = tools.iter().flat_map(|(key, values)| {
+            values.iter().map(|value| {
+                json!({
+                    "type": "function",
+                    "function": {
+                        "name": format!("{}_{}", key, value.get("name").and_then(|v| v.as_str()).unwrap_or_default()),
+                        "description": value.get("description").and_then(|v| v.as_str()).unwrap_or_default(),
+                        "parameters": value.get("inputSchema").unwrap_or(&Value::Null),
+                    }
+                })
+            }).collect::<Vec<Value>>()
+        }).collect();
+
+    let post_body = json!({
+      "model": model,
+      "temperature": temperature,
+      "messages": messages,
+      "tools": available_tools
+    //   "tool_choice": "required"
+    });
+
+    let response = client
+        .post(url)
+        .headers(headers)
+        .json(&post_body)
+        .send()
+        .await?;
+
+    let status = response.status();
+    let json_response: Value = response.json().await?;
+
+    // println!("json_response: {:?}", json_response);
+
+    let response: ToolExecution = if status == 200 {
+        let message = json_response["choices"]
+            .get(0)
+            .ok_or("No response choices available")?["message"]
+            .clone();
+
+        if message["tool_calls"].is_null() {
+            ToolExecution {
+                is_required_user_permission: false,
+                content: message["content"]
+                    .as_str()
+                    .unwrap_or("No content found")
+                    .to_string(),
+                cmds: executed_cmds.unwrap_or(vec![]),
+            }
+        } else {
+            if let Some(tool_calls) = message["tool_calls"].as_array() {
+                let mut tool_results = executed_cmds.unwrap_or(vec![]);
+                for tool_call in tool_calls {
+                    let call_id = tool_call["id"].as_str().expect("call_id not found");
+                    let function_id = tool_call["function"]["name"]
+                        .as_str()
+                        .expect("function not found");
+
+                    let tool_args: Value = serde_json::from_str(
+                        tool_call["function"]["arguments"].as_str().unwrap_or("{}"),
+                    )?;
+
+                    let (tool_name, method) = function_id
+                        .split_once('_')
+                        .ok_or_else(|| format!("Invalid function ID format: {}", function_id))?;
+                    tool_results.push(ToolExecutionCmd {
+                        call_id: call_id.to_string(),
+                        args: tool_args,
+                        name: tool_name.to_string(),
+                        method: method.to_string(),
+                        description: tools
+                            .get(tool_name)
+                            .and_then(|values| {
+                                values.iter().find(|value| {
+                                    value
+                                        .get("name")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or_default()
+                                        == method
+                                })
+                            })
+                            .and_then(|value| {
+                                value
+                                    .get("description")
+                                    .and_then(|d| d.as_str())
+                                    .map(String::from)
+                            })
+                            .unwrap_or_default(),
+                        result: None,
+                    });
+                }
+                ToolExecution {
+                    is_required_user_permission: true,
+                    content: message["content"]
+                        .as_str()
+                        .unwrap_or("ツールの実行許可を待っています。")
+                        .to_string(),
+                    cmds: tool_results,
+                }
+            } else {
+                ToolExecution {
+                    is_required_user_permission: false,
+                    content: "ツールを正常に呼び出せませんでした。".to_string(),
+                    cmds: vec![],
+                }
+            }
+        }
+    } else {
+        ToolExecution {
+            is_required_user_permission: false,
+            content: json_response.to_string(),
+            cmds: vec![],
+        }
+    };
+
+    Ok(response)
 }

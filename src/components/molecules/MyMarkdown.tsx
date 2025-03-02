@@ -7,8 +7,10 @@ import { save } from '@tauri-apps/api/dialog';
 import html2canvas from 'html2canvas';
 import { ControlledMenu, MenuItem } from '@szhsin/react-menu';
 import clipboard from "tauri-plugin-clipboard-api";
-import { PaperClip } from '../atoms/PaperClip';
 import { Download } from '../atoms/Download';
+import { Photo } from '../atoms/Photo';
+import { DocumentText } from '../atoms/DocumentText';
+import { DocumentDuplicateFilled } from '../atoms/DocumentDuplicateFilled';
 
 type MyMarkdownProps = {
     content: string
@@ -147,9 +149,10 @@ const MyMarkdown = (props: MyMarkdownProps) => {
     }, [content]);
 
     return (
-        <div ref={rootRef} className='znc w-full' style={minWidth ? { minWidth } : {}}>
+        <div ref={rootRef} className='znc w-full select-auto' style={minWidth ? { minWidth, overflowWrap: "anywhere" } : { overflowWrap: "anywhere" }}>
             <Markdown
                 options={{
+                    disableParsingRawHTML: true,
                     forceBlock: true,
                     overrides: {
                         a: ({ children, ...props }) => <a {...props} target="_blank">{children}</a>,
@@ -166,32 +169,32 @@ const MyMarkdown = (props: MyMarkdownProps) => {
             >
                 {isTextSelected ?
                     <>
-                        <MenuItem onClick={handlePartialText}>
-                            <PaperClip />
+                        <MenuItem onClick={handlePartialText} style={{margin: 0}}>
+                            <DocumentDuplicateFilled />
                             <p className='pl-2'>コピー</p>
                         </MenuItem>
                     </> :
                     isTableSelected ?
                         <>
-                            <MenuItem onClick={() => handleImage("copy")}>
-                                <PaperClip />
+                            <MenuItem onClick={() => handleImage("copy")} style={{margin: 0}}>
+                                <Photo />
                                 <p className='pl-2'>画像としてコピー</p>
                             </MenuItem>
-                            <MenuItem onClick={() => handleImage("download")}>
+                            <MenuItem onClick={() => handleImage("download")} style={{margin: 0}}>
                                 <Download />
                                 <p className='pl-2'>画像としてダウンロード</p>
                             </MenuItem>
                         </> :
                         <>
-                            <MenuItem onClick={handleText}>
-                                <PaperClip />
-                                <p className='pl-2'>全体をコピー</p>
+                            <MenuItem onClick={handleText} style={{margin: 0}}>
+                                <DocumentText />
+                                <p className='pl-2'>テキストとしてコピー</p>
                             </MenuItem>
-                            <MenuItem onClick={() => handleImage("copy")}>
-                                <PaperClip />
+                            <MenuItem onClick={() => handleImage("copy")} style={{margin: 0}}>
+                                <Photo />
                                 <p className='pl-2'>画像としてコピー</p>
                             </MenuItem>
-                            <MenuItem onClick={() => handleImage("download")}>
+                            <MenuItem onClick={() => handleImage("download")} style={{margin: 0}}>
                                 <Download />
                                 <p className='pl-2'>画像としてダウンロード</p>
                             </MenuItem>
