@@ -54,7 +54,7 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     <div>
                         {cmds.filter(cmd => cmd.result == null).map(({ call_id, args, name, method, description }) => {
                             return (
-                                <div className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow">
+                                <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow">
                                     <h3 className="flex items-center justify-between text-xl font-semibold text-neutral-700 border-b pb-2">
                                         {name}
                                         <div className="cursor-pointer group relative"
@@ -102,16 +102,10 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                         {showExecuted && (
                             cmds.filter(cmd => cmd.result !== null).reverse().map(({ call_id, args, name, method, description, result }) => {
                                 return (
-                                    <div className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow">
+                                    <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow mb-2">
                                         <h3 className="flex items-center justify-between text-xl font-semibold text-neutral-700 border-b pb-2">
                                             <div className="flex items-center gap-2">
-                                                <div className="text-primary group cursor-pointer relative"
-                                                    onClick={() => {
-                                                        setDialogName(name);
-                                                        setDialogMethod(method);
-                                                        setDialogResult(result || "");
-                                                        dialogExecutedRef.current?.showModal();
-                                                    }}>
+                                                <div className="text-primary">
                                                     <CheckBadge />
                                                 </div>
                                                 {name}
@@ -170,7 +164,7 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                         {showExecuted && (
                             cmds.filter(cmd => cmd.result !== null).reverse().map(({ call_id, args, name, method, description, result }) => {
                                 return (
-                                    <div className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow mb-2">
+                                    <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow mb-2">
                                         <h3 className="flex items-center justify-between text-xl font-semibold text-neutral-700 border-b pb-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="text-primary">

@@ -68,8 +68,8 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                         </div>
                     </div>
                     {serverName === openDescription && <div className="mt-2 ml-8">
-                        {toolDescriptions.map(t => (
-                            <div className="cursor-default py-3 px-6 mb-2 border border-neutral-300 rounded-md">
+                        {toolDescriptions.map((t, index) => (
+                            <div key={`${t.name}_${index}`} className="cursor-default py-3 px-6 mb-2 border border-neutral-300 rounded-md">
                                 <div className="mb-2">{t.name}</div>
                                 <div className="text-sm">
                                     <p>{t.description}</p>

@@ -35,6 +35,7 @@ import { ModelDownloadReazonSpeechButton } from "../molecules/ModelDownloadReazo
 import { ModelDownloadReazonSpeechProgress } from "../molecules/ModelDownloadReazonSpeechProgress"
 import { useState } from "react"
 import { SettingToolContent } from "../molecules/SettingToolContent"
+import { settingKeyState } from "../../store/atoms/settingKeyState"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -42,6 +43,7 @@ const SettingsMain = (): JSX.Element => {
     const settingOnline = useRecoilValue(settingOnlineState);
     const settingVoice = useRecoilValue(settingVoiceState);
     const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3>(0);
+    const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
 
     return (
         <div className="settings py-5 pl-8" >
@@ -55,7 +57,7 @@ const SettingsMain = (): JSX.Element => {
             <ul className="menu menu-horizontal menu-xs bg-base-200 rounded gap-2 mt-8 p-[4px] mb-2 text-gray-400 h-[32px]">
                 <li><button onClick={() => { if (settingCategory !== 0) { setSettingCategory(0); } }} className={settingCategory === 0 ? "active" : ""}>基本設定</button></li>
                 <li><button onClick={() => { if (settingCategory !== 1) { setSettingCategory(1); } }} className={settingCategory === 1 ? "active" : ""}>オンライン設定</button></li>
-                <li><button onClick={() => { if (settingCategory !== 2) { setSettingCategory(2); } }} className={settingCategory === 2 ? "active" : ""}>各種アクション</button></li>
+                <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 2) { setSettingCategory(2); } }} className={settingCategory === 2 ? "active" : ""}>各種アクション</button></li>
                 <li><button onClick={() => { if (settingCategory !== 3) { setSettingCategory(3); } }} className={settingCategory === 3 ? "active" : ""}>スマート読み上げ</button></li>
             </ul>
             <div className="settings-inner overflow-auto mr-8 pb-4" style={{ height: `calc(100vh - 200px)` }}>
