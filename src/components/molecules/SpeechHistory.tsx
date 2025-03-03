@@ -101,7 +101,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                             {c.action_type === "chat" &&
                                                 <>
                                                     <div className="chat chat-start">
-                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm w-full">
                                                             <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
                                                         </div>
                                                     </div>
@@ -164,12 +164,12 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                             {c.action_type === "tool" &&
                                                 <>
                                                     <div className="chat chat-start">
-                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 shadow-sm w-full">
                                                             <MyMarkdown content={c.content} title={`${selectedNote?.note_title.trim()}_action-start_${i}`} />
                                                         </div>
                                                     </div>
                                                     <div className="chat chat-end">
-                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full relative shadow-sm">
+                                                        <div className="flex chat-bubble bg-white text-slate-500 py-5 w-full shadow-sm">
                                                             {c.content_2 ?
                                                                 <ToolCard
                                                                     id={c.id!}

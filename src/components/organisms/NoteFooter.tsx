@@ -6,6 +6,7 @@ import { AppWindow } from '../molecules/AppWindow'
 import { ActionSet } from '../molecules/ActionSet'
 import { settingKeyState } from '../../store/atoms/settingKeyState'
 import { actionState } from '../../store/atoms/actionState'
+import { SettingModel } from '../molecules/SettingModel'
 
 type NoteFooterProps = {
     titleRef: React.RefObject<HTMLInputElement>
@@ -24,6 +25,8 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
     const selectedNote = useRecoilValue(selectedNoteState)
     const setHistories = useSetRecoilState(speechHistoryState(selectedNote!.note_id))
     const targetAction = useRecoilValue(actionState)
+    const settingKey = useRecoilValue(settingKeyState("settingModel"))
+    const dialogRef = useRef<HTMLDialogElement>(null)
     const update = (type: "memo" | "action", action_type?: "chat" | "suggest" | "tool") => {
         if (type === "memo") {
             if (inputValue === "") {
@@ -206,6 +209,38 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
             {!isMemo &&
                 <div className={"flex flex-col items-center w-52" + (isMemo ? " hidden" : "")}>
                     <ActionSet />
+                    {targetAction === "チャット" &&
+                        <div className="flex items-center absolute right-2 bottom-2 bg-base-100 border border-base-200 rounded-lg px-3 py-[2px] text-black/60 text-xs hover:shadow-inner shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-3">
+                                <path d="M6.5 2.25a.75.75 0 0 0-1.5 0v3a.75.75 0 0 0 1.5 0V4.5h6.75a.75.75 0 0 0 0-1.5H6.5v-.75ZM11 6.5a.75.75 0 0 0-1.5 0v3a.75.75 0 0 0 1.5 0v-.75h2.25a.75.75 0 0 0 0-1.5H11V6.5ZM5.75 10a.75.75 0 0 1 .75.75v.75h6.75a.75.75 0 0 1 0 1.5H6.5v.75a.75.75 0 0 1-1.5 0v-3a.75.75 0 0 1 .75-.75ZM2.75 7.25H8.5v1.5H2.75a.75.75 0 0 1 0-1.5ZM4 3H2.75a.75.75 0 0 0 0 1.5H4V3ZM2.75 11.5H4V13H2.75a.75.75 0 0 1 0-1.5Z" />
+                            </svg>
+                            <button className="ml-1" onClick={((e) => {
+                                e.stopPropagation();
+                                dialogRef.current?.showModal();
+                            })}>{settingKey}</button>
+                            <dialog
+                                ref={dialogRef}
+                                className="modal cursor-default"
+                                onClick={e => {
+                                    e.stopPropagation();
+                                    if (e.target === dialogRef.current) {
+                                        dialogRef.current?.close();
+                                    }
+                                }}
+                            >
+                                <div className="modal-box w-[320px]">
+                                    <h3 className="font-bold text-lg">チャット利用モデルの変更</h3>
+                                    <div className="mt-6 flex justify-end">
+                                        <SettingModel />
+                                    </div>
+                                    <div className="modal-action">
+                                        <form method="dialog">
+                                            <button className="btn">OK</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </dialog>
+                        </div>}
                 </div>
             }
         </div>
