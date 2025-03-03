@@ -12,9 +12,9 @@ const SettingModel = (): JSX.Element => {
     }
 
     return (
-        <div className="flex items-center mb-2">
-            <p className="w-[12rem]">利用モデル</p>
-            <div className="flex flex-col w-full">
+        <div className="flex items-center">
+            <p className="mr-4">利用モデル</p>
+            <div>
                 <select className="select select-bordered focus:outline-none text-xs w-fit" name="setting-model" onChange={change} >
                     {settingModels?.map((model, i) => (
                         <option key={"setting-model" + i} value={model} selected={model === settingKey}>{model}</option>
