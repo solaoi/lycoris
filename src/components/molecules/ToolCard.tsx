@@ -1,10 +1,8 @@
 import { clipboard, invoke } from "@tauri-apps/api";
-import { useRef, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 import DB from "../../lib/sqlite";
-import { showExecutedToolsState } from "../../store/atoms/showExecutedToolsState";
 import { ArrowPath } from "../atoms/ArrowPath";
 import { Check } from "../atoms/Check";
 import { CheckBadge } from "../atoms/CheckBadge";
@@ -28,7 +26,10 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
     const [dialogName, setDialogName] = useState<string>("");
     const [dialogMethod, setDialogMethod] = useState<string>("");
     const [dialogDescription, setDialogDescription] = useState<string>("");
-    const [showExecuted, setShowExecuted] = useRecoilState(showExecutedToolsState);
+    const [showExecutedTool, setShowExecutedTool] = useState(false);
+    useEffect(() => {
+        setShowExecutedTool(false);
+    }, [id]);
     const obj = (() => {
         try {
             return JSON.parse(tool_results) as { "is_required_user_permission": boolean, "content": string | null, "cmds": { "call_id": string, "args": Object, "name": string, "method": string, "description": string, "result": string | null }[] }
@@ -90,14 +91,14 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     <div>
                         {hasExecutedTools &&
                             <button className="mt-4 mb-2 cursor-pointer flex items-center"
-                                onClick={() => setShowExecuted(!showExecuted)}>
-                                {showExecuted ?
+                                onClick={() => setShowExecutedTool(!showExecutedTool)}>
+                                {showExecutedTool ?
                                     <ChevronDown /> :
                                     <ChevronRight />
                                 }
                                 <span>実行済みのツール（{executedTools}）</span>
                             </button>}
-                        {showExecuted && (
+                        {showExecutedTool && (
                             cmds.filter(cmd => cmd.result !== null).reverse().map(({ call_id, args, name, method, description, result }) => {
                                 return (
                                     <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow mb-2">
@@ -152,14 +153,14 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     <div>
                         {hasExecutedTools &&
                             <button className="mt-4 mb-2 cursor-pointer flex items-center"
-                                onClick={() => setShowExecuted(!showExecuted)}>
-                                {showExecuted ?
+                                onClick={() => setShowExecutedTool(!showExecutedTool)}>
+                                {showExecutedTool ?
                                     <ChevronDown /> :
                                     <ChevronRight />
                                 }
                                 <span>実行済みのツール（{executedTools}）</span>
                             </button>}
-                        {showExecuted && (
+                        {showExecutedTool && (
                             cmds.filter(cmd => cmd.result !== null).reverse().map(({ call_id, args, name, method, description, result }) => {
                                 return (
                                     <div key={call_id} className="cursor-default h-full py-3 px-6 border border-neutral-300 rounded-md shadow mb-2">
