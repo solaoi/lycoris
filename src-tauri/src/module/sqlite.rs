@@ -92,7 +92,7 @@ impl Sqlite {
     pub fn select_all_tools(&self) -> Result<HashMap<String, ToolConfig>, rusqlite::Error> {
         let mut stmt = self
             .conn
-            .prepare("SELECT name, command, args, env FROM tools")
+            .prepare("SELECT name, command, args, env, auto_approve, instruction FROM tools")
             .unwrap();
         let results = stmt
             .query_map(params![], |row| {
@@ -104,7 +104,9 @@ impl Sqlite {
                             .unwrap_or_default(),
                         env: serde_json::from_str(&row.get_unwrap::<_, String>(3))
                             .unwrap_or_default(),
-                    },
+                        auto_approve: Some(row.get_unwrap::<_, u16>(4)),
+                        instruction: Some(row.get_unwrap::<_, String>(5)),
+                    }
                 ))
             })
             .unwrap()
@@ -164,10 +166,21 @@ impl Sqlite {
         command: String,
         args: String,
         env: String,
+        auto_approve: Option<u16>,
+        instruction: Option<String>,
     ) -> Result<(), rusqlite::Error> {
         self.conn.execute(
-            "INSERT INTO tools (name, command, args, env) VALUES (?1, ?2, ?3, ?4)",
-            params![name, command, args, env],
+            "INSERT INTO tools (name, command, args, env, auto_approve, instruction) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![name, command, args, env, auto_approve.unwrap_or(0), instruction.unwrap_or("".to_string())],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn update_tool(&self, tool_name: String, auto_approve: u16, instruction: String) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE tools SET auto_approve = ?1, instruction = ?2 WHERE name = ?3",
+            params![auto_approve, instruction, tool_name],
         )?;
 
         Ok(())
@@ -580,7 +593,9 @@ impl Sqlite {
                     name TEXT,
                     command TEXT,
                     args TEXT,
-                    env TEXT
+                    env TEXT,
+                    auto_approve INTEGER DEFAULT 0,
+                    instruction TEXT
                 )",
                 [],
             )?;

@@ -1,15 +1,16 @@
 import { invoke } from "@tauri-apps/api";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { Tool } from "../../type/Tool.type";
 
 type SettingToolAddButtonProps = {
-    serverNames: string[]
-    addServerNames: (serverNames: string[]) => void
+    tools: Tool[]
+    addTools: (serverNames: string[]) => void
     setReload: () => void
 }
 
 const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => {
-    const { serverNames, addServerNames, setReload } = props;
+    const { tools, addTools, setReload } = props;
     const dialogRef = useRef<HTMLDialogElement>(null);
     const [content, setContent] = useState("");
     const [connecting, setConnecting] = useState(false);
@@ -40,7 +41,7 @@ const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => 
                     error: 'サーバー名は空文字列にできません'
                 };
             }
-            if (serverNames.includes(serverName)) {
+            if (tools.some(tool => tool.name === serverName)) {
                 return {
                     isValid: false,
                     error: `"${serverName}" はすでに存在します`
@@ -159,7 +160,7 @@ const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => 
                                     const parsed = JSON.parse(content);
                                     await invoke("add_mcp_config_command", { config: parsed }).then(async () => {
                                         const serverNames = Object.keys(parsed.mcpServers) as string[];
-                                        addServerNames(serverNames.map(serverName => serverName.replaceAll('_', '-')));
+                                        addTools(serverNames.map(serverName => serverName.replaceAll('_', '-')));
                                         setReload();
                                     }).catch((e) => {
                                         console.error(e.message);

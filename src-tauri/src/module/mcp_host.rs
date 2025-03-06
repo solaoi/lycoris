@@ -26,12 +26,21 @@ pub struct ToolConfig {
     pub args: Vec<String>,
     #[serde(default)]
     pub env: HashMap<String, String>,
+    pub auto_approve: Option<u16>,
+    pub instruction: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
     #[serde(rename = "mcpServers")]
     pub mcp_servers: HashMap<String, ToolConfig>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Tool {
+    pub name: String,
+    pub auto_approve: u16,
+    pub instruction: String,
 }
 
 #[derive(Clone)]
@@ -284,7 +293,7 @@ pub async fn add_mcp_config(config: Config) -> Result<(), std::string::String> {
         let env_json = serde_json::to_string(&tool.env).map_err(|e| e.to_string())?;
         let sqlite = Sqlite::new();
         sqlite
-            .insert_tool(name.replace("_", "-"), tool.command, args_json, env_json)
+            .insert_tool(name.replace("_", "-"), tool.command, args_json, env_json, tool.auto_approve, tool.instruction)
             .map_err(|e| e.to_string())?;
     }
     Ok(())
@@ -298,11 +307,18 @@ pub fn delete_mcp_config(tool_names: Vec<String>) -> Result<(), std::string::Str
     Ok(())
 }
 
-pub fn get_mcp_tools() -> Result<Vec<String>, std::string::String> {
+pub fn get_mcp_tools() -> Result<Vec<Tool>, std::string::String> {
     let sqlite = Sqlite::new();
     let tools = sqlite
         .select_all_tools()
         .expect("Failed to select all tools");
 
-    Ok(tools.keys().cloned().collect())
+    Ok(tools
+        .into_iter()
+        .map(|(name, tool)| Tool {
+            name,
+            auto_approve: tool.auto_approve.unwrap_or(0),
+            instruction: tool.instruction.unwrap_or("".to_string()),
+        })
+        .collect())
 }

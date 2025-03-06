@@ -4,17 +4,19 @@ import { SettingTools } from "./SettingTools"
 import { invoke } from "@tauri-apps/api";
 import { useRecoilState } from "recoil";
 import { disabledMCPSettingState } from "../../store/atoms/disabledMCPSettingState";
+import { Tool } from "../../type/Tool.type";
 
 const SettingToolContent = (): JSX.Element => {
     const [requireReload, setRequireReload] = useRecoilState(disabledMCPSettingState);
-    const [serverNames, setServerNames] = useState<string[]>([]);
+    const [tools, setTools] = useState<Tool[]>([]);
     useEffect(() => {
-        invoke('get_mcp_tools_command').then((serverNames) => {
-            setServerNames(serverNames as string[]);
+        invoke('get_mcp_tools_command').then((arr) => {
+            const tools = arr as Tool[];
+            setTools(tools);
         });
-    }, [setServerNames]);
-    const addServerNames = (serverNames: string[]) => {
-        setServerNames(prev => [...prev, ...serverNames]);
+    }, [setTools]);
+    const addTools = (serverNames: string[]) => {
+        setTools(prev => [...prev, ...serverNames.map(name => ({ name, auto_approve: 0, instruction: "" }))]);
     }
     const [selectedServers, setSelectedServers] = useState<string[]>([]);
     const addSelectedServers = (serverName: string) => {
@@ -23,11 +25,14 @@ const SettingToolContent = (): JSX.Element => {
     const deleteSelectedServers = (serverName: string) => {
         setSelectedServers(prev => prev.filter((selectedServer) => selectedServer !== serverName));
     }
+    const updateTool = (toolName: string, autoApprove: number, instruction: string) => {
+        setTools(prev => prev.map(tool => tool.name === toolName ? { ...tool, auto_approve: autoApprove, instruction: instruction } : tool));
+    }
 
     return (
         <div>
             <div className="flex items-center">
-                <SettingToolAddButton setReload={() => setRequireReload(true)} serverNames={serverNames} addServerNames={addServerNames} />
+                <SettingToolAddButton setReload={() => setRequireReload(true)} tools={tools} addTools={addTools} />
                 <div>
                     {selectedServers.length > 0 && (
                         <button
@@ -35,7 +40,7 @@ const SettingToolContent = (): JSX.Element => {
                             onClick={async () => {
                                 await invoke('delete_mcp_config_command', { toolNames: selectedServers })
                                     .then(async () => {
-                                        setServerNames(prev => prev.filter((serverName) => !selectedServers.includes(serverName)));
+                                        setTools(prev => prev.filter((tool) => !selectedServers.includes(tool.name)));
                                         setSelectedServers([]);
                                         setRequireReload(true);
                                     });
@@ -49,7 +54,7 @@ const SettingToolContent = (): JSX.Element => {
                 </div>
             </div>
             <div className="mt-4">
-                <SettingTools disabled={requireReload} serverNames={serverNames} addSelectedServers={addSelectedServers} deleteSelectedServers={deleteSelectedServers} />
+                <SettingTools disabled={requireReload} tools={tools} addSelectedServers={addSelectedServers} deleteSelectedServers={deleteSelectedServers} updateTool={updateTool} />
             </div>
         </div>
     )

@@ -36,8 +36,7 @@ use module::{
         whisper::WhisperModelDownloader,
     },
     mcp_host::{
-        self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
-        test_tool_connection, MCPHost, ToolConnectTestRequest,
+        self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host, test_tool_connection, MCPHost, ToolConnectTestRequest
     },
     model_type_sbv2::ModelTypeStyleBertVits2,
     model_type_vosk::ModelTypeVosk,
@@ -407,8 +406,32 @@ fn delete_mcp_config_command(tool_names: Vec<String>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_mcp_tools_command() -> Result<Vec<String>, String> {
-    get_mcp_tools()
+fn get_mcp_tools_command() -> Result<Vec<Value>, String> {
+    let tools = get_mcp_tools()?;
+    let serialized_tools = tools
+        .into_iter()
+        .map(|tool| {
+            let tool_value = serde_json::json!({
+                "name": tool.name,
+                "instruction": tool.instruction,
+                "auto_approve": tool.auto_approve,
+            });
+            Ok(tool_value)
+        })
+        .collect::<Result<Vec<Value>, String>>()?;
+    Ok(serialized_tools)
+}
+
+#[tauri::command]
+fn update_tool_command(
+    tool_name: String,
+    auto_approve: u16,
+    instruction: String,
+) -> Result<(), String> {
+    let sqlite = Sqlite::new();
+    sqlite
+        .update_tool(tool_name, auto_approve, instruction)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -643,6 +666,7 @@ fn main() {
             get_mcp_tool_features_command,
             delete_mcp_config_command,
             execute_mcp_tool_feature_command,
+            update_tool_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -23,7 +23,7 @@ const ActionSet = (): JSX.Element => {
 
     useEffect(() => {
         invoke('get_mcp_tools_command').then((serverNames) => {
-            const array = serverNames as string[]
+            const array = serverNames as { name: string, auto_approve: number, instruction: string }[]
             if (array.length === 0) {
                 setActions(["チャット", "発話サジェスト"])
             }

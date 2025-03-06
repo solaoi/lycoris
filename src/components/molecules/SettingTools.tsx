@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "../atoms/ChevronRight";
 import { ChevronDown } from "../atoms/ChevronDown";
 import { invoke } from "@tauri-apps/api";
+import { Tool } from "../../type/Tool.type";
 
 type SettingToolsProps = {
     disabled: boolean
-    serverNames: string[]
+    tools: Tool[]
     addSelectedServers: (serverName: string) => void
     deleteSelectedServers: (serverName: string) => void
+    updateTool: (toolName: string, autoApprove: number, instruction: string) => void
 }
 
 type ToolDescription = {
@@ -16,15 +18,15 @@ type ToolDescription = {
 }
 
 const SettingTools = (props: SettingToolsProps): JSX.Element => {
-    const { disabled, serverNames, addSelectedServers, deleteSelectedServers } = props
-    const sortedServerNames = useMemo(() => [...serverNames].sort(), [serverNames])
+    const { disabled, tools, addSelectedServers, deleteSelectedServers, updateTool } = props
+    const sortedServerNames = useMemo(() => [...tools.map(tool => tool.name)].sort(), [tools])
     const [openDescription, setOpenDescription] = useState("")
     const [toolDescriptions, setToolDescriptions] = useState<ToolDescription[]>([])
     const [isLoading, setIsLoading] = useState(false)
     useEffect(() => {
         setOpenDescription("")
         setToolDescriptions([])
-    }, [serverNames])
+    }, [tools.length])
 
     return (
         <div>
@@ -79,6 +81,60 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                     </div>
                                 ) : (
                                     <>
+                                        <div className="py-3 px-6 mb-2 border border-neutral-300 rounded-md">
+                                            <div className="py-3 px-6">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-2">自動承認</p>
+                                                </div>
+                                                <div className="flex items-center mt-2">
+                                                    <div className="font-bold text-gray-600 mr-2">
+                                                        <label className="cursor-pointer label">
+                                                            <span className="label-text inline-flex mr-2">
+                                                                <p className="text-base-content/40">有効化</p>
+                                                            </span>
+                                                            <input type="checkbox"
+                                                                className="toggle toggle-accent"
+                                                                defaultChecked={tools.find(tool => tool.name === serverName)?.auto_approve === 1}
+                                                                onChange={(e) => {
+                                                                    const autoApprove = e.target.checked ? 1 : 0
+                                                                    const instruction = tools.find(tool => tool.name === serverName)?.instruction ?? ""
+                                                                    invoke("update_tool_command", {
+                                                                        toolName: serverName,
+                                                                        autoApprove,
+                                                                        instruction
+                                                                    }).then(() => {
+                                                                        updateTool(serverName, autoApprove, instruction)
+                                                                    })
+                                                                }
+                                                                }
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="py-3 px-6">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-2">詳細説明</p>
+                                                    <p className="text-sm">AIがこの説明を参照して、サーバを呼び出しやすくなります。</p>
+                                                </div>
+                                                <textarea
+                                                    className="w-full p-3 border border-gray-300 rounded-md min-h-[100px]"
+                                                    placeholder="サーバの機能、呼び出し方法、パラメータの説明などを入力してください..."
+                                                    defaultValue={tools.find(tool => tool.name === serverName)?.instruction ?? ""}
+                                                    onBlur={(e) => {
+                                                        const instruction = e.target.value
+                                                        const autoApprove = tools.find(tool => tool.name === serverName)?.auto_approve ?? 0
+                                                        invoke("update_tool_command", {
+                                                            toolName: serverName,
+                                                            autoApprove,
+                                                            instruction
+                                                        }).then(() => {
+                                                            updateTool(serverName, autoApprove, instruction)
+                                                        })
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
                                         {toolDescriptions.map((t, index) => (
                                             <div key={`${t.name}_${index}`} className="cursor-default py-3 px-6 mb-2 border border-neutral-300 rounded-md">
                                                 <div className="mb-2">{t.name}</div>
@@ -87,6 +143,9 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                                 </div>
                                             </div>
                                         ))}
+                                        <div className="flex justify-center">
+                                            <button className="bg-base-200/50 hover:bg-base-200 text-gray-400 text-sm px-4 py-1 rounded-2xl mb-2" onClick={() => setOpenDescription("")}>閉じる</button>
+                                        </div>
                                     </>
                                 )
                             ))
