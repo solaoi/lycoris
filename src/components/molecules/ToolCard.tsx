@@ -146,6 +146,11 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                                 )
                             })
                         )}
+                        {showExecutedTool && (
+                            <div className="flex justify-center">
+                                <button className="bg-base-200/50 hover:bg-base-200 text-gray-400 text-sm px-4 py-1 rounded-2xl" onClick={() => setShowExecutedTool(false)}>閉じる</button>
+                            </div>
+                        )}
                     </div>
                 </div> :
                 <div>
@@ -207,6 +212,11 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                                     </div>
                                 )
                             })
+                        )}
+                        {showExecutedTool && (
+                            <div className="flex justify-center">
+                                <button className="bg-base-200/50 hover:bg-base-200 text-gray-400 text-sm px-4 py-1 rounded-2xl" onClick={() => setShowExecutedTool(false)}>閉じる</button>
+                            </div>
                         )}
                     </div>
                 </div>

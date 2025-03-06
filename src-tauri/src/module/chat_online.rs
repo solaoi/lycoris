@@ -177,7 +177,16 @@ impl ChatOnline {
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
 
         let post_body = if !template.is_empty() {
-            if model == "o1" || model == "o1-mini" || model == "o1-preview" {
+            if model == "o1"
+                || model == "o3-mini-low"
+                || model == "o3-mini"
+                || model == "o3-mini-high"
+            {
+                json!({
+                  "model": model,
+                  "messages": [{"role": "developer", "content": template},{"role": "user", "content": question}]
+                })
+            } else if model == "o1-mini" || model == "o1-preview" {
                 json!({
                   "model": model,
                   "messages": [{"role": "assistant", "content": template},{"role": "user", "content": question}]
@@ -211,7 +220,13 @@ impl ChatOnline {
                 }
             }
         } else {
-            if model == "o1" || model == "o1-mini" || model == "o1-preview" {
+            if model == "o1"
+                || model == "o1-mini"
+                || model == "o1-preview"
+                || model == "o3-mini-low"
+                || model == "o3-mini"
+                || model == "o3-mini-high"
+            {
                 json!({
                   "model": model,
                   "messages": [{"role": "user", "content": question}]
@@ -257,7 +272,14 @@ impl ChatOnline {
         let json_response: Value = response.json().await?;
 
         let response_text = if status == 200 {
-            if !functions.is_empty() && model != "o1" && model != "o1-mini" && model != "o1-preview" {
+            if !functions.is_empty()
+                && model != "o1"
+                && model != "o1-mini"
+                && model != "o1-preview"
+                && model != "o3-mini-low"
+                && model != "o3-mini"
+                && model != "o3-mini-high"
+            {
                 let name = serde_json::to_string(
                     &json_response["choices"][0]["message"]["function_call"]["name"],
                 )

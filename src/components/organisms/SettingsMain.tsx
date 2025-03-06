@@ -686,7 +686,7 @@ const SettingsMain = (): JSX.Element => {
                                         <SettingKey settingName="settingKeyOpenai" />
                                     </div>
 
-                                    <div className="mt-8 mb-4">
+                                    {/* <div className="mt-8 mb-4">
                                         <p className="mb-2">アシスタント設定</p>
                                         <hr />
                                     </div>
@@ -705,7 +705,7 @@ const SettingsMain = (): JSX.Element => {
                                     <div className="mb-8">
                                         <SettingFCfunctionCall />
                                     </div>
-                                    <SettingHook />
+                                    <SettingHook /> */}
                                 </>}
                                 {settingOnline === "AmiVoice" && <>
                                     <div className="mb-4 text-sm">

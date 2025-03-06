@@ -1,12 +1,13 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRecoilState } from "recoil"
 import { actionState } from "../../store/atoms/actionState"
+import { invoke } from "@tauri-apps/api"
 
 const ActionSet = (): JSX.Element => {
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
     const [targetAction, setTargetAction] = useRecoilState(actionState)
-    const actions = ["チャット", "発話サジェスト", "ツール"]
+    const [actions, setActions] = useState<string[]>(["チャット", "発話サジェスト", "ツール"])
     const [toggle, setToggle] = useState(false)
 
     const change = (actionName: string) => {
@@ -19,6 +20,15 @@ const ActionSet = (): JSX.Element => {
             setTimeout(() => target.blur(), 0);
         }
     }
+
+    useEffect(() => {
+        invoke('get_mcp_tools_command').then((serverNames) => {
+            const array = serverNames as string[]
+            if (array.length === 0) {
+                setActions(["チャット", "発話サジェスト"])
+            }
+        });
+    }, []);
 
     return (
         <div className="dropdown dropdown-top">

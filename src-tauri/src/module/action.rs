@@ -134,7 +134,7 @@ impl Action {
 
         // 将来的には、『assistant』roleではなく『developer』roleにする必要がある。現時点ではAPI側が未対応@2025/01/02
         messages.push(json!({
-            "role": if model == "o1" || model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
+            "role": if model == "o1" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
             "content": prompt
         }));
         messages.push(json!({
@@ -150,6 +150,12 @@ impl Action {
             json!({
               "model": model,
               "messages": messages
+            })
+        } else if model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {
+            json!({
+              "model": "o3-mini",
+              "messages": messages,
+              "reasoning_effort": if model == "o3-mini-low" {"low"} else if model == "o3-mini" {"medium"} else {"high"}
             })
         } else {
             json!({
