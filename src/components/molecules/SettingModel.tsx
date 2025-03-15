@@ -22,7 +22,13 @@ const SettingModel = (): JSX.Element => {
         "o1-mini",
         "o3-mini-low",
         "o3-mini",
-        "o3-mini-high"
+        "o3-mini-high",
+        "gpt-4o-search-preview-low",
+        "gpt-4o-search-preview",
+        "gpt-4o-search-preview-high",
+        "gpt-4o-mini-search-preview-low",
+        "gpt-4o-mini-search-preview",
+        "gpt-4o-mini-search-preview-high",
     ]
     const [settingKey, setSettingKey] = useRecoilState(settingKeyState("settingModel"))
 
@@ -32,10 +38,10 @@ const SettingModel = (): JSX.Element => {
     }
 
     return (
-        <div className="flex items-center">
-            <p className="mr-4">利用モデル</p>
+        <div className="flex flex-col gap-2 w-full">
+            <p>利用モデル</p>
             <div>
-                <select className="select select-bordered focus:outline-none text-xs w-fit" name="setting-model" onChange={change} >
+                <select className="select select-bordered focus:outline-none text-xs w-full" name="setting-model" onChange={change} >
                     {settingModels?.map((model, i) => (
                         <option key={"setting-model" + i} value={model} selected={model === settingKey}>{model}</option>
                     ))}

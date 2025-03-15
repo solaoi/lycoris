@@ -28,7 +28,10 @@ const ScreenShotButton = (props: ScreenShotButtonProps): JSX.Element => {
             .then(r => {
                 const isSuccess = r as boolean
                 if (!isSuccess) {
-                    toast.error('スクリーンショットに失敗しました')
+                    toast.error('スクリーンショットに失敗しました', {
+                        pauseOnFocusLoss: false,
+                        autoClose: 2500
+                    })
                 }
                 setDisabled(false)
             })

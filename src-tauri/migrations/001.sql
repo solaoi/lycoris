@@ -67,6 +67,8 @@ VALUES(
         "settingHasAccessedScreenCapturePermission",
         "never"
     );
+INSERT INTO settings(setting_name, setting_status)
+VALUES("settingAutoApproveLimit", "0");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,

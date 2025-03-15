@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRecoilState } from "recoil"
 import { actionState } from "../../store/atoms/actionState"
 import { invoke } from "@tauri-apps/api"
+import { Tool } from "../../type/Tool.type"
 
 const ActionSet = (): JSX.Element => {
     const dropdownRef = useRef<HTMLLabelElement>(null)
@@ -22,12 +23,13 @@ const ActionSet = (): JSX.Element => {
     }
 
     useEffect(() => {
-        invoke('get_mcp_tools_command').then((serverNames) => {
-            const array = serverNames as { name: string, auto_approve: number, instruction: string }[]
-            if (array.length === 0) {
+        invoke('get_mcp_tools_command').then((arr) => {
+            const tools = arr as Tool[];
+            if (tools.filter(tool => tool.disabled === 0).length === 0) {
                 setActions(["チャット", "発話サジェスト"])
             }
         });
+        return () => setTargetAction("チャット");
     }, []);
 
     return (

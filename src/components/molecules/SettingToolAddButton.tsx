@@ -5,7 +5,7 @@ import { Tool } from "../../type/Tool.type";
 
 type SettingToolAddButtonProps = {
     tools: Tool[]
-    addTools: (serverNames: string[]) => void
+    addTools: (tools: Tool[]) => void
     setReload: () => void
 }
 
@@ -82,31 +82,51 @@ const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => 
             const obj = JSON.parse(content);
             const { isValid, error } = validateMCPConfig(obj);
             if (!isValid) {
-                toast.error(error);
+                toast.error(error, {
+                    pauseOnFocusLoss: false,
+                    autoClose: 2500
+                });
                 return;
             }
-            const { mcpServers } = obj as { mcpServers: unknown };
-            const serverEntries = Object.entries(mcpServers as Record<string, unknown>);
-            const testPromises = Array.from(serverEntries).map(([_, config]) =>
-                invoke('test_mcp_tool_command', { toolConnectTestRequest: config })
-            );
+            const { mcpServers } = obj as { mcpServers: Record<string, { command: string, args?: string[], env?: Record<string, string>, disabled?: boolean, aiAutoApprove?: boolean, instruction?: string, autoApprove?: string[], alwaysAllow?: string[] }> };
+            const serverEntries = Object.entries(mcpServers);
+            const testPromises = Array.from(serverEntries).map(([_, config]) => {
+                const toolConnectTestRequest = {
+                    command: config.command,
+                    args: config.args ?? [],
+                    env: config.env ?? {}
+                }
+                return invoke('test_mcp_tool_command', { toolConnectTestRequest });
+            });
             await Promise.all(testPromises)
                 .then((results) => {
                     if (results.every((result) => result === true)) {
                         setIsPassedTest(true);
-                        toast.success("接続テストに成功しました");
+                        toast.success("接続テストに成功しました", {
+                            pauseOnFocusLoss: false,
+                            autoClose: 2500
+                        });
                     } else {
                         setIsPassedTest(false);
-                        toast.error("接続テストに失敗しました");
+                        toast.error("接続テストに失敗しました", {
+                            pauseOnFocusLoss: false,
+                            autoClose: 2500
+                        });
                     }
                 })
                 .catch((e) => {
                     setIsPassedTest(false);
                     console.error(e);
-                    toast.error("接続テストに失敗しました");
+                    toast.error("接続テストに失敗しました", {
+                        pauseOnFocusLoss: false,
+                        autoClose: 2500
+                    });
                 });
         } catch (e) {
-            toast.error("JSON形式が正しくありません");
+            toast.error("JSON形式が正しくありません", {
+                pauseOnFocusLoss: false,
+                autoClose: 2500
+            });
             return;
         } finally {
             setConnecting(false);
@@ -157,10 +177,24 @@ const SettingToolAddButton = (props: SettingToolAddButtonProps): JSX.Element => 
                             <button className="btn mr-2" onClick={() => { setContent(""); setConnecting(false); }}>キャンセル</button>
                             <button className="btn text-primary" {...(isPassedTest ? {} : { disabled: true })}
                                 onClick={async () => {
-                                    const parsed = JSON.parse(content);
-                                    await invoke("add_mcp_config_command", { config: parsed }).then(async () => {
-                                        const serverNames = Object.keys(parsed.mcpServers) as string[];
-                                        addTools(serverNames.map(serverName => serverName.replaceAll('_', '-')));
+                                    const parsed = JSON.parse(content) as { mcpServers: Record<string, { command: string, args?: string[], env?: Record<string, string>, disabled?: boolean, aiAutoApprove?: boolean, instruction?: string, autoApprove?: string[], alwaysAllow?: string[] }> };
+                                    const config = {
+                                        mcpServers: Object.fromEntries(
+                                            Object.entries(parsed.mcpServers).map(([key, value]) => [key, {
+                                                command: value.command,
+                                                args: value.args ?? [],
+                                                env: value.env ?? {},
+                                                disabled: Number(value.disabled ?? false),
+                                                ai_auto_approve: Number(value.aiAutoApprove ?? false),
+                                                instruction: value.instruction ?? "",
+                                                auto_approve: [...(value.autoApprove ?? []), ...(value.alwaysAllow ?? [])],
+                                            }])
+                                        )
+                                    }
+
+                                    await invoke("add_mcp_config_command", { config }).then(async (value: unknown) => {
+                                        const tools = value as Tool[];
+                                        addTools(tools);
                                         setReload();
                                     }).catch((e) => {
                                         console.error(e.message);

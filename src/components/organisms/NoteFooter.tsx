@@ -210,7 +210,7 @@ const NoteFooter = (props: NoteFooterProps): JSX.Element => {
                 <div className={"flex flex-col items-center w-52" + (isMemo ? " hidden" : "")}>
                     <ActionSet />
                     {targetAction === "チャット" &&
-                        <div className="flex items-center absolute right-2 bottom-2 bg-base-100 border border-base-200 rounded-lg px-3 py-[2px] text-black/60 text-xs hover:shadow-inner shadow-sm cursor-pointer"
+                        <div className="flex items-center absolute right-2 bottom-2 bg-base-100 border border-base-200 rounded-lg px-[3px] py-[2px] text-black/60 text-xs hover:shadow-inner shadow-sm cursor-pointer"
                             onClick={((e) => {
                                 e.stopPropagation();
                                 dialogRef.current?.showModal();

@@ -15,8 +15,8 @@ const SettingToolContent = (): JSX.Element => {
             setTools(tools);
         });
     }, [setTools]);
-    const addTools = (serverNames: string[]) => {
-        setTools(prev => [...prev, ...serverNames.map(name => ({ name, auto_approve: 0, instruction: "" }))]);
+    const addTools = (tools: Tool[]) => {
+        setTools(prev => [...prev, ...tools]);
     }
     const [selectedServers, setSelectedServers] = useState<string[]>([]);
     const addSelectedServers = (serverName: string) => {
@@ -25,8 +25,8 @@ const SettingToolContent = (): JSX.Element => {
     const deleteSelectedServers = (serverName: string) => {
         setSelectedServers(prev => prev.filter((selectedServer) => selectedServer !== serverName));
     }
-    const updateTool = (toolName: string, autoApprove: number, instruction: string) => {
-        setTools(prev => prev.map(tool => tool.name === toolName ? { ...tool, auto_approve: autoApprove, instruction: instruction } : tool));
+    const updateTool = (toolName: string, disabled: number, aiAutoApprove: number, instruction: string, autoApprove: string[]) => {
+        setTools(prev => prev.map(tool => tool.name === toolName ? { ...tool, disabled, ai_auto_approve: aiAutoApprove, instruction: instruction, auto_approve: autoApprove } : tool));
     }
 
     return (

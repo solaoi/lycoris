@@ -2,7 +2,6 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
-
 use serde_json::Value;
 use tauri::{
     http::{HttpRange, ResponseBuilder},
@@ -10,6 +9,7 @@ use tauri::{
 };
 use tauri_plugin_sql::{Migration, MigrationKind};
 use tokio::runtime::Runtime;
+use window_shadows::set_shadow;
 
 use std::{
     cmp::min,
@@ -36,11 +36,13 @@ use module::{
         whisper::WhisperModelDownloader,
     },
     mcp_host::{
-        self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host, test_tool_connection, MCPHost, ToolConnectTestRequest
+        self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
+        test_tool_connection, MCPHost, ToolConnectTestRequest,
     },
     model_type_sbv2::ModelTypeStyleBertVits2,
     model_type_vosk::ModelTypeVosk,
     model_type_whisper::ModelTypeWhisper,
+    online_llm_client::{ApprovedResult, OnlineLLMClient},
     permissions,
     record::Record,
     record_desktop::RecordDesktop,
@@ -396,8 +398,22 @@ async fn test_mcp_tool_command(
 }
 
 #[tauri::command]
-async fn add_mcp_config_command(config: mcp_host::Config) -> Result<(), String> {
-    add_mcp_config(config).await
+async fn add_mcp_config_command(config: mcp_host::Config) -> Result<Vec<Value>, String> {
+    let tools = add_mcp_config(config).await?;
+    let serialized_tools = tools
+        .into_iter()
+        .map(|tool| {
+            let tool_value = serde_json::json!({
+                "name": tool.name,
+                "disabled": tool.disabled,
+                "instruction": tool.instruction,
+                "ai_auto_approve": tool.ai_auto_approve,
+                "auto_approve": tool.auto_approve,
+            });
+            tool_value
+        })
+        .collect::<Vec<Value>>();
+    Ok(serialized_tools)
 }
 
 #[tauri::command]
@@ -413,7 +429,9 @@ fn get_mcp_tools_command() -> Result<Vec<Value>, String> {
         .map(|tool| {
             let tool_value = serde_json::json!({
                 "name": tool.name,
+                "disabled": tool.disabled,
                 "instruction": tool.instruction,
+                "ai_auto_approve": tool.ai_auto_approve,
                 "auto_approve": tool.auto_approve,
             });
             Ok(tool_value)
@@ -423,14 +441,30 @@ fn get_mcp_tools_command() -> Result<Vec<Value>, String> {
 }
 
 #[tauri::command]
+fn update_content_2_on_speech_command(speech_id: u64, content_2: String) -> Result<(), String> {
+    let sqlite = Sqlite::new();
+    sqlite
+        .update_content_2_on_speech(speech_id, content_2)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn update_tool_command(
     tool_name: String,
-    auto_approve: u16,
+    disabled: u16,
+    ai_auto_approve: u16,
     instruction: String,
+    auto_approve: Vec<String>,
 ) -> Result<(), String> {
     let sqlite = Sqlite::new();
     sqlite
-        .update_tool(tool_name, auto_approve, instruction)
+        .update_tool(
+            tool_name,
+            disabled,
+            ai_auto_approve,
+            instruction,
+            auto_approve,
+        )
         .map_err(|e| e.to_string())
 }
 
@@ -515,10 +549,17 @@ async fn execute_mcp_tool_feature_command(
             let question = tool_execution_wrapper.content;
             let contents = sqlite.select_contents_by(note_id, id).unwrap();
             let token = sqlite.select_whisper_token().unwrap();
-            let result =
-                request_gpt_tool(tools_clone, question, contents, token, Some(updated_cmds))
-                    .await
-                    .unwrap();
+            let updated_tools = sqlite.select_all_tools().unwrap();
+            let result = request_gpt_tool(
+                tools_clone,
+                question,
+                contents,
+                token,
+                Some(updated_cmds),
+                updated_tools,
+            )
+            .await
+            .unwrap();
 
             sqlite
                 .update_tool_execution(speech_id, &result)
@@ -529,6 +570,32 @@ async fn execute_mcp_tool_feature_command(
     })
     .await
     .map_err(|e| format!("Runtime error: {}", e))?
+}
+
+#[tauri::command]
+async fn check_approve_cmds_command(
+    note_id: u64,
+    speech_id: u16,
+    cmds: Vec<Value>,
+) -> Result<ApprovedResult, String> {
+    let target = cmds
+        .into_iter()
+        .map(|cmd| {
+            let tool_name = cmd["name"].as_str().unwrap();
+            let method = cmd["method"].as_str().unwrap();
+            let args = cmd["args"].as_str().unwrap();
+            let description = cmd["description"].as_str().unwrap();
+            let instruction = cmd["instruction"].as_str().unwrap();
+            (tool_name.to_string(), method.to_string(), args.to_string(), description.to_string(), instruction.to_string())
+        })
+        .collect::<Vec<(String, String, String, String, String)>>();
+
+    let online_llm_client = OnlineLLMClient::new();
+    let result = online_llm_client
+        .check_approve_cmds(note_id, speech_id, target)
+        .await?;
+
+    Ok(result)
 }
 
 fn set_ort_env(path_resolver: &PathResolver) {
@@ -630,6 +697,10 @@ fn main() {
                 }
             });
 
+            let window = app.get_window("main").unwrap();
+            #[cfg(any(windows, target_os = "macos"))]
+            set_shadow(&window, true).unwrap();
+
             Ok(())
         })
         .manage(RecordState(Default::default()))
@@ -667,6 +738,8 @@ fn main() {
             delete_mcp_config_command,
             execute_mcp_tool_feature_command,
             update_tool_command,
+            check_approve_cmds_command,
+            update_content_2_on_speech_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

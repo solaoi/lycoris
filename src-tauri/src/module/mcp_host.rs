@@ -26,8 +26,10 @@ pub struct ToolConfig {
     pub args: Vec<String>,
     #[serde(default)]
     pub env: HashMap<String, String>,
-    pub auto_approve: Option<u16>,
+    pub disabled: Option<u16>,
+    pub ai_auto_approve: Option<u16>,
     pub instruction: Option<String>,
+    pub auto_approve: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -39,8 +41,10 @@ pub struct Config {
 #[derive(Debug, Clone, Deserialize)]
 pub struct Tool {
     pub name: String,
-    pub auto_approve: u16,
+    pub disabled: u16,
+    pub ai_auto_approve: u16,
     pub instruction: String,
+    pub auto_approve: Vec<String>,
 }
 
 #[derive(Clone)]
@@ -286,17 +290,26 @@ pub async fn test_tool_connection(
     Ok(true)
 }
 
-pub async fn add_mcp_config(config: Config) -> Result<(), std::string::String> {
+pub async fn add_mcp_config(config: Config) -> Result<Vec<Tool>, std::string::String> {
+    let mut tools = Vec::new();
     for (name, tool) in config.mcp_servers {
         let args_json = serde_json::to_string(&tool.args).map_err(|e| e.to_string())?;
 
         let env_json = serde_json::to_string(&tool.env).map_err(|e| e.to_string())?;
         let sqlite = Sqlite::new();
+        let name = name.replace("_", "-");
         sqlite
-            .insert_tool(name.replace("_", "-"), tool.command, args_json, env_json, tool.auto_approve, tool.instruction)
+            .insert_tool(name.clone(), tool.command, args_json, env_json, tool.disabled, tool.ai_auto_approve.clone(), tool.instruction.clone(), tool.auto_approve.clone())
             .map_err(|e| e.to_string())?;
+        tools.push(Tool {
+            name,
+            disabled: tool.disabled.unwrap_or(0),
+            ai_auto_approve: tool.ai_auto_approve.unwrap_or(0),
+            instruction: tool.instruction.unwrap_or("".to_string()),
+            auto_approve: tool.auto_approve,
+        });
     }
-    Ok(())
+    Ok(tools)
 }
 
 pub fn delete_mcp_config(tool_names: Vec<String>) -> Result<(), std::string::String> {
@@ -317,8 +330,10 @@ pub fn get_mcp_tools() -> Result<Vec<Tool>, std::string::String> {
         .into_iter()
         .map(|(name, tool)| Tool {
             name,
-            auto_approve: tool.auto_approve.unwrap_or(0),
+            disabled: tool.disabled.unwrap_or(0),
+            ai_auto_approve: tool.ai_auto_approve.unwrap_or(0),
             instruction: tool.instruction.unwrap_or("".to_string()),
+            auto_approve: tool.auto_approve,
         })
         .collect())
 }

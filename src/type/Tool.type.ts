@@ -1,5 +1,7 @@
 export type Tool = {
     name: string;
-    auto_approve: number;
+    disabled: number;
+    ai_auto_approve: number;
     instruction: string;
+    auto_approve: string[];
 }

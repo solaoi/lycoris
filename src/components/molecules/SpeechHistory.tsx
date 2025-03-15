@@ -111,12 +111,22 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                                                                 <>
                                                                     <MyMarkdown content={c.content_2} title={`${selectedNote?.note_title.trim()}_action-end_${i}`} />
                                                                     <div className='flex gap-2 absolute left-[16px] bottom-[-1.2rem] bg-white border-2 border-gray-200/60 rounded-2xl px-4 py-[2px] text-gray-400 text-sm'>
-                                                                        <button className='flex items-center hover:text-gray-500' onClick={() => { if (c.content_2) { clipboard.writeText(c.content_2); toast.success("コピーしました") } }}>
+                                                                        <button className='flex items-center hover:text-gray-500' onClick={() => {
+                                                                            if (c.content_2) {
+                                                                                clipboard.writeText(c.content_2); toast.info("コピーしました", {
+                                                                                    pauseOnFocusLoss: false,
+                                                                                    autoClose: 2500
+                                                                                })
+                                                                            }
+                                                                        }}>
                                                                             <DocumentDuplicate />
                                                                             <p className='ml-[2px]'>コピー</p>
                                                                         </button>
                                                                         <button className='flex items-center hover:text-gray-500' onClick={async () => {
-                                                                            toast.success("リトライしました");
+                                                                            toast.success("リトライしました", {
+                                                                                pauseOnFocusLoss: false,
+                                                                                autoClose: 2500
+                                                                            });
                                                                             await DB.getInstance().then(db => db.resetAction(c.id!));
                                                                             setHistories((prev) => {
                                                                                 return prev.map(h => {

@@ -8,13 +8,13 @@ import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperBut
 import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperProgress"
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
-import { SettingTemplate } from "../molecules/SettingTemplate"
-import { SettingFCfunctions } from "../molecules/SettingFCfunctions"
-import { SettingFCfunctionCall } from "../molecules/SettingFCfunctionCall"
-import { SettingHook } from "../molecules/SettingHook"
-import { SettingResource } from "../molecules/SettingResource"
-import { SettingModel } from "../molecules/SettingModel"
-import { SettingAILanguage } from "../molecules/SettingAILanguage"
+// import { SettingTemplate } from "../molecules/SettingTemplate"
+// import { SettingFCfunctions } from "../molecules/SettingFCfunctions"
+// import { SettingFCfunctionCall } from "../molecules/SettingFCfunctionCall"
+// import { SettingHook } from "../molecules/SettingHook"
+// import { SettingResource } from "../molecules/SettingResource"
+// import { SettingModel } from "../molecules/SettingModel"
+// import { SettingAILanguage } from "../molecules/SettingAILanguage"
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
 import { ModelDownloadFugumtEnJaButton } from "../molecules/ModelDownloadFugumtEnJaButton"
 import { ModelDownloadFugumtEnJaProgress } from "../molecules/ModelDownloadFugumtEnJaProgress"
@@ -36,6 +36,7 @@ import { ModelDownloadReazonSpeechProgress } from "../molecules/ModelDownloadRea
 import { useState } from "react"
 import { SettingToolContent } from "../molecules/SettingToolContent"
 import { settingKeyState } from "../../store/atoms/settingKeyState"
+import { SettingAutoApproveLimit } from "../molecules/SettingAutoApproveLimit"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -733,9 +734,11 @@ const SettingsMain = (): JSX.Element => {
                                 ツール
                             </h2>
                             <div className="px-5 mt-2 flex flex-col gap-4">
-                                <div>
+                                <div className="mb-2">
                                     <p>Model Context Protocol（MCP）に対応するサーバを、ツールとして追加できます。</p>
                                 </div>
+                                <SettingAutoApproveLimit />
+                                <hr />
                                 <SettingToolContent />
                             </div>
                         </div>
