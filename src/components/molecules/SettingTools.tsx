@@ -101,7 +101,7 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                                 <div className="flex items-center">
                                                     <div className="font-bold text-gray-600 mr-2">
                                                         <label className="cursor-pointer label">
-                                                            <span className="label-text inline-flex mr-2">
+                                                            <span className="label-text inline-flex mr-2 w-20">
                                                                 <p className="text-base-content/40">有効化</p>
                                                             </span>
                                                             <input type="checkbox"
@@ -162,7 +162,7 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                                 <div className="flex items-center">
                                                     <div className="font-bold text-gray-600 mr-2">
                                                         <label className="cursor-pointer label">
-                                                            <span className="label-text inline-flex mr-2">
+                                                            <span className="label-text inline-flex mr-2 w-20">
                                                                 <p className="text-base-content/40">自動承認</p>
                                                             </span>
                                                             <input type="checkbox"

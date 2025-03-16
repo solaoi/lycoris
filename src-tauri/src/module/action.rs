@@ -496,6 +496,8 @@ impl Action {
                                             self.token.clone(),
                                             None,
                                             self.sqlite.select_all_tools().unwrap(),
+                                            self.sqlite.select_survey_tool_enabled().unwrap(),
+                                            self.sqlite.select_search_tool_enabled().unwrap(),
                                         )
                                         .await
                                         {
@@ -586,10 +588,12 @@ pub async fn request_gpt_tool(
     token: String,
     executed_cmds: Option<Vec<ToolExecutionCmd>>,
     updated_tools: HashMap<String, ToolConfig>,
+    survey_tool_enabled: u16,
+    search_tool_enabled: u16,
 ) -> Result<ToolExecution, Box<dyn std::error::Error>> {
-    let model = "gpt-4o";
+    let model = "o3-mini";
+    let reasoning_effort = "low";
     let url = "https://api.openai.com/v1/chat/completions";
-    let temperature = 0;
 
     let client = Client::new();
 
@@ -613,6 +617,7 @@ c) 過去のAIとのQ&A (:::assistant で囲まれた部分)：関連する追�
 - 既存の情報や一般知識で解決できるかを判断し、ツールの利用が適切かどうかを判断します。
 3. ツールの活用：
 - 与えられたツールの一覧から、ユーザーの最終的な質問に対して必要なツールを選択します。
+- ツールを選択しない場合でも、次に利用するツールの実行同意を得たい場合は、そのツールをスキーマに追加します。
 - ツールの使用結果が英語で提供される場合、必要に応じて日本語に翻訳・要約します。
 - ツールの使用結果が期待通りでない場合：
 a) 他の適切なツールがないか検討します。
@@ -673,7 +678,7 @@ b) 他に適切なツールがない、または全て期待通りの結果が�
     prompt.push_str("\n回答の際は、上記の手順に従い、情報を適切に統合し、必要に応じてツールを使用するか、次のユーザーの質問に直接応えてください。");
 
     messages.push(json!({
-        "role": "system",
+        "role": "developer",
         "content": prompt
     }));
     messages.push(json!({
@@ -709,7 +714,7 @@ b) 他に適切なツールがない、または全て期待通りの結果が�
 
     // for debugging
     // println!("messages: {:?}", messages);
-    let available_tools: Vec<Value> = tools.iter().filter(|(key, _)| {
+    let mut available_tools: Vec<Value> = tools.iter().filter(|(key, _)| {
         updated_tools.get(key.as_str()).map_or(false, |tool| tool.disabled == Some(0))
     }).flat_map(|(key, values)| {
         let tool_config = updated_tools.get(key.as_str());
@@ -734,12 +739,45 @@ b) 他に適切なツールがない、または全て期待通りの結果が�
             }).collect::<Vec<Value>>()
         }).collect();
 
+    if survey_tool_enabled == 1 {
+        available_tools.push(json!({
+            "type": "function",
+            "function": {
+                "name": "system_get_user_response",
+                "description": "あなたがユーザーに回答を依頼したり、要望を聞く際には、他に適切なツールがなければ、このツールを必ず使用してください。\nユーザーが分かりやすい形式で、ユーザーに情報を求めます。",
+                "parameters": json!({
+                    "type": "object",
+                    "properties": {
+                        "question": { "type": "string", "description": "ユーザーに質問する内容を指定します。" },
+                    },
+                    "required": ["question"]
+                })
+                }
+            }));
+    }
+
+    if search_tool_enabled == 1 {
+        available_tools.push(json!({
+            "type": "function",
+            "function": {
+                "name": "system_search_web_with_openai",
+                "description": "自然言語でWEB検索を行えるツールです。\n提供された情報とユーザーの質問から、インターネット上の情報を検索するために、質問を再定義して検索しましょう。\nなお、検索結果の引用記事のURLは、引き継いで最終的な回答にMarkdown形式（[記事タイトル](URL)）で含めてください。",
+                "parameters": json!({
+                    "type": "object",
+                    "properties": {
+                        "question": { "type": "string", "description": "再定義された質問を指定します。" },
+                    },
+                    "required": ["question"]
+                })
+            }
+        }));
+    }
+
     let post_body = json!({
       "model": model,
-      "temperature": temperature,
+      "reasoning_effort": reasoning_effort,
       "messages": messages,
       "tools": available_tools
-    //   "tool_choice": "required"
     });
 
     let response = client

@@ -26,6 +26,7 @@ import { speechFilterState } from '../../store/atoms/speechFilterState'
 import { invoke } from '@tauri-apps/api'
 import { settingKeyState } from '../../store/atoms/settingKeyState'
 import { Download } from '../atoms/Download'
+import { ChevronDown } from '../atoms/ChevronDown'
 
 const NoteMain = (): JSX.Element => {
     const filterTarget = useRecoilValue(speechFilterState);
@@ -251,81 +252,83 @@ const NoteMain = (): JSX.Element => {
             </div>
             <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm" >
                 <FilterTabs />
-                <div className="group mr-4">
-                    <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
-                        const typeMapper = (speech_type: string) => {
-                            switch (speech_type) {
-                                case "speech":
-                                    return "発言";
-                                case "memo":
-                                    return "メモ";
-                                case "screenshot":
-                                    return "スクリーンショット";
-                                case "action":
-                                    return "アクション";
-                                default:
-                                    return "不明";
-                            }
-                        }
-                        const filterHistory = (speech_type: string) => {
-                            if (filterTarget === "speech") {
-                                if (speech_type === "speech") {
-                                    return true;
+                <div className='flex gap-2 items-center'>
+                    <div className="flex group mr-4">
+                        <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
+                            const typeMapper = (speech_type: string) => {
+                                switch (speech_type) {
+                                    case "speech":
+                                        return "発言";
+                                    case "memo":
+                                        return "メモ";
+                                    case "screenshot":
+                                        return "スクリーンショット";
+                                    case "action":
+                                        return "アクション";
+                                    default:
+                                        return "不明";
                                 }
-                                return false;
-                            } else if (filterTarget === "memo") {
-                                if (speech_type === "memo") {
-                                    return true;
-                                }
-                                return false;
-                            } else if (filterTarget === "screenshot") {
-                                if (speech_type === "screenshot") {
-                                    return true;
-                                }
-                                return false;
-                            } else if (filterTarget === "action") {
-                                if (speech_type === "action") {
-                                    return true;
-                                }
-                                return false;
                             }
-                            return true;
-                        }
-                        const csvSuffix = (() => {
-                            switch (filterTarget) {
-                                case null:
-                                    return "all";
-                                case "speech":
-                                    return "speech";
-                                case "memo":
-                                    return "memo";
-                                case "screenshot":
-                                    return "screenshot";
-                                case "action":
-                                    return "action";
-                                default:
-                                    return "unknown";
+                            const filterHistory = (speech_type: string) => {
+                                if (filterTarget === "speech") {
+                                    if (speech_type === "speech") {
+                                        return true;
+                                    }
+                                    return false;
+                                } else if (filterTarget === "memo") {
+                                    if (speech_type === "memo") {
+                                        return true;
+                                    }
+                                    return false;
+                                } else if (filterTarget === "screenshot") {
+                                    if (speech_type === "screenshot") {
+                                        return true;
+                                    }
+                                    return false;
+                                } else if (filterTarget === "action") {
+                                    if (speech_type === "action") {
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                                return true;
                             }
-                        })();
-                        const csvData = (() => {
-                            if (settingKeyOpenai !== "") {
-                                return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
-                            } else if (histories.some(h => h.speech_type === "action")) {
-                                return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
-                            } else {
-                                return "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                            const csvSuffix = (() => {
+                                switch (filterTarget) {
+                                    case null:
+                                        return "all";
+                                    case "speech":
+                                        return "speech";
+                                    case "memo":
+                                        return "memo";
+                                    case "screenshot":
+                                        return "screenshot";
+                                    case "action":
+                                        return "action";
+                                    default:
+                                        return "unknown";
+                                }
+                            })();
+                            const csvData = (() => {
+                                if (settingKeyOpenai !== "") {
+                                    return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                                } else if (histories.some(h => h.speech_type === "action")) {
+                                    return "日付,種別,内容1,内容2\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}","${h.content_2 || ""}"`).join("\n");
+                                } else {
+                                    return "日付,種別,内容\n" + histories.filter(h => filterHistory(h.speech_type)).map(h => `${dayjs.unix(h.created_at_unixtime).format('YYYY-M-D H:mm')},${typeMapper(h.speech_type)},"${h.content}"`).join("\n");
+                                }
+                            })()
+                            const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
+                            if (path) {
+                                await writeTextFile(path, csvData);
                             }
-                        })()
-                        const path = await save({ defaultPath: `${selectedNote?.note_title.trim()}_${csvSuffix}.csv` });
-                        if (path) {
-                            await writeTextFile(path, csvData);
-                        }
-                    }}>
-                        <Download />
-                    </button>
-                    <div className="w-20 invisible rounded text-[12px]
+                        }}>
+                            <Download />
+                        </button>
+                        <div className="w-20 invisible rounded text-[12px]
                         font-bold text-white py-1 bg-slate-600 top-[154px] right-7
                         group-hover:visible absolute text-center z-10">ダウンロード
+                        </div>
                     </div>
                 </div>
             </div>
@@ -342,12 +345,10 @@ const NoteMain = (): JSX.Element => {
             </div>
             <NoteFooter titleRef={inputEl} />
         </div>
-        <div className="flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-[1.4rem] bg-base-200 rounded-lg drop-shadow-lg cursor-pointer hover:bg-base-300"
+        <div className="flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-[1.4rem] bg-white/80 drop-shadow-md rounded-full cursor-pointer hover:bg-base-200"
             style={!showGotoBottom ? { display: "none" } : {}}
             onClick={() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={"w-6 h-6"}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" />
-            </svg>
+            <ChevronDown />
         </div>
     </>)
 }

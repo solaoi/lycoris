@@ -69,6 +69,10 @@ VALUES(
     );
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingAutoApproveLimit", "0");
+INSERT INTO settings(setting_name, setting_status)
+VALUES("settingSurveyToolEnabled", "1");
+INSERT INTO settings(setting_name, setting_status)
+VALUES("settingSearchToolEnabled", "1");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,

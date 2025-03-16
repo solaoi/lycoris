@@ -16,9 +16,8 @@ const MultiSelect = (props: any) => {
         options?.filter(({ label }: Option) =>
             label.toLowerCase().includes(input.toLowerCase())
         );
-
     const comparator = (v1: Option, v2: Option) =>
-        (v1.value as number) - (v2.value as number);
+        v1.value.localeCompare(v2.value);
 
     let filteredOptions = filterOptions(props.options, selectInput);
     let filteredSelectedOptions = filterOptions(props.value, selectInput);

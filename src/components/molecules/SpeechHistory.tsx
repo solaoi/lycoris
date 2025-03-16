@@ -16,6 +16,7 @@ import clipboard from "tauri-plugin-clipboard-api";
 import { toast } from 'react-toastify'
 import { invoke } from '@tauri-apps/api'
 import { ToolCard } from './ToolCard'
+import { CalendarDays } from '../atoms/CalendarDays'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -57,16 +58,26 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                     }
                     return [...acc, {
                         el: (<div key={"history_" + i}>
-                            {cal && <div className={(i > 0 ? 'mt-6 ' : '') + 'mb-2'}>[{cal}]</div>}
+                            {cal &&
+                                <div className={'badge bg-white shadow-md border-transparent mb-4 cursor-default'} style={{ padding: "0.7rem 0.8rem", fontSize: "0.8rem" }}>
+                                    <CalendarDays />
+                                    <p className='ml-1'>{cal}</p>
+                                </div>}
                             {c.speech_type === "memo"
                                 && <div className='flex py-1' key={"memo_" + i}>
-                                    <div className="w-16 pl-2 flex-none">{date}</div>
-                                    <div className="flex flex-col items-start ml-5 cursor-pointer hover:border-base-300 border-2 border-transparent rounded-lg"
+                                    <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>
+                                    <div className="w-full memo flex flex-col items-start ml-5 cursor-pointer hover:border-base-300 border-2 border-transparent rounded-lg"
                                         onDoubleClick={(e) => { e.preventDefault(); setEditMemoId(i); }}>
                                         {editMemoId === null || editMemoId !== i ?
-                                            <MyMarkdown minWidth="692px" content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
-                                            : <textarea className="w-[692px] px-[4px] py-[2px] rounded-lg bg-base-200 focus:outline-none" rows={c.content.split("\n").length < 5 ? 5 : c.content.split("\n").length} defaultValue={c.content} autoFocus
+                                            <MyMarkdown minWidth="408px" content={c.content} title={`${selectedNote?.note_title.trim()}_memo_${i}`} />
+                                            : <textarea className="w-full w-min-[408px] px-[4px] py-[2px] rounded-lg bg-base-200 focus:outline-none" rows={c.content.split("\n").length < 5 ? 5 : c.content.split("\n").length} defaultValue={c.content} autoFocus
                                                 onFocus={(e) => { e.currentTarget.selectionStart = c.content.length }}
+                                                onKeyDown={(e) => {
+                                                    if (!(e.shiftKey && e.key === 'Enter')) {
+                                                        return
+                                                    }
+                                                    e.currentTarget.blur();
+                                                }}
                                                 onBlur={async (e) => {
                                                     const new_content = e.target.value.trim();
                                                     if (c.content !== new_content) {
@@ -95,7 +106,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             {
                                 c.speech_type === "action"
                                 && <div className='flex py-2' key={"action_" + i}>
-                                    <div className="w-16 pl-2 flex-none">{date}</div>
+                                    <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>
                                     <div className="card w-4/5 ml-5">
                                         <div className="card-body bg-white/60 drop-shadow-md rounded-lg">
                                             {c.action_type === "chat" &&

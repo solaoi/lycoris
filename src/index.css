@@ -92,6 +92,14 @@ h6 {
     background-color: initial;
 }
 
+.memo .znc ul {
+    margin: 0;
+}
+
+.memo .znc p,h1,h2,h3,h4,h5,h6 {
+    padding-left: 0.5rem;
+}
+
 .szh-menu {
     padding: 0;
 }

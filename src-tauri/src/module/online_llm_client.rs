@@ -26,6 +26,58 @@ impl OnlineLLMClient {
         Self { model, token }
     }
 
+    pub async fn search_web_with_openai(
+        &self,
+        question: String,
+    ) -> Result<String, String> {
+        let url = "https://api.openai.com/v1/chat/completions";
+        let model = "gpt-4o-search-preview";
+        let search_context_size = "high";
+
+        let client = Client::new();
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(&format!("Bearer {}", self.token)).map_err(|e| e.to_string())?,
+        );
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+
+        let post_body = json!({
+            "model": model,
+            "web_search_options": {
+                "search_context_size": search_context_size
+              },
+            "messages": [
+                {
+                    "role": "user",
+                    "content": question
+                }
+            ]
+        });
+
+        let response = client
+            .post(url)
+            .headers(headers)
+            .json(&post_body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        let status = response.status();
+        let json_response: Value = response.json().await.map_err(|e| e.to_string())?;
+
+        let response_text = if status == 200 {
+            json_response["choices"][0]["message"]["content"]
+                .as_str()
+                .unwrap_or("choices[0].message.content field not found")
+                .to_string()
+        } else {
+            json_response.to_string()
+        };
+
+        Ok(response_text)
+    }
+
     pub async fn check_approve_cmds(
         &self,
         note_id: u64,

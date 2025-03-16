@@ -506,6 +506,7 @@ async fn execute_mcp_tool_feature_command(
     let runtime = runtime_state.0.clone();
     let state_clone = state.0.clone();
     let tools_clone = tools_state.0.clone();
+    let online_llm_client = OnlineLLMClient::new();
     tokio::task::spawn_blocking(move || {
         runtime.block_on(async move {
             let host = {
@@ -524,23 +525,33 @@ async fn execute_mcp_tool_feature_command(
                     updated_cmds.push(cmd);
                     continue;
                 }
-                let host = host.clone();
                 let tool_args = cmd.args.clone();
 
-                let result = host
-                    .execute_tool_feature(&cmd.name, &cmd.method, tool_args)
-                    .await
-                    .map_err(|e| e.to_string());
-                cmd.result = match result {
-                    Ok(value) => {
-                        if let Some(content) = value.get("content") {
-                            Some(content.to_string())
-                        } else {
-                            Some(value.to_string())
+                if cmd.name == "system" && cmd.method == "search_web_with_openai" {
+                    let question = tool_args["question"].as_str().unwrap().to_string();
+                    let result = online_llm_client.search_web_with_openai(question).await;
+                    cmd.result = match result {
+                        Ok(value) => Some(value),
+                        Err(e) => Some(format!("Error: {}", e)),
+                    };
+                } else {
+                    let host = host.clone();
+                    let result = host
+                        .execute_tool_feature(&cmd.name, &cmd.method, tool_args)
+                        .await
+                        .map_err(|e| e.to_string());
+                    cmd.result = match result {
+                        Ok(value) => {
+                            if let Some(content) = value.get("content") {
+                                Some(content.to_string())
+                            } else {
+                                Some(value.to_string())
+                            }
                         }
-                    }
-                    Err(err) => Some(format!("Error: {}", err)),
-                };
+                        Err(err) => Some(format!("Error: {}", err)),
+                    };
+                }
+
                 updated_cmds.push(cmd);
             }
 
@@ -550,6 +561,8 @@ async fn execute_mcp_tool_feature_command(
             let contents = sqlite.select_contents_by(note_id, id).unwrap();
             let token = sqlite.select_whisper_token().unwrap();
             let updated_tools = sqlite.select_all_tools().unwrap();
+            let survey_tool_enabled = sqlite.select_survey_tool_enabled().unwrap();
+            let search_tool_enabled = sqlite.select_search_tool_enabled().unwrap();
             let result = request_gpt_tool(
                 tools_clone,
                 question,
@@ -557,6 +570,8 @@ async fn execute_mcp_tool_feature_command(
                 token,
                 Some(updated_cmds),
                 updated_tools,
+                survey_tool_enabled,
+                search_tool_enabled,
             )
             .await
             .unwrap();
@@ -586,7 +601,13 @@ async fn check_approve_cmds_command(
             let args = cmd["args"].as_str().unwrap();
             let description = cmd["description"].as_str().unwrap();
             let instruction = cmd["instruction"].as_str().unwrap();
-            (tool_name.to_string(), method.to_string(), args.to_string(), description.to_string(), instruction.to_string())
+            (
+                tool_name.to_string(),
+                method.to_string(),
+                args.to_string(),
+                description.to_string(),
+                instruction.to_string(),
+            )
         })
         .collect::<Vec<(String, String, String, String, String)>>();
 

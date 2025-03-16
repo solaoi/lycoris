@@ -146,6 +146,28 @@ impl Sqlite {
         );
     }
 
+    pub fn select_survey_tool_enabled(&self) -> Result<u16, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingSurveyToolEnabled\"",
+            params![],
+            |row| {
+                let setting_status: String = row.get_unwrap(0);
+                Ok(setting_status.parse::<u16>().unwrap())
+            },
+        );
+    }
+
+    pub fn select_search_tool_enabled(&self) -> Result<u16, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingSearchToolEnabled\"",
+            params![],
+            |row| {
+                let setting_status: String = row.get_unwrap(0);
+                Ok(setting_status.parse::<u16>().unwrap())
+            },
+        );
+    }
+
     pub fn update_content_2_on_speech(
         &self,
         speech_id: u64,
