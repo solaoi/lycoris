@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "Lycoris",
-    "version": "0.9.28"
+    "version": "0.9.29"
   },
   "tauri": {
     "allowlist": {
@@ -68,7 +68,7 @@
         "fullscreen": false,
         "width": 1180,
         "height": 768,
-        "minWidth": 1180,
+        "minWidth": 860,
         "minHeight": 384,
         "resizable": true
       }

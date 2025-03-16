@@ -11,7 +11,7 @@ const Screenshot = (props: ScreenshotProps): JSX.Element => {
 
     return (
         <div className={"flex mb-1 "}>
-            <div className="w-16 pl-2 flex-none">{date}</div>
+            <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>
             <div className="pr-2 pb-4 ml-5">
                 <Zoom>
                     <img

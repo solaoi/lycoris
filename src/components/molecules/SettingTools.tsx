@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "../atoms/ChevronRight";
 import { ChevronDown } from "../atoms/ChevronDown";
 import { invoke } from "@tauri-apps/api";
+import { Tool } from "../../type/Tool.type";
+import { MultiSelect, Option } from "./MultiSelect";
 
 type SettingToolsProps = {
     disabled: boolean
-    serverNames: string[]
+    tools: Tool[]
     addSelectedServers: (serverName: string) => void
     deleteSelectedServers: (serverName: string) => void
+    updateTool: (toolName: string, disabled: number, aiAutoApprove: number, instruction: string, autoApprove: string[]) => void
 }
 
 type ToolDescription = {
@@ -16,15 +19,25 @@ type ToolDescription = {
 }
 
 const SettingTools = (props: SettingToolsProps): JSX.Element => {
-    const { disabled, serverNames, addSelectedServers, deleteSelectedServers } = props
-    const sortedServerNames = useMemo(() => [...serverNames].sort(), [serverNames])
+    const { disabled, tools, addSelectedServers, deleteSelectedServers, updateTool } = props
+    const sortedServerNames = useMemo(() => [...tools.map(tool => tool.name)].sort(), [tools])
     const [openDescription, setOpenDescription] = useState("")
     const [toolDescriptions, setToolDescriptions] = useState<ToolDescription[]>([])
     const [isLoading, setIsLoading] = useState(false)
     useEffect(() => {
         setOpenDescription("")
         setToolDescriptions([])
-    }, [serverNames])
+    }, [tools.length])
+
+    const [optionSelected, setSelected] = useState<Option[] | null>();
+    const handleChange = (selected: Option[]) => {
+        setSelected(selected);
+    };
+    useEffect(() => {
+        if (openDescription === "") { return; }
+        const optionSelected = tools.find(tool => tool.name === openDescription)!.auto_approve.map(feature => ({ value: feature, label: feature }))
+        setSelected(optionSelected)
+    }, [openDescription])
 
     return (
         <div>
@@ -62,7 +75,7 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                         }).finally(() => { setIsLoading(false) });
                                 }
                             }}>
-                            <div>{serverName}</div>
+                            <div style={tools.find(tool => tool.name === serverName)!.disabled === 0 ? {} : { color: "#9B9B9B", textDecoration: "line-through" }}>{serverName}</div>
                             {serverName !== openDescription ? <ChevronRight /> : <ChevronDown />}
                         </div>
                     </div>
@@ -79,14 +92,155 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                     </div>
                                 ) : (
                                     <>
-                                        {toolDescriptions.map((t, index) => (
-                                            <div key={`${t.name}_${index}`} className="cursor-default py-3 px-6 mb-2 border border-neutral-300 rounded-md">
-                                                <div className="mb-2">{t.name}</div>
-                                                <div className="text-sm">
-                                                    <p>{t.description}</p>
+                                        <div className="px-6 py-3 mb-2 border border-neutral-300 rounded-md">
+                                            <div className="py-2 px-6 mb-2">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-1">ツールの有効化</p>
+                                                    <p className="text-sm">Lycorisがこのツールを呼び出すことができます。</p>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <div className="font-bold text-gray-600 mr-2">
+                                                        <label className="cursor-pointer label">
+                                                            <span className="label-text inline-flex mr-2 w-20">
+                                                                <p className="text-base-content/40">有効化</p>
+                                                            </span>
+                                                            <input type="checkbox"
+                                                                className="toggle toggle-accent"
+                                                                defaultChecked={tools.find(tool => tool.name === serverName)!.disabled === 0}
+                                                                onChange={(e) => {
+                                                                    const disabled = e.target.checked ? 0 : 1
+                                                                    const aiAutoApprove = tools.find(tool => tool.name === serverName)!.ai_auto_approve
+                                                                    const instruction = tools.find(tool => tool.name === serverName)!.instruction
+                                                                    const autoApprove = tools.find(tool => tool.name === serverName)!.auto_approve
+                                                                    invoke("update_tool_command", {
+                                                                        toolName: serverName,
+                                                                        disabled,
+                                                                        aiAutoApprove,
+                                                                        instruction,
+                                                                        autoApprove
+                                                                    }).then(() => {
+                                                                        updateTool(serverName, disabled, aiAutoApprove, instruction, autoApprove)
+                                                                    })
+                                                                }
+                                                                }
+                                                            />
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        ))}
+                                            <div className="py-2 px-6">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-1">詳細説明</p>
+                                                    <p className="text-sm">Lycorisがこの説明を参照して、このツールを呼び出しやすくなります。</p>
+                                                </div>
+                                                <textarea
+                                                    className="my-2 w-full p-3 border border-gray-300 rounded-md min-h-[100px]"
+                                                    placeholder="サーバの機能、呼び出し方法、パラメータの説明などを入力してください..."
+                                                    defaultValue={tools.find(tool => tool.name === serverName)!.instruction}
+                                                    onBlur={(e) => {
+                                                        const instruction = e.target.value
+                                                        const disabled = tools.find(tool => tool.name === serverName)!.disabled
+                                                        const aiAutoApprove = tools.find(tool => tool.name === serverName)!.ai_auto_approve
+                                                        const autoApprove = tools.find(tool => tool.name === serverName)!.auto_approve
+                                                        invoke("update_tool_command", {
+                                                            toolName: serverName,
+                                                            disabled,
+                                                            aiAutoApprove,
+                                                            instruction,
+                                                            autoApprove
+                                                        }).then(() => {
+                                                            updateTool(serverName, disabled, aiAutoApprove, instruction, autoApprove)
+                                                        })
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="py-2 px-6 mb-2">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-1">Lycorisによる自動承認</p>
+                                                    <p className="text-sm">各機能の自動承認が無効でも、低リスクであればLycorisが自動で承認します。</p>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <div className="font-bold text-gray-600 mr-2">
+                                                        <label className="cursor-pointer label">
+                                                            <span className="label-text inline-flex mr-2 w-20">
+                                                                <p className="text-base-content/40">自動承認</p>
+                                                            </span>
+                                                            <input type="checkbox"
+                                                                className="toggle toggle-accent"
+                                                                defaultChecked={tools.find(tool => tool.name === serverName)!.ai_auto_approve === 1}
+                                                                onChange={(e) => {
+                                                                    const aiAutoApprove = e.target.checked ? 1 : 0
+                                                                    const disabled = tools.find(tool => tool.name === serverName)!.disabled
+                                                                    const instruction = tools.find(tool => tool.name === serverName)!.instruction
+                                                                    const autoApprove = tools.find(tool => tool.name === serverName)!.auto_approve
+                                                                    invoke("update_tool_command", {
+                                                                        toolName: serverName,
+                                                                        disabled,
+                                                                        aiAutoApprove,
+                                                                        instruction,
+                                                                        autoApprove
+                                                                    }).then(() => {
+                                                                        updateTool(serverName, disabled, aiAutoApprove, instruction, autoApprove)
+                                                                    })
+                                                                }
+                                                                }
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="py-2 px-6 mb-2">
+                                                <div className=" text-gray-600 mb-2">
+                                                    <p className="font-bold mb-1">各機能の自動承認</p>
+                                                    <p className="text-sm">選択した機能の自動承認を有効化します。</p>
+                                                </div>
+                                                <div className="my-2">
+                                                    <MultiSelect
+                                                        key={`${serverName}_features_${index}`}
+                                                        options={toolDescriptions.map(desc => ({ value: desc.name, label: desc.name }))}
+                                                        onChange={handleChange}
+                                                        value={optionSelected}
+                                                        isSelectAll={true}
+                                                        menuPlacement={"bottom"}
+                                                        placeholder="機能を選択..."
+                                                        onBlur={() => {
+                                                            const instruction = tools.find(tool => tool.name === serverName)!.instruction
+                                                            const disabled = tools.find(tool => tool.name === serverName)!.disabled
+                                                            const aiAutoApprove = tools.find(tool => tool.name === serverName)!.ai_auto_approve
+                                                            const autoApprove = optionSelected?.map(option => option.value) ?? []
+                                                            invoke("update_tool_command", {
+                                                                toolName: serverName,
+                                                                disabled,
+                                                                aiAutoApprove,
+                                                                instruction,
+                                                                autoApprove
+                                                            }).then(() => {
+                                                                updateTool(serverName, disabled, aiAutoApprove, instruction, autoApprove)
+                                                            })
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="px-6 py-3 mb-4 border border-neutral-300 rounded-md">
+                                            <div className="py-2 px-6 mb-2">
+                                                <div className=" text-gray-600 mb-4">
+                                                    <p className="font-bold mb-1">機能一覧</p>
+                                                    <p className="text-sm">Lycorisが呼び出すことができる、このツールの機能一覧です。</p>
+                                                </div>
+                                                {toolDescriptions.map((t, index) => (
+                                                    <div key={`${t.name}_${index}`} className="cursor-default py-3 px-6 mb-2 border border-neutral-300 rounded-md">
+                                                        <div className="mb-2">{t.name}</div>
+                                                        <div className="text-sm">
+                                                            <p>{t.description}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-center">
+                                            <button className="bg-base-200/50 hover:bg-base-200 text-gray-400 text-sm px-4 py-1 rounded-2xl mb-2" onClick={() => setOpenDescription("")}>閉じる</button>
+                                        </div>
                                     </>
                                 )
                             ))

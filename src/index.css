@@ -45,17 +45,37 @@ body {
     display: none;
 }
 
-.chat-start .znc ul,ol,p+p,blockquote,table,h1,h2,h3,h4,h5,h6 {
-    margin: 0!important;
+.chat-start .znc ul,
+ol,
+p+p,
+blockquote,
+table,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 !important;
 }
 
-.znc ul,ol,p+p,blockquote,table,h1,h2,h3,h4,h5,h6 {
+.znc ul,
+ol,
+p+p,
+blockquote,
+table,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     width: 100%;
 }
 
 .znc hr {
     width: 100%;
-    margin: 1.5rem 0!important;
+    margin: 1.5rem 0 !important;
 }
 
 .znc p {
@@ -72,6 +92,14 @@ body {
     background-color: initial;
 }
 
+.memo .znc ul {
+    margin: 0;
+}
+
+.memo .znc p,h1,h2,h3,h4,h5,h6 {
+    padding-left: 0.5rem;
+}
+
 .szh-menu {
     padding: 0;
 }
@@ -81,16 +109,18 @@ body {
     width: max-content;
 }
 
-.collapse,.collapse-content {
-    visibility: inherit!important;
+.collapse,
+.collapse-content {
+    visibility: inherit !important;
 }
 
 .tab-lifted {
     &::before {
-        background-image: none!important;
+        background-image: none !important;
     }
+
     &::after {
-        background-image: none!important;
+        background-image: none !important;
     }
 }
 
@@ -104,6 +134,7 @@ body {
     animation: radiomark var(--animation-input, 0.2s) ease-out;
     box-shadow: 0 0 0 4px hsl(var(--b1)) inset, 0 0 0 4px hsl(var(--b1)) inset;
 }
+
 .radio-accent.checked {
     --tw-border-opacity: 1;
     border-color: hsl(var(--a) / var(--tw-border-opacity));
@@ -117,25 +148,34 @@ body {
     width: fit-content;
 }
 
-.settings .menu li > *:not(ul):not(.menu-title):not(details):active,
-.menu li > *:not(ul):not(.menu-title):not(details).active,
-.menu li > details > summary:active {
+.settings .menu li>*:not(ul):not(.menu-title):not(details):active,
+.menu li>*:not(ul):not(.menu-title):not(details).active,
+.menu li>details>summary:active {
     color: hsl(var(--bc));
     background-color: hsl(var(--b1));
     cursor: default;
 }
 
+.jer-input-component,
+.jer-bracket-open,
+.jer-collection-item-count {
+    cursor: pointer;
+}
+
 main {
     background-color: hsl(var(--b1));
+
     ::-webkit-scrollbar {
         width: 28px;
     }
+
     ::-webkit-scrollbar-thumb {
         background: hsl(var(--bc) / 0.1);
         border-radius: 14px;
         border: 6px solid hsl(var(--b1) / var(--tw-bg-opacity, 1));
         min-height: 48px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
         background: hsl(var(--bc) / 0.2);
     }

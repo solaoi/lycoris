@@ -92,7 +92,7 @@ impl Sqlite {
     pub fn select_all_tools(&self) -> Result<HashMap<String, ToolConfig>, rusqlite::Error> {
         let mut stmt = self
             .conn
-            .prepare("SELECT name, command, args, env FROM tools")
+            .prepare("SELECT name, command, args, env, disabled, ai_auto_approve, instruction, auto_approve FROM tools")
             .unwrap();
         let results = stmt
             .query_map(params![], |row| {
@@ -103,6 +103,11 @@ impl Sqlite {
                         args: serde_json::from_str(&row.get_unwrap::<_, String>(2))
                             .unwrap_or_default(),
                         env: serde_json::from_str(&row.get_unwrap::<_, String>(3))
+                            .unwrap_or_default(),
+                        disabled: Some(row.get_unwrap::<_, u16>(4)),
+                        ai_auto_approve: Some(row.get_unwrap::<_, u16>(5)),
+                        instruction: Some(row.get_unwrap::<_, String>(6)),
+                        auto_approve: serde_json::from_str(&row.get_unwrap::<_, String>(7))
                             .unwrap_or_default(),
                     },
                 ))
@@ -141,6 +146,41 @@ impl Sqlite {
         );
     }
 
+    pub fn select_survey_tool_enabled(&self) -> Result<u16, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingSurveyToolEnabled\"",
+            params![],
+            |row| {
+                let setting_status: String = row.get_unwrap(0);
+                Ok(setting_status.parse::<u16>().unwrap())
+            },
+        );
+    }
+
+    pub fn select_search_tool_enabled(&self) -> Result<u16, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingSearchToolEnabled\"",
+            params![],
+            |row| {
+                let setting_status: String = row.get_unwrap(0);
+                Ok(setting_status.parse::<u16>().unwrap())
+            },
+        );
+    }
+
+    pub fn update_content_2_on_speech(
+        &self,
+        speech_id: u64,
+        content_2: String,
+    ) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE speeches SET content_2 = ?1 WHERE id = ?2",
+            params![content_2, speech_id],
+        )?;
+
+        Ok(())
+    }
+
     pub fn update_tool_execution(
         &self,
         speech_id: u64,
@@ -164,10 +204,30 @@ impl Sqlite {
         command: String,
         args: String,
         env: String,
+        disabled: Option<u16>,
+        ai_auto_approve: Option<u16>,
+        instruction: Option<String>,
+        auto_approve: Vec<String>,
     ) -> Result<(), rusqlite::Error> {
         self.conn.execute(
-            "INSERT INTO tools (name, command, args, env) VALUES (?1, ?2, ?3, ?4)",
-            params![name, command, args, env],
+            "INSERT INTO tools (name, command, args, env, disabled, ai_auto_approve, instruction, auto_approve) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![name, command, args, env, disabled.unwrap_or(0), ai_auto_approve.unwrap_or(0), instruction.unwrap_or("".to_string()), serde_json::to_string(&auto_approve).unwrap_or("[]".to_string())],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn update_tool(
+        &self,
+        tool_name: String,
+        disabled: u16,
+        ai_auto_approve: u16,
+        instruction: String,
+        auto_approve: Vec<String>,
+    ) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE tools SET disabled = ?1, ai_auto_approve = ?2, instruction = ?3, auto_approve = ?4 WHERE name = ?5",
+            params![disabled, ai_auto_approve, instruction, serde_json::to_string(&auto_approve).unwrap_or("[]".to_string()), tool_name],
         )?;
 
         Ok(())
@@ -580,7 +640,11 @@ impl Sqlite {
                     name TEXT,
                     command TEXT,
                     args TEXT,
-                    env TEXT
+                    env TEXT,
+                    disabled INTEGER DEFAULT 0,
+                    ai_auto_approve INTEGER DEFAULT 0,
+                    instruction TEXT,
+                    auto_approve TEXT
                 )",
                 [],
             )?;

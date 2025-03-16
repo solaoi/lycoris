@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.28"
+version = "0.9.29"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -55,6 +55,7 @@ sherpa-rs = "0.6.6"
 mcp-sdk = { git="https://github.com/solaoi/mcp-sdk", rev="c7e06ce40156fbe23911379e48268eb9543f8acc" }
 which = "7.0.2"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
+window-shadows = "0.2.2"
 
 [dependencies.tauri-plugin-sql]
 git = "https://github.com/tauri-apps/plugins-workspace"
