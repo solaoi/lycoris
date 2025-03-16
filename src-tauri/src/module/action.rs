@@ -7,7 +7,10 @@ use reqwest::{
 use serde_json::{json, Value};
 use tauri::{AppHandle, Manager};
 
-use super::sqlite::{Content, Sqlite, ToolExecution, ToolExecutionCmd};
+use super::{
+    mcp_host::ToolConfig,
+    sqlite::{Content, Sqlite, ToolExecution, ToolExecutionCmd},
+};
 use tokio::runtime::Runtime;
 
 pub struct Action {
@@ -134,7 +137,7 @@ impl Action {
 
         // 将来的には、『assistant』roleではなく『developer』roleにする必要がある。現時点ではAPI側が未対応@2025/01/02
         messages.push(json!({
-            "role": if model == "o1" || model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
+            "role": if model == "o1" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
             "content": prompt
         }));
         messages.push(json!({
@@ -150,6 +153,50 @@ impl Action {
             json!({
               "model": model,
               "messages": messages
+            })
+        } else if model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {
+            json!({
+              "model": "o3-mini",
+              "messages": messages,
+              "reasoning_effort": if model == "o3-mini-low" {"low"} else if model == "o3-mini" {"medium"} else {"high"}
+            })
+        } else if model == "gpt-4o-search-preview-low"
+            || model == "gpt-4o-search-preview"
+            || model == "gpt-4o-search-preview-high"
+        {
+            let search_context_size = if model == "gpt-4o-search-preview-low" {
+                "low"
+            } else if model == "gpt-4o-search-preview" {
+                "medium"
+            } else {
+                "high"
+            };
+
+            json!({
+              "model": "gpt-4o-search-preview",
+              "messages": messages,
+              "web_search_options": {
+                "search_context_size": search_context_size
+              }
+            })
+        } else if model == "gpt-4o-mini-search-preview-low"
+            || model == "gpt-4o-mini-search-preview"
+            || model == "gpt-4o-mini-search-preview-high"
+        {
+            let search_context_size = if model == "gpt-4o-mini-search-preview-low" {
+                "low"
+            } else if model == "gpt-4o-mini-search-preview" {
+                "medium"
+            } else {
+                "high"
+            };
+
+            json!({
+              "model": "gpt-4o-mini-search-preview",
+              "messages": messages,
+              "web_search_options": {
+                "search_context_size": search_context_size
+              }
             })
         } else {
             json!({
@@ -448,6 +495,9 @@ impl Action {
                                             contents,
                                             self.token.clone(),
                                             None,
+                                            self.sqlite.select_all_tools().unwrap(),
+                                            self.sqlite.select_survey_tool_enabled().unwrap(),
+                                            self.sqlite.select_search_tool_enabled().unwrap(),
                                         )
                                         .await
                                         {
@@ -537,10 +587,13 @@ pub async fn request_gpt_tool(
     contents: Vec<Content>,
     token: String,
     executed_cmds: Option<Vec<ToolExecutionCmd>>,
+    updated_tools: HashMap<String, ToolConfig>,
+    survey_tool_enabled: u16,
+    search_tool_enabled: u16,
 ) -> Result<ToolExecution, Box<dyn std::error::Error>> {
-    let model = "gpt-4o";
+    let model = "o3-mini";
+    let reasoning_effort = "low";
     let url = "https://api.openai.com/v1/chat/completions";
-    let temperature = 0;
 
     let client = Client::new();
 
@@ -564,10 +617,15 @@ c) 過去のAIとのQ&A (:::assistant で囲まれた部分)：関連する追�
 - 既存の情報や一般知識で解決できるかを判断し、ツールの利用が適切かどうかを判断します。
 3. ツールの活用：
 - 与えられたツールの一覧から、ユーザーの最終的な質問に対して必要なツールを選択します。
+- ツールを選択しない場合でも、次に利用するツールの実行同意を得たい場合は、そのツールをスキーマに追加します。
 - ツールの使用結果が英語で提供される場合、必要に応じて日本語に翻訳・要約します。
 - ツールの使用結果が期待通りでない場合：
 a) 他の適切なツールがないか検討します。
 b) 他に適切なツールがない、または全て期待通りの結果が得られない場合は、その旨を明確に伝えます。
+
+※注意事項
+ツールを呼び出す際に指定したコマンドの引数は、最終的にユーザーにより強制的に書き換えられる可能性があります。
+書き換えられた引数に基づいてツールが動作する場合があるため、ツールの出力があなたの想定と異なることがあります。
 
 以下に提供される情報を上記の手順に従って分析し、次のユーザーの質問に答えてください：
 
@@ -620,7 +678,7 @@ b) 他に適切なツールがない、または全て期待通りの結果が�
     prompt.push_str("\n回答の際は、上記の手順に従い、情報を適切に統合し、必要に応じてツールを使用するか、次のユーザーの質問に直接応えてください。");
 
     messages.push(json!({
-        "role": "system",
+        "role": "developer",
         "content": prompt
     }));
     messages.push(json!({
@@ -656,26 +714,70 @@ b) 他に適切なツールがない、または全て期待通りの結果が�
 
     // for debugging
     // println!("messages: {:?}", messages);
+    let mut available_tools: Vec<Value> = tools.iter().filter(|(key, _)| {
+        updated_tools.get(key.as_str()).map_or(false, |tool| tool.disabled == Some(0))
+    }).flat_map(|(key, values)| {
+        let tool_config = updated_tools.get(key.as_str());
+        values.iter().map(|value| {
+            let original_description = value.get("description").and_then(|v| v.as_str()).unwrap_or_default();
+            let instruction = tool_config.and_then(|tc| tc.instruction.as_deref()).unwrap_or_default();
+            
+            let combined_description = if !instruction.is_empty() {
+                format!("{}\n\nツール全体の説明: {}", original_description, instruction)
+            } else {
+                original_description.to_string()
+            };
 
-    let available_tools: Vec<Value> = tools.iter().flat_map(|(key, values)| {
-            values.iter().map(|value| {
-                json!({
-                    "type": "function",
+            json!({
+                "type": "function",
                     "function": {
                         "name": format!("{}_{}", key, value.get("name").and_then(|v| v.as_str()).unwrap_or_default()),
-                        "description": value.get("description").and_then(|v| v.as_str()).unwrap_or_default(),
+                        "description": combined_description,
                         "parameters": value.get("inputSchema").unwrap_or(&Value::Null),
                     }
                 })
             }).collect::<Vec<Value>>()
         }).collect();
 
+    if survey_tool_enabled == 1 {
+        available_tools.push(json!({
+            "type": "function",
+            "function": {
+                "name": "system_get_user_response",
+                "description": "あなたがユーザーに回答を依頼したり、要望を聞く際には、他に適切なツールがなければ、このツールを必ず使用してください。\nユーザーが分かりやすい形式で、ユーザーに情報を求めます。",
+                "parameters": json!({
+                    "type": "object",
+                    "properties": {
+                        "question": { "type": "string", "description": "ユーザーに質問する内容を指定します。" },
+                    },
+                    "required": ["question"]
+                })
+                }
+            }));
+    }
+
+    if search_tool_enabled == 1 {
+        available_tools.push(json!({
+            "type": "function",
+            "function": {
+                "name": "system_search_web_with_openai",
+                "description": "自然言語でWEB検索を行えるツールです。\n提供された情報とユーザーの質問から、インターネット上の情報を検索するために、質問を再定義して検索しましょう。\nなお、検索結果の引用記事のURLは、引き継いで最終的な回答にMarkdown形式（[記事タイトル](URL)）で含めてください。",
+                "parameters": json!({
+                    "type": "object",
+                    "properties": {
+                        "question": { "type": "string", "description": "再定義された質問を指定します。" },
+                    },
+                    "required": ["question"]
+                })
+            }
+        }));
+    }
+
     let post_body = json!({
       "model": model,
-      "temperature": temperature,
+      "reasoning_effort": reasoning_effort,
       "messages": messages,
       "tools": available_tools
-    //   "tool_choice": "required"
     });
 
     let response = client

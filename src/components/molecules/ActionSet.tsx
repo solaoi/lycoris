@@ -1,12 +1,16 @@
-import { useRef, useState } from "react"
-import { useRecoilState } from "recoil"
+import { useEffect, useRef, useState } from "react"
+import { useRecoilState, useRecoilValue } from "recoil"
 import { actionState } from "../../store/atoms/actionState"
+import { invoke } from "@tauri-apps/api"
+import { Tool } from "../../type/Tool.type"
+import { settingSurveyToolEnabledState } from "../../store/atoms/settingSurveyToolEnabledState"
+import { settingSearchToolEnabledState } from "../../store/atoms/settingSearchToolEnabledState"
 
 const ActionSet = (): JSX.Element => {
     const dropdownRef = useRef<HTMLLabelElement>(null)
 
     const [targetAction, setTargetAction] = useRecoilState(actionState)
-    const actions = ["チャット", "発話サジェスト", "ツール"]
+    const [actions, setActions] = useState<string[]>(["チャット", "発話サジェスト", "ツール"])
     const [toggle, setToggle] = useState(false)
 
     const change = (actionName: string) => {
@@ -19,6 +23,21 @@ const ActionSet = (): JSX.Element => {
             setTimeout(() => target.blur(), 0);
         }
     }
+
+    const surveyToolEnabled = useRecoilValue(settingSurveyToolEnabledState);
+    const searchToolEnabled = useRecoilValue(settingSearchToolEnabledState);
+
+    useEffect(() => {
+        if (surveyToolEnabled === 0 && searchToolEnabled === 0) {
+            invoke('get_mcp_tools_command').then((arr) => {
+                const tools = arr as Tool[];
+                if (tools.filter(tool => tool.disabled === 0).length === 0) {
+                    setActions(["チャット", "発話サジェスト"])
+                }
+            });
+        }
+        return () => setTargetAction("チャット");
+    }, [surveyToolEnabled, searchToolEnabled]);
 
     return (
         <div className="dropdown dropdown-top">
