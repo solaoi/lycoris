@@ -168,6 +168,14 @@ impl Sqlite {
         );
     }
 
+    pub fn select_slack_webhook_url(&self) -> Result<String, rusqlite::Error> {
+        return self.conn.query_row(
+            "SELECT setting_status FROM settings WHERE setting_name = \"settingSlackWebHookUrl\"",
+            params![],
+            |row| Ok(row.get_unwrap(0)),
+        );
+    }
+
     pub fn update_content_2_on_speech(
         &self,
         speech_id: u64,
