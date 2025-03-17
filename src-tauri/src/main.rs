@@ -47,6 +47,7 @@ use module::{
     record::Record,
     record_desktop::RecordDesktop,
     screenshot::{self, AppWindow},
+    slack_client::SlackClient,
     sqlite::{Sqlite, ToolExecution},
     synthesizer::{self, Synthesizer},
     transcription::{TraceCompletion, Transcription},
@@ -619,6 +620,14 @@ async fn check_approve_cmds_command(
     Ok(result)
 }
 
+#[tauri::command]
+async fn send_slack_message_command(content: String) -> Result<String, String> {
+    let slack_client: SlackClient = SlackClient::new();
+    let result = slack_client.send_message(content).await;
+
+    result
+}
+
 fn set_ort_env(path_resolver: &PathResolver) {
     let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
 
@@ -760,7 +769,8 @@ fn main() {
             execute_mcp_tool_feature_command,
             update_tool_command,
             check_approve_cmds_command,
-            update_content_2_on_speech_command
+            update_content_2_on_speech_command,
+            send_slack_message_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

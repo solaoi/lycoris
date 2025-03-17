@@ -27,6 +27,8 @@ import { invoke } from '@tauri-apps/api'
 import { settingKeyState } from '../../store/atoms/settingKeyState'
 import { Download } from '../atoms/Download'
 import { ChevronDown } from '../atoms/ChevronDown'
+import { toast } from 'react-toastify'
+import { settingSlackSendTraceMessageEnabledState } from '../../store/atoms/settingSlackSendTraceMessageEnabledState'
 
 const NoteMain = (): JSX.Element => {
     const filterTarget = useRecoilValue(speechFilterState);
@@ -42,6 +44,7 @@ const NoteMain = (): JSX.Element => {
     const [editTitle, setEditTitle] = useState(false);
     const isTracing = useRecoilValue(tracingState);
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
+    const slackSendTraceMessageEnabled = useRecoilValue(settingSlackSendTraceMessageEnabledState)
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputEl = useRef<HTMLInputElement>(null);
     const [showGotoBottom, setShowGotoBottom] = useState(true);
@@ -134,6 +137,15 @@ const NoteMain = (): JSX.Element => {
                 }
                 return prev.map(p => {
                     if (p.id === id) {
+                        if (p.content !== content && slackSendTraceMessageEnabled === 1) {
+                            invoke('send_slack_message_command', { content }).catch(e => {
+                                console.error(`Slackメッセージの送信に失敗しました: ${e}`)
+                                toast.error("Slackメッセージの送信に失敗しました", {
+                                    pauseOnFocusLoss: false,
+                                    autoClose: 2500
+                                });
+                            });
+                        }
                         return {
                             ...p,
                             content,
