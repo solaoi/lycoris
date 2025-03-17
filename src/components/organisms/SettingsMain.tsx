@@ -39,13 +39,15 @@ import { settingKeyState } from "../../store/atoms/settingKeyState"
 import { SettingAutoApproveLimit } from "../molecules/SettingAutoApproveLimit"
 import { SettingSurveyToolEnabled } from "../molecules/SettingSurveyToolEnabled"
 import { SettingSearchToolEnabled } from "../molecules/SettingSearchToolEnabled"
+import { SettingSlackWebHookUrl } from "../molecules/SettingSlackWebHookUrl"
+import { SettingSlackSendTraceMessageEnabled } from "../molecules/SettingSlackSendTraceMessageEnabled"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
     const settingProcess = useRecoilValue(settingProcessState);
     const settingOnline = useRecoilValue(settingOnlineState);
     const settingVoice = useRecoilValue(settingVoiceState);
-    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3>(0);
+    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3 | 4>(0);
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
 
     return (
@@ -59,8 +61,9 @@ const SettingsMain = (): JSX.Element => {
             </h1>
             <ul className="menu menu-horizontal menu-xs bg-base-200 rounded gap-2 mt-8 p-[4px] mb-2 text-gray-400 h-[32px]">
                 <li><button onClick={() => { if (settingCategory !== 0) { setSettingCategory(0); } }} className={settingCategory === 0 ? "active" : ""}>基本設定</button></li>
-                <li><button onClick={() => { if (settingCategory !== 1) { setSettingCategory(1); } }} className={settingCategory === 1 ? "active" : ""}>オンライン設定</button></li>
+                <li><button onClick={() => { if (settingCategory !== 1) { setSettingCategory(1); } }} className={settingCategory === 1 ? "active" : ""}>APIキー管理</button></li>
                 <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 2) { setSettingCategory(2); } }} className={settingCategory === 2 ? "active" : ""}>各種アクション</button></li>
+                <li><button onClick={() => { if (settingCategory !== 4) { setSettingCategory(4); } }} className={settingCategory === 4 ? "active" : ""}>外部サービス連携</button></li>
                 <li><button onClick={() => { if (settingCategory !== 3) { setSettingCategory(3); } }} className={settingCategory === 3 ? "active" : ""}>スマート読み上げ</button></li>
             </ul>
             <div className="settings-inner overflow-auto mr-8 pb-4" style={{ height: `calc(100vh - 200px)` }}>
@@ -491,7 +494,7 @@ const SettingsMain = (): JSX.Element => {
                             <div className="px-5 mt-2">
                                 <div className="mb-8">
                                     <p>通常の文字起こしを追いかける形式で、高精度の文字起こしや翻訳を行います。</p>
-                                    <p>各パックをダウンロードするか、オンライン設定を行ってください。</p>
+                                    <p>各パックをダウンロードするか、APIキー管理からキー登録してください。</p>
                                 </div>
                                 <div className="mb-4 border-b">
                                     <SettingProcesses />
@@ -665,14 +668,14 @@ const SettingsMain = (): JSX.Element => {
                     <div className="mt-2">
                         <div className="px-5 cursor-default border pt-4 pb-8 bg-white/60 drop-shadow-md rounded-lg">
                             <h2 className="text-xl mt-5 mb-4 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-6 mr-2">
+                                    <path fillRule="evenodd" d="M8 7a5 5 0 1 1 3.61 4.804l-1.903 1.903A1 1 0 0 1 9 14H8v1a1 1 0 0 1-1 1H6v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a1 1 0 0 1 .293-.707L8.196 8.39A5.002 5.002 0 0 1 8 7Zm5-3a.75.75 0 0 0 0 1.5A1.5 1.5 0 0 1 14.5 7 .75.75 0 0 0 16 7a3 3 0 0 0-3-3Z" clipRule="evenodd" />
                                 </svg>
-                                オンライン設定
+                                APIキー管理
                             </h2>
                             <div className="px-5 mt-2">
                                 <div className="mb-8">
-                                    <p>利用したい各APIとの疎通設定を行ってください。</p>
+                                    <p>利用したい各APIのAPIキーを登録してください。</p>
                                 </div>
                                 <div className="mb-4 border-b">
                                     <SettingOnlines />
@@ -744,7 +747,7 @@ const SettingsMain = (): JSX.Element => {
                                         <h3 className="text-lg">
                                             標準ツール
                                         </h3>
-                                        <p className="text-sm">Lycorisが標準で利用できるツールです。</p>
+                                        <p className="text-sm ml-2">Lycorisが標準で利用できるツールです。</p>
                                     </div>
                                     <SettingSurveyToolEnabled />
                                     <SettingSearchToolEnabled />
@@ -754,9 +757,34 @@ const SettingsMain = (): JSX.Element => {
                                     <h3 className="text-lg">
                                         MCPツール
                                     </h3>
-                                    <p className="text-sm">Model Context Protocol（MCP）に対応するサーバを、ツールとして追加できます。</p>
+                                    <p className="text-sm ml-2">Model Context Protocol（MCP）に対応するサーバを、ツールとして追加できます。</p>
                                 </div>
                                 <SettingToolContent />
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {settingCategory === 4 && (
+                    <div className="mt-2">
+                        <div className="px-5 cursor-default border pt-4 pb-8 bg-white/60 drop-shadow-md rounded-lg">
+                            <h2 className="text-xl flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-6 mr-2">
+                                    <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                                    <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                                </svg>
+                                外部サービス連携
+                            </h2>
+                            <div className="px-5 mt-4 flex flex-col gap-4 w-full">
+                                <div>
+                                    <h3 className="text-lg">
+                                        Slack連携
+                                    </h3>
+                                    <p className="text-sm ml-2">Slackに指定した文字起こしの結果を送信します。（現在は追っかけ文字起こしのみ）</p>
+                                </div>
+                                <div className="ml-1 flex gap-4 flex-col">
+                                    <SettingSlackSendTraceMessageEnabled />
+                                    <SettingSlackWebHookUrl />
+                                </div>
                             </div>
                         </div>
                     </div>
