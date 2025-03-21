@@ -13,8 +13,8 @@ function App() {
       <div className="flex select-none">
         <SideMenu />
         <Main />
-        <ToastContainer/>
       </div>
+      <ToastContainer/>
     </RecoilRoot>
   )
 }

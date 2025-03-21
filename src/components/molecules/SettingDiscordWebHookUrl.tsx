@@ -3,8 +3,8 @@ import { useRecoilState } from 'recoil';
 import { settingKeyState } from "../../store/atoms/settingKeyState";
 import { TestConnectionOnExternalServiceButton } from "./TestConnectionOnExternalServiceButton";
 
-const SettingSlackWebHookUrl = (): JSX.Element => {
-    const [settingKey, setSettingKey] = useRecoilState(settingKeyState("settingSlackWebHookUrl"))
+const SettingDiscordWebHookUrl = (): JSX.Element => {
+    const [settingKey, setSettingKey] = useRecoilState(settingKeyState("settingDiscordWebHookUrl"))
     const change = (e: ChangeEvent<HTMLInputElement>) => {
         const settingKey = e.target.value
         setSettingKey(settingKey)
@@ -15,10 +15,10 @@ const SettingSlackWebHookUrl = (): JSX.Element => {
             <div className="text-sm ml-2 text-gray-500">
                 Webhook URL
             </div>
-            <input placeholder='https://hooks.slack.com/services/xxxxxxxxxxx/yyyyyyyyyyy/zzzzzzzzzzzzzzzzzzzzzzzz' className="rounded-2xl input input-bordered focus:outline-none" value={settingKey} onChange={change} />
-            <TestConnectionOnExternalServiceButton serviceType="slack" disabled={settingKey === ""} />
+            <input placeholder='https://discord.com/api/webhooks/xxxxxxxxxxx/yyyyyyyyyyy' className="rounded-2xl input input-bordered focus:outline-none" value={settingKey} onChange={change} />
+            <TestConnectionOnExternalServiceButton serviceType="discord" disabled={settingKey === ""} />
         </div>
     )
 }
 
-export { SettingSlackWebHookUrl }
+export { SettingDiscordWebHookUrl }

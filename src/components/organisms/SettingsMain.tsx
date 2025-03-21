@@ -41,6 +41,10 @@ import { SettingSurveyToolEnabled } from "../molecules/SettingSurveyToolEnabled"
 import { SettingSearchToolEnabled } from "../molecules/SettingSearchToolEnabled"
 import { SettingSlackWebHookUrl } from "../molecules/SettingSlackWebHookUrl"
 import { SettingSlackSendTraceMessageEnabled } from "../molecules/SettingSlackSendTraceMessageEnabled"
+import { SlackLogo } from "../atoms/SlackLogo"
+import { DiscordLogo } from "../atoms/DiscordLogo"
+import { SettingDiscordWebHookUrl } from "../molecules/SettingDiscordWebHookUrl"
+import { SettingDiscordSendTraceMessageEnabled } from "../molecules/SettingDiscordSendTraceMessageEnabled"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
@@ -774,16 +778,33 @@ const SettingsMain = (): JSX.Element => {
                                 </svg>
                                 外部サービス連携
                             </h2>
-                            <div className="px-5 mt-4 flex flex-col gap-4 w-full">
-                                <div>
-                                    <h3 className="text-lg">
-                                        Slack連携
-                                    </h3>
-                                    <p className="text-sm ml-2">Slackに指定した文字起こしの結果を送信します。（現在は追っかけ文字起こしのみ）</p>
+                            <div className="flex flex-col gap-4">
+                                <div className="px-5 my-4 flex flex-col gap-4 w-full">
+                                    <div>
+                                        <h3 className="text-lg flex items-center gap-2">
+                                            <SlackLogo />
+                                            Slack 連携
+                                        </h3>
+                                        <p className="text-sm ml-2 mt-2">文字起こし結果をWebhookに指定したSlackチャンネルに送信します。</p>
+                                    </div>
+                                    <div className="ml-1 flex gap-4 flex-col">
+                                        <SettingSlackSendTraceMessageEnabled />
+                                        <SettingSlackWebHookUrl />
+                                    </div>
                                 </div>
-                                <div className="ml-1 flex gap-4 flex-col">
-                                    <SettingSlackSendTraceMessageEnabled />
-                                    <SettingSlackWebHookUrl />
+                                <hr />
+                                <div className="px-5 my-4 flex flex-col gap-4 w-full">
+                                    <div>
+                                        <h3 className="text-lg flex items-center gap-2">
+                                            <DiscordLogo />
+                                            Discord 連携
+                                        </h3>
+                                        <p className="text-sm ml-2 mt-2">文字起こし結果をWebhookに指定したDiscordチャンネルに送信します。</p>
+                                    </div>
+                                    <div className="ml-1 flex gap-4 flex-col">
+                                        <SettingDiscordSendTraceMessageEnabled />
+                                        <SettingDiscordWebHookUrl />
+                                    </div>
                                 </div>
                             </div>
                         </div>
