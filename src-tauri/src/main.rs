@@ -26,38 +26,14 @@ use urlencoding::decode;
 
 mod module;
 use module::{
-    action::{self, request_gpt_tool},
-    chat_online::ChatOnline,
-    deleter::NoteDeleter,
-    device::{self, Device},
-    downloader::{
+    action::{self, request_gpt_tool}, chat_online::ChatOnline, deleter::NoteDeleter, device::{self, Device}, discord_client::DiscordClient, downloader::{
         model_dir::ModelDirDownloader, sbv2::StyleBertVits2ModelDownloader,
         sbv2_voice::StyleBertVits2VoiceModelDownloader, vosk::VoskModelDownloader,
         whisper::WhisperModelDownloader,
-    },
-    mcp_host::{
+    }, mcp_host::{
         self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
         test_tool_connection, MCPHost, ToolConnectTestRequest,
-    },
-    model_type_sbv2::ModelTypeStyleBertVits2,
-    model_type_vosk::ModelTypeVosk,
-    model_type_whisper::ModelTypeWhisper,
-    online_llm_client::{ApprovedResult, OnlineLLMClient},
-    permissions,
-    record::Record,
-    record_desktop::RecordDesktop,
-    screenshot::{self, AppWindow},
-    slack_client::SlackClient,
-    sqlite::{Sqlite, ToolExecution},
-    synthesizer::{self, Synthesizer},
-    transcription::{TraceCompletion, Transcription},
-    transcription_amivoice::TranscriptionAmivoice,
-    transcription_hybrid::TranscriptionHybrid,
-    transcription_ja::TranscriptionJa,
-    transcription_online::TranscriptionOnline,
-    translation_en::TranslationEn,
-    translation_ja::TranslationJa,
-    translation_ja_high::TranslationJaHigh,
+    }, model_type_sbv2::ModelTypeStyleBertVits2, model_type_vosk::ModelTypeVosk, model_type_whisper::ModelTypeWhisper, online_llm_client::{ApprovedResult, OnlineLLMClient}, permissions, record::Record, record_desktop::RecordDesktop, screenshot::{self, AppWindow}, slack_client::SlackClient, sqlite::{Sqlite, ToolExecution}, synthesizer::{self, Synthesizer}, transcription::{TraceCompletion, Transcription}, transcription_amivoice::TranscriptionAmivoice, transcription_hybrid::TranscriptionHybrid, transcription_ja::TranscriptionJa, transcription_online::TranscriptionOnline, translation_en::TranslationEn, translation_ja::TranslationJa, translation_ja_high::TranslationJaHigh
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -628,6 +604,14 @@ async fn send_slack_message_command(content: String) -> Result<String, String> {
     result
 }
 
+#[tauri::command]
+async fn send_discord_message_command(content: String) -> Result<String, String> {
+    let discord_client: DiscordClient = DiscordClient::new();
+    let result = discord_client.send_message(content).await;
+
+    result
+}
+
 fn set_ort_env(path_resolver: &PathResolver) {
     let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
 
@@ -770,7 +754,8 @@ fn main() {
             update_tool_command,
             check_approve_cmds_command,
             update_content_2_on_speech_command,
-            send_slack_message_command
+            send_slack_message_command,
+            send_discord_message_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
