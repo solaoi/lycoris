@@ -98,7 +98,7 @@
 
 ## 💻 System Requirements
 
-- **Operating System**: macOS 13 Ventura or later.
+- **Operating System**: macOS 14 Sonoma or later.
 - **Processor**: Compatible with Apple Silicon (M1, M2, M3) and Intel processors.
 - **Memory**: Minimum 8GB RAM recommended for optimal performance.
 
