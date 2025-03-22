@@ -144,21 +144,24 @@ Whether you’re a developer interested in contributing or a user wanting to sup
 
 <!-- readme: contributors -start -->
 <table>
-<tr>
-    <td align="center">
-        <a href="https://github.com/solaoi">
-            <img src="https://avatars.githubusercontent.com/u/46414076?v=4" width="100;" alt="solaoi"/>
-            <br />
-            <sub><b>Solaoi</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/mohemohe">
-            <img src="https://avatars.githubusercontent.com/u/5028163?v=4" width="100;" alt="mohemohe"/>
-            <br />
-            <sub><b>Mohemohe</b></sub>
-        </a>
-    </td></tr>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/solaoi">
+                    <img src="https://avatars.githubusercontent.com/u/46414076?v=4" width="100;" alt="solaoi"/>
+                    <br />
+                    <sub><b>Solaoi</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/mohemohe">
+                    <img src="https://avatars.githubusercontent.com/u/5028163?v=4" width="100;" alt="mohemohe"/>
+                    <br />
+                    <sub><b>Mohemohe</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
 </table>
 <!-- readme: contributors -end -->
 
