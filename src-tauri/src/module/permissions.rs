@@ -1,15 +1,5 @@
-extern crate objc;
-extern crate objc_foundation;
-extern crate objc_id;
-
-use objc::{
-    msg_send,
-    runtime::{Class, Object},
-    sel, sel_impl,
-};
-use objc_id::Id;
-
 use core_graphics::access::ScreenCaptureAccess;
+use objc2::{class, msg_send, runtime::AnyObject};
 use tauri::{api::dialog::confirm, Window};
 
 use super::sqlite::Sqlite;
@@ -21,10 +11,10 @@ pub fn has_accessibility_permission() -> bool {
 
 pub fn has_microphone_permission(window: Window) -> bool {
     unsafe {
-        let av_audio_session: Id<Object> =
-            msg_send![Class::get("AVAudioSession").unwrap(), sharedInstance];
-        let permission_status: i32 = msg_send![av_audio_session, recordPermission];
-        const AVAUDIO_SESSION_RECORD_PERMISSION_GRANTED: i32 = 1735552628;
+        let av_audio_session: *mut AnyObject =
+            msg_send![class!(AVAudioApplication), sharedInstance];
+        let permission_status: i64 = msg_send![av_audio_session, recordPermission];
+        const AVAUDIO_SESSION_RECORD_PERMISSION_GRANTED: i64 = 1735552628;
         let trusted = permission_status == AVAUDIO_SESSION_RECORD_PERMISSION_GRANTED;
         if !trusted {
             let func = |ok: bool| {
@@ -37,7 +27,7 @@ pub fn has_microphone_permission(window: Window) -> bool {
                     .expect("failed to open system preferences");
                 }
             };
-            confirm(Some(&window),"システム設定の\"セキュリティとプライバシー\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"からマイクにアクセスしようとしています。",func);
+            confirm(Some(&window),"システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"からマイクにアクセスしようとしています。",func);
         }
         return trusted;
     }
@@ -62,7 +52,7 @@ pub fn has_screen_capture_permission(window: Window) -> bool {
                     .expect("failed to open system preferences");
                 }
             };
-            confirm(Some(&window),"システム設定の\"セキュリティとプライバシー\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"から画面収録にアクセスしようとしています。",func);
+            confirm(Some(&window),"システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"から画面収録にアクセスしようとしています。",func);
         }
         return trusted;
     } else {
