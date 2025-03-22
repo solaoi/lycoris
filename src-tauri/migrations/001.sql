@@ -65,6 +65,8 @@ VALUES("settingAILanguage", "None");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingSlackWebHookUrl", "");
 INSERT INTO settings(setting_name, setting_status)
+VALUES("settingDiscordWebHookUrl", "");
+INSERT INTO settings(setting_name, setting_status)
 VALUES(
         "settingHasAccessedScreenCapturePermission",
         "never"
@@ -77,6 +79,8 @@ INSERT INTO settings(setting_name, setting_status)
 VALUES("settingSearchToolEnabled", "1");
 INSERT INTO settings(setting_name, setting_status)
 VALUES("settingSlackSendTraceMessageEnabled", "0");
+INSERT INTO settings(setting_name, setting_status)
+VALUES("settingDiscordSendTraceMessageEnabled", "0");
 CREATE TABLE models (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     model_name TEXT,
