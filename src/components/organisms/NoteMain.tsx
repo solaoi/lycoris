@@ -241,10 +241,10 @@ const NoteMain = (): JSX.Element => {
     return (<>
         <div className="bg-white">
             <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden h-[64px]" >
-                <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 hover:border-base-300 border-2 border-transparent rounded-lg"
+                <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 !pl-0 hover:border-base-300 border-2 border-transparent rounded-lg"
                     onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                     {editTitle ?
-                        <input className='w-full bg-base-200 focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
+                        <input className='w-full bg-base-200 rounded-md focus:outline-none pl-1 tracking-normal' autoFocus value={selectedNote!.note_title} ref={inputEl}
                             onKeyDown={e => {
                                 if (e.key === "Enter" && e.keyCode === 13) {
                                     setEditTitle(false)
