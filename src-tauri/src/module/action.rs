@@ -137,7 +137,7 @@ impl Action {
 
         // 将来的には、『assistant』roleではなく『developer』roleにする必要がある。現時点ではAPI側が未対応@2025/01/02
         messages.push(json!({
-            "role": if model == "o1-low" || model == "o1" || model == "o1-high"|| model == "o1-high" || model == "o3-low" || model == "o3" || model == "o3-high" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" || model == "gpt-4.1" || model == "gpt-4.1-mini" || model == "gpt-4.1-nano" || model == "o4-mini-low" || model == "o4-mini" || model == "o4-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
+            "role": if model == "o1-low" || model == "o1" || model == "o1-high" || model == "o3-low" || model == "o3" || model == "o3-high" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" || model == "gpt-4.1" || model == "gpt-4.1-mini" || model == "gpt-4.1-nano" || model == "o4-mini-low" || model == "o4-mini" || model == "o4-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
             "content": prompt
         }));
         messages.push(json!({
