@@ -21,15 +21,12 @@ impl OnlineLLMClient {
     pub fn new() -> Self {
         let sqlite = Sqlite::new();
         let token = sqlite.select_whisper_token().unwrap();
-        let model = "gpt-4o-mini".to_string();
+        let model = "gpt-4.1-mini".to_string();
 
         Self { model, token }
     }
 
-    pub async fn search_web_with_openai(
-        &self,
-        question: String,
-    ) -> Result<String, String> {
+    pub async fn search_web_with_openai(&self, question: String) -> Result<String, String> {
         let url = "https://api.openai.com/v1/chat/completions";
         let model = "gpt-4o-search-preview";
         let search_context_size = "high";
@@ -152,7 +149,22 @@ impl OnlineLLMClient {
 
         let system_role = if matches!(
             self.model.as_str(),
-            "o1" | "o3-mini-low" | "o3-mini" | "o3-mini-high" | "gpt-4.5-preview"
+            "o1-low"
+                | "o1"
+                | "o1-high"
+                | "o3-low"
+                | "o3"
+                | "o3-high"
+                | "o3-mini-low"
+                | "o3-mini"
+                | "o3-mini-high"
+                | "o4-mini-low"
+                | "o4-mini"
+                | "o4-mini-high"
+                | "gpt-4.5-preview"
+                | "gpt-4.1"
+                | "gpt-4.1-mini"
+                | "gpt-4.1-nano"
         ) {
             "developer"
         } else {
@@ -248,6 +260,20 @@ impl OnlineLLMClient {
               "messages": messages,
               "response_format": response_format
             })
+        } else if self.model == "o1-low" || self.model == "o1" || self.model == "o1-high" {
+            json!({
+              "model": "o1",
+              "messages": messages,
+              "response_format": response_format,
+              "reasoning_effort": if self.model == "o1-low" {"low"} else if self.model == "o1" {"medium"} else {"high"}
+            })
+        } else if self.model == "o3-low" || self.model == "o3" || self.model == "o3-high" {
+            json!({
+              "model": "o3",
+              "messages": messages,
+              "response_format": response_format,
+              "reasoning_effort": if self.model == "o3-low" {"low"} else if self.model == "o3" {"medium"} else {"high"}
+            })
         } else if self.model == "o3-mini-low"
             || self.model == "o3-mini"
             || self.model == "o3-mini-high"
@@ -257,6 +283,16 @@ impl OnlineLLMClient {
               "messages": messages,
               "response_format": response_format,
               "reasoning_effort": if self.model == "o3-mini-low" {"low"} else if self.model == "o3-mini" {"medium"} else {"high"}
+            })
+        } else if self.model == "o4-mini-low"
+            || self.model == "o4-mini"
+            || self.model == "o4-mini-high"
+        {
+            json!({
+              "model": "o4-mini",
+              "messages": messages,
+              "response_format": response_format,
+              "reasoning_effort": if self.model == "o4-mini-low" {"low"} else if self.model == "o4-mini" {"medium"} else {"high"}
             })
         } else {
             json!({
