@@ -24,6 +24,16 @@ pub struct Speech {
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
+pub struct Agent {
+    pub id: u16,
+    pub name: String,
+    pub has_workspace: u16,
+    pub mode: u16,
+    pub role_prompt: String,
+    pub tool_list: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct PreTranscript {
     pub id: u16,
     pub hybrid_whisper_content: String,
@@ -77,6 +87,31 @@ pub struct ToolExecutionWrapper {
     pub note_id: u64,
     pub content: String,
     pub tool_execution: ToolExecution,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct WhisperContent {
+    pub id: u16,
+    pub content: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AgentHistory {
+    pub id: u16,
+    pub created_at_unixtime: u64,
+    pub content: String,
+    pub speech_id: u16,
+    pub agent_id: u16,
+    pub note_id: u64,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct AgentWorkspace {
+    pub id: u16,
+    pub content: String,
+    pub agent_id: u16,
+    pub created_at_unixtime: u64,
+    pub note_id: u64,
 }
 
 impl Sqlite {
@@ -211,6 +246,155 @@ impl Sqlite {
             params![content, speech_id],
         )?;
 
+        Ok(())
+    }
+
+    pub fn select_agent_workspace(
+        &self,
+        note_id: u64,
+        agent_id: u16,
+    ) -> Result<Option<AgentWorkspace>, rusqlite::Error> {
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT id, content, agent_id, created_at_unixtime, note_id FROM agent_workspaces WHERE note_id = ?1 AND agent_id = ?2",
+            )
+            .unwrap();
+        let params: Vec<&dyn rusqlite::ToSql> = vec![&note_id, &agent_id];
+
+        let results = stmt
+            .query_map(params.as_slice(), |row| {
+                Ok(AgentWorkspace {
+                    id: row.get_unwrap(0),
+                    content: row.get_unwrap(1),
+                    agent_id: row.get_unwrap(2),
+                    created_at_unixtime: row.get_unwrap(3),
+                    note_id: row.get_unwrap(4),
+                })
+            })?
+            .collect::<Result<Vec<_>, rusqlite::Error>>()?;
+        Ok(results.first().cloned())
+    }
+
+    pub fn select_agent(&self, agent_name: String) -> Result<Agent, rusqlite::Error> {
+        let mut stmt = self.conn.prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list FROM agents WHERE name = ?1").unwrap();
+        let params: Vec<&dyn rusqlite::ToSql> = vec![&agent_name];
+
+        let results = stmt
+            .query_map(params.as_slice(), |row| {
+                Ok(Agent {
+                    id: row.get_unwrap(0),
+                    name: row.get_unwrap(1),
+                    has_workspace: row.get_unwrap(2),
+                    mode: row.get_unwrap(3),
+                    role_prompt: row.get_unwrap(4),
+                    tool_list: row.get_unwrap(5),
+                })
+            })?
+            .collect::<Result<Vec<_>, rusqlite::Error>>()?;
+        Ok(results[0].clone())
+    }
+
+    pub fn select_all_agents(&self) -> Result<Vec<Agent>, rusqlite::Error> {
+        let mut stmt = self
+            .conn
+            .prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list FROM agents")
+            .unwrap();
+        let results = stmt
+            .query_map(params![], |row| {
+                Ok(Agent {
+                    id: row.get_unwrap(0),
+                    name: row.get_unwrap(1),
+                    has_workspace: row.get_unwrap(2),
+                    mode: row.get_unwrap(3),
+                    role_prompt: row.get_unwrap(4),
+                    tool_list: row.get_unwrap(5),
+                })
+            })
+            .unwrap()
+            .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn insert_agent(
+        &self,
+        name: String,
+        has_workspace: u16,
+        mode: u16,
+        role_prompt: String,
+        tool_list: String,
+    ) -> Result<Agent, rusqlite::Error> {
+        let mut stmt = self.conn.prepare(
+            "
+            INSERT INTO agents (name, has_workspace, mode, role_prompt, tool_list) 
+            VALUES (?1, ?2, ?3, ?4, ?5)
+            RETURNING id, name, has_workspace, mode, role_prompt, tool_list
+        ",
+        )?;
+
+        let agent = stmt.query_row(
+            rusqlite::params![name, has_workspace, mode, role_prompt, tool_list],
+            |row| {
+                Ok(Agent {
+                    id: row.get_unwrap(0),
+                    name: row.get_unwrap(1),
+                    has_workspace: row.get_unwrap(2),
+                    mode: row.get_unwrap(3),
+                    role_prompt: row.get_unwrap(4),
+                    tool_list: row.get_unwrap(5),
+                })
+            },
+        )?;
+
+        Ok(agent)
+    }
+
+    pub fn upsert_agent_workspace(
+        &self,
+        id: Option<u16>,
+        content: String,
+        agent_id: u16,
+        note_id: u64,
+    ) -> Result<AgentWorkspace, rusqlite::Error> {
+        let mut stmt = self.conn.prepare(
+            r#"
+            INSERT INTO agent_workspaces (id, content, agent_id, note_id)
+            VALUES (?1, ?2, ?3, ?4)
+            ON CONFLICT(id) DO UPDATE SET content = excluded.content
+            RETURNING id, content, agent_id, created_at_unixtime, note_id
+            "#
+        )?;
+        let row = stmt.query_row(
+            (&id, &content, &agent_id, &note_id),
+            |row| Ok(AgentWorkspace {
+                id: row.get_unwrap(0),
+                content: row.get_unwrap(1),
+                agent_id: row.get_unwrap(2),
+                created_at_unixtime: row.get_unwrap(3),
+                note_id: row.get_unwrap(4),
+            }),
+        )?;
+
+        Ok(row)
+    }
+
+    pub fn delete_agents(&self, agent_names: Vec<String>) -> Result<(), rusqlite::Error> {
+        if agent_names.is_empty() {
+            return Ok(());
+        }
+
+        let placeholders = (0..agent_names.len())
+            .map(|i| format!("?{}", i + 1))
+            .collect::<Vec<_>>()
+            .join(",");
+
+        let sql = format!("DELETE FROM agents WHERE name IN ({})", placeholders);
+        let params = agent_names
+            .iter()
+            .map(|name| name as &dyn rusqlite::ToSql)
+            .collect::<Vec<_>>();
+
+        self.conn.execute(&sql, &params[..])?;
         Ok(())
     }
 
@@ -378,6 +562,29 @@ impl Sqlite {
                     hybrid_reazonspeech_content: row.get_unwrap(2),
                 })
             });
+    }
+
+    pub fn select_whisper_with_no_agent(
+        &self,
+        note_id: u64,
+    ) -> Result<WhisperContent, rusqlite::Error> {
+        return self.conn
+            .query_row("SELECT id, content FROM speeches WHERE model = \"whisper\" AND is_done_with_agent = 0 AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
+            |row| {
+                Ok(WhisperContent {
+                    id: row.get_unwrap(0),
+                    content: row.get_unwrap(1),
+                })
+            });
+    }
+
+    pub fn update_speech_agent_done(&self, speech_id: u16) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE speeches SET is_done_with_agent = 1 WHERE id = ?1",
+            params![speech_id],
+        )?;
+        Ok(())
     }
 
     pub fn select_whisper_token(&self) -> Result<String, rusqlite::Error> {
@@ -627,6 +834,20 @@ impl Sqlite {
             Ok(_) => Ok(Speech { id: self.conn.last_insert_rowid() as u16, speech_type, created_at_unixtime, content, wav, model, model_description, note_id, is_desktop: false }),
             Err(err) => Err(err),
         }
+    }
+
+    pub fn insert_agent_speech(
+        &self,
+        speech_id: u16,
+        agent_id: u16,
+        content: String,
+        note_id: u64,
+    ) -> Result<AgentHistory, rusqlite::Error> {
+        return self.conn.query_row(
+            "INSERT INTO agent_speeches (speech_id, agent_id, content, note_id) VALUES (?1, ?2, ?3, ?4) RETURNING id,speech_id,agent_id,content,created_at_unixtime,note_id",
+            params![speech_id, agent_id, content, note_id],
+            |row| Ok(AgentHistory { id: row.get_unwrap(0), speech_id: row.get_unwrap(1), agent_id: row.get_unwrap(2), content: row.get_unwrap(3), created_at_unixtime: row.get_unwrap(4), note_id: row.get_unwrap(5) }),
+        );
     }
 
     pub fn delete_note(&self, note_id: u64) -> Result<usize, rusqlite::Error> {

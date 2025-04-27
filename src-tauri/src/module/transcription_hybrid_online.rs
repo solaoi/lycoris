@@ -264,7 +264,10 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
 
 pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionHybridOnline>> = Mutex::new(None);
 
-pub fn initialize_transcription_hybrid_online(app_handle: AppHandle, note_id: u64) {
+pub fn initialize_transcription_hybrid_online(
+    app_handle: AppHandle,
+    note_id: u64,
+) {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     if singleton.is_none() {
         *singleton = Some(TranscriptionHybridOnline::new(app_handle, note_id));

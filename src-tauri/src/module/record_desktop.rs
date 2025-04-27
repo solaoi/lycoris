@@ -1,10 +1,3 @@
-//! Run with:
-//! cargo run --example read_wav <model path> <wav path>
-//! e.g. "cargo run --example read_wav /home/user/stt/model /home/user/stt/test.wav"
-//! (The WAV file must have signed 16-bit samples)
-//!
-//! Read the "Setup" section in the README to know how to link the vosk dynamic
-//! libaries to the examples
 use crate::BUNDLE_IDENTIFIER;
 
 use std::{
@@ -108,7 +101,7 @@ impl RecordDesktop {
             .unwrap()
             .set_channel_count(channels)
             .unwrap();
-        
+
         let recognizer = MyRecognizer::build(
             self.app_handle.clone(),
             speaker_language.clone(),
@@ -197,6 +190,7 @@ impl RecordDesktop {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
+
                     if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
@@ -208,6 +202,7 @@ impl RecordDesktop {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
+
                             if transcription_accuracy_clone.starts_with("online-transcript") {
                                 transcription_online::initialize_transcription_online(
                                     app_handle_clone,
@@ -279,12 +274,14 @@ impl RecordDesktop {
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }
-                            } else if transcription_accuracy_clone.starts_with("hybrid-transcript") {
+                            } else if transcription_accuracy_clone.starts_with("hybrid-transcript")
+                            {
                                 transcription_hybrid::initialize_transcription_hybrid(
                                     app_handle_clone,
                                     note_id,
                                 );
-                                let mut lock = transcription_hybrid::SINGLETON_INSTANCE.lock().unwrap();
+                                let mut lock =
+                                    transcription_hybrid::SINGLETON_INSTANCE.lock().unwrap();
                                 if let Some(singleton) = lock.as_mut() {
                                     singleton.start(stop_convert_rx_clone, false);
                                 }

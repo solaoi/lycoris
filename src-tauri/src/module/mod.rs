@@ -30,3 +30,4 @@ pub mod mcp_host;
 pub mod online_llm_client;
 pub mod slack_client;
 pub mod discord_client;
+pub mod agents;

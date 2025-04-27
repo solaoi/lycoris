@@ -8,6 +8,7 @@ import { selectedNoteState } from '../../store/atoms/selectedNoteState';
 import { recordingNoteState } from '../../store/atoms/recordingNoteState';
 import { tracingState } from '../../store/atoms/tracingState';
 import { desktopAudioState } from '../../store/atoms/desktopAudioState';
+import { agentSelectedState } from '../../store/atoms/agentSelectedState';
 
 const RecordStartButton = (): JSX.Element => {
     const deviceLabel = useRecoilValue(audioDeviceState)
@@ -18,6 +19,7 @@ const RecordStartButton = (): JSX.Element => {
     const selectedNote = useRecoilValue(selectedNoteState)
     const [recordingNote, setRecordingNote] = useRecoilState(recordingNoteState)
     const isTracing = useRecoilValue(tracingState);
+    const agentSelected = useRecoilValue(agentSelectedState);
     const deviceType = (() => {
         if (deviceLabel === null && hasDesktopAudio) {
             return "desktop"
