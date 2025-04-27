@@ -9,11 +9,10 @@ type AgentSwitcherTabsProps = {
     agents: Agent[];
     selectedAgent: string[];
     agentIdsWithNote: number[];
-    agentSwitcherRef: React.RefObject<HTMLDivElement>;
 }
 
 const AgentSwitcherTabs = (props: AgentSwitcherTabsProps): JSX.Element => {
-    const { agents, selectedAgent, agentIdsWithNote, agentSwitcherRef } = props;
+    const { agents, selectedAgent, agentIdsWithNote } = props;
     const [activeTab, setActiveTab] = useState(0);
     const setAgentSwitcher = useSetRecoilState(agentSwitcherState)
 
@@ -30,7 +29,7 @@ const AgentSwitcherTabs = (props: AgentSwitcherTabsProps): JSX.Element => {
     const tabIds = [...new Set([...selectedAgentIds, ...agentIdsWithNote])]
 
     return (
-        <div className="tabs" ref={agentSwitcherRef}>
+        <div className="tabs">
             <a className={"tab tab-lifted border-none" + (activeTab === 0 ? " tab-active" : "")}
                 onClick={() => { setActiveTab(0); setAgentSwitcher(null); }}>
                 デフォルト

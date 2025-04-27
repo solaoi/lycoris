@@ -32,7 +32,7 @@ import { settingSlackSendTraceMessageEnabledState } from '../../store/atoms/sett
 import { settingDiscordSendTraceMessageEnabledState } from '../../store/atoms/settingDiscordSendTraceMessageEnabledState'
 import { AgentSelectButton } from '../molecules/AgentSelectButton'
 import { Agent } from '../../type/Agent.type'
-import { AgentSwitcherTabs } from '../molecules/AgentSwicherTabs'
+import { AgentSwitcherTabs } from '../molecules/AgentSwitcherTabs'
 import { agentSelectedState } from '../../store/atoms/agentSelectedState'
 import { agentSwitcherState } from '../../store/atoms/agentSwitcherState'
 import { AgentHistory } from '../molecules/AgentHistory'
