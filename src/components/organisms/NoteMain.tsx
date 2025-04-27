@@ -149,7 +149,7 @@ const NoteMain = (): JSX.Element => {
                 if (settingKeyOpenai !== "" && prev.some(h => h.speech_type === "action" && !h.content_2)) {
                     invoke('execute_action_command', { noteId: recordingNote || tracingNote });
                 }
-                if (selectedAgent.length > 0) {
+                if (settingKeyOpenai !== "" && transcriptionAccuracy !== "off" && selectedAgent.length > 0) {
                     invoke('execute_agent_command', { noteId: recordingNote || tracingNote, agents: selectedAgent });
                 }
                 return prev.map(p => {

@@ -57,7 +57,7 @@ const SettingAgents = (props: SettingAgentsProps): JSX.Element => {
                         ) : (<>
                             <div className="px-6 py-3 mb-4 border border-neutral-300 rounded-md">
                                 {agents.filter(agent => agent.name === agentName).map((t) => (
-                                    <div className="py-2 px-6 mb-2 flex gap-4 flex-col">
+                                    <div key={`agent-${t.id}`} className="py-2 px-6 mb-2 flex gap-4 flex-col">
                                         <div>
                                             <div className="mb-2 font-bold border-b border-neutral-300 pb-2">役割</div>
                                             <div className="text-sm">

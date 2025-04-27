@@ -7,6 +7,7 @@ import { recordState } from '../../store/atoms/recordState';
 import { tracingState } from '../../store/atoms/tracingState';
 import { Agent } from '../../type/Agent.type';
 import { agentSelectedState } from '../../store/atoms/agentSelectedState';
+import { transcriptionAccuracyState } from '../../store/atoms/transcriptionAccuracyState';
 
 type AgentSelectButtonProps = {
     agents: Agent[];
@@ -19,6 +20,7 @@ const AgentSelectButton = (props: AgentSelectButtonProps): JSX.Element => {
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
     const isOpenaiKeySet = settingKeyOpenai !== "";
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const transcriptionAccuracy = useRecoilValue(transcriptionAccuracyState);
 
     const [agentSelected, setAgentSelected] = useRecoilState(agentSelectedState);
     const handleChange = (selected: Option[]) => {
@@ -32,7 +34,7 @@ const AgentSelectButton = (props: AgentSelectButtonProps): JSX.Element => {
                     e.stopPropagation();
                     dialogRef.current?.showModal();
                 })}
-                disabled={!isOpenaiKeySet || isRecording || isTracing}>
+                disabled={!isOpenaiKeySet || isRecording || isTracing || transcriptionAccuracy === "off"}>
                 <img src={logo} alt="select agent" className='w-6 absolute left-1/2 -translate-x-1/2 group-hover:left-6 transition-all duration-300' />
                 <span className="opacity-0 group-hover:opacity-100 transition-[opacity] duration-300 ease-in whitespace-nowrap ml-8">エージェント選択</span>
                 <div className={`badge absolute top-[-6px] right-[-12px] ${agentSelected.length === 0 ? "hidden" : ""}`}>{agentSelected?.length}</div>

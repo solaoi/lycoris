@@ -52,7 +52,6 @@ CREATE TABLE agent_workspaces (
     created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
     note_id INTEGER NOT NULL,
     FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE
-    FOREIGN KEY(agent_id) REFERENCES agents(id) ON DELETE CASCADE
 );
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
