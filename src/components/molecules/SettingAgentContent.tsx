@@ -7,16 +7,9 @@ import { SettingAgentAddButton } from "./SettingAgentAddButton";
 const SettingAgentContent = (): JSX.Element => {
     const [agents, setAgents] = useState<Agent[]>([]);
     useEffect(() => {
-        invoke('select_all_agents_command').then((arr) => {
-            const agents = arr as { id: number, name: string, has_workspace: number, mode: number, role_prompt: string, tool_list: string[] }[];
-            setAgents(agents.map(agent => ({
-                id: agent.id,
-                name: agent.name,
-                has_workspace: agent.has_workspace,
-                mode: agent.mode,
-                role_prompt: agent.role_prompt,
-                tool_list: agent.tool_list
-            })));
+        invoke('select_all_agents_command').then((value: unknown) => {
+            const agents = value as Agent[];
+            setAgents(agents);
         });
     }, [setAgents]);
     const addAgent = (agent: Agent) => {
@@ -33,7 +26,7 @@ const SettingAgentContent = (): JSX.Element => {
     return (
         <div>
             <div className="flex items-center">
-                <SettingAgentAddButton addAgent={addAgent} />
+                <SettingAgentAddButton addAgent={addAgent} agents={agents} />
                 <div>
                     {selectedAgents.length > 0 && (
                         <button

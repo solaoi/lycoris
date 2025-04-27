@@ -5,4 +5,5 @@ export type Agent = {
     mode: number;
     role_prompt: string;
     tool_list: string[];
+    ref_recent_conversation: number;
 }

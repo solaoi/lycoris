@@ -691,10 +691,11 @@ fn insert_agent_command(
     mode: u16,
     role_prompt: String,
     tool_list: String,
+    ref_recent_conversation: u16,
 ) -> Result<Agent, String> {
     let sqlite = Sqlite::new();
     sqlite
-        .insert_agent(name, has_workspace, mode, role_prompt, tool_list)
+        .insert_agent(name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation)
         .map_err(|e| e.to_string())
 }
 

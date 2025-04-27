@@ -42,7 +42,8 @@ CREATE TABLE agents (
     has_workspace INTEGER DEFAULT 0,
     mode INTEGER DEFAULT 0,
     role_prompt TEXT,
-    tool_list TEXT
+    tool_list TEXT,
+    ref_recent_conversation INTEGER DEFAULT 0
 );
 CREATE TABLE agent_workspaces (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

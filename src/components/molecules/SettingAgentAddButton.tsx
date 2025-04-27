@@ -5,16 +5,19 @@ import { toast } from "react-toastify";
 
 type SettingAgentAddButtonProps = {
     addAgent: (agent: Agent) => void
+    agents: Agent[]
 }
 
 const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element => {
-    const { addAgent } = props;
+    const { addAgent, agents } = props;
     const dialogRef = useRef<HTMLDialogElement>(null);
     const [name, setName] = useState("");
     const [rolePrompt, setRolePrompt] = useState("");
     const [mode, setMode] = useState(0);
     const [hasWorkspace, setHasWorkspace] = useState(0);
     const [toolList, setToolList] = useState("");
+    const [refRecentConversation, setRefRecentConversation] = useState(0);
+    const isNameExists = agents.some(agent => agent.name === name);
 
     return (
         <>
@@ -41,6 +44,7 @@ const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element =
                         setMode(0);
                         setHasWorkspace(0);
                         setToolList("");
+                        setRefRecentConversation(0);
                         dialogRef.current?.close();
                     }
                 }}
@@ -105,22 +109,40 @@ const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element =
                                     <option value="1">有効</option>
                                 </select>
                             </div>
+                            <div className="flex">
+                                <label className="label w-1/2">
+                                    <span className="label-text">直近の会話を参照</span>
+                                </label>
+                                <select className="select select-bordered w-full max-w-xs"
+                                    value={refRecentConversation}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        setRefRecentConversation(value)
+                                    }}>
+                                    <option value="0">無効</option>
+                                    <option value="1">有効</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div className="modal-action">
                         <form method="dialog">
-                            <button className="btn mr-2" onClick={() => { setName(""); setRolePrompt(""); setMode(0); setHasWorkspace(0); setToolList(""); }}>キャンセル</button>
-                            <button className="btn text-primary"
+                            <button className="btn mr-2" onClick={() => { setName(""); setRolePrompt(""); setMode(0); setHasWorkspace(0); setToolList(""); setRefRecentConversation(0); }}>キャンセル</button>
+                            <button className={`btn text-primary ${name === "" || rolePrompt === "" || isNameExists ? "btn-disabled" : ""}`}
                                 onClick={async () => {
-                                    await invoke("insert_agent_command", { name: name, hasWorkspace: hasWorkspace, mode: mode, rolePrompt: rolePrompt, toolList: toolList })
+                                    if (name === "" || rolePrompt === "" || isNameExists) {
+                                        return;
+                                    }
+                                    await invoke("insert_agent_command", { name: name, hasWorkspace: hasWorkspace, mode: mode, rolePrompt: rolePrompt, toolList: toolList, refRecentConversation: refRecentConversation })
                                         .then(async (value: unknown) => {
-                                            const agent = value as { id: number, name: string, has_workspace: number, mode: number, role_prompt: string, tool_list: string };
+                                            const agent = value as { id: number, name: string, has_workspace: number, mode: number, role_prompt: string, tool_list: string, ref_recent_conversation: number };
                                             setName("");
                                             setRolePrompt("");
                                             setMode(0);
                                             setHasWorkspace(0);
                                             setToolList("");
-                                            addAgent({ id: agent.id, name: agent.name, has_workspace: agent.has_workspace, mode: agent.mode, role_prompt: agent.role_prompt, tool_list: agent.tool_list.split(",") });
+                                            setRefRecentConversation(0);
+                                            addAgent({ id: agent.id, name: agent.name, has_workspace: agent.has_workspace, mode: agent.mode, role_prompt: agent.role_prompt, tool_list: agent.tool_list.split(","), ref_recent_conversation: agent.ref_recent_conversation });
                                         }).catch((e) => {
                                             console.error(e.message);
                                         });

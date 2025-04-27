@@ -31,6 +31,7 @@ pub struct Agent {
     pub mode: u16,
     pub role_prompt: String,
     pub tool_list: String,
+    pub ref_recent_conversation: u16,
 }
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -277,7 +278,7 @@ impl Sqlite {
     }
 
     pub fn select_agent(&self, agent_name: String) -> Result<Agent, rusqlite::Error> {
-        let mut stmt = self.conn.prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list FROM agents WHERE name = ?1").unwrap();
+        let mut stmt = self.conn.prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation FROM agents WHERE name = ?1").unwrap();
         let params: Vec<&dyn rusqlite::ToSql> = vec![&agent_name];
 
         let results = stmt
@@ -289,6 +290,7 @@ impl Sqlite {
                     mode: row.get_unwrap(3),
                     role_prompt: row.get_unwrap(4),
                     tool_list: row.get_unwrap(5),
+                    ref_recent_conversation: row.get_unwrap(6),
                 })
             })?
             .collect::<Result<Vec<_>, rusqlite::Error>>()?;
@@ -298,7 +300,7 @@ impl Sqlite {
     pub fn select_all_agents(&self) -> Result<Vec<Agent>, rusqlite::Error> {
         let mut stmt = self
             .conn
-            .prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list FROM agents")
+            .prepare("SELECT id, name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation FROM agents")
             .unwrap();
         let results = stmt
             .query_map(params![], |row| {
@@ -309,6 +311,7 @@ impl Sqlite {
                     mode: row.get_unwrap(3),
                     role_prompt: row.get_unwrap(4),
                     tool_list: row.get_unwrap(5),
+                    ref_recent_conversation: row.get_unwrap(6),
                 })
             })
             .unwrap()
@@ -323,17 +326,18 @@ impl Sqlite {
         mode: u16,
         role_prompt: String,
         tool_list: String,
+        ref_recent_conversation: u16,
     ) -> Result<Agent, rusqlite::Error> {
         let mut stmt = self.conn.prepare(
             "
-            INSERT INTO agents (name, has_workspace, mode, role_prompt, tool_list) 
-            VALUES (?1, ?2, ?3, ?4, ?5)
-            RETURNING id, name, has_workspace, mode, role_prompt, tool_list
+            INSERT INTO agents (name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation) 
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+            RETURNING id, name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation
         ",
         )?;
 
         let agent = stmt.query_row(
-            rusqlite::params![name, has_workspace, mode, role_prompt, tool_list],
+            rusqlite::params![name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation],
             |row| {
                 Ok(Agent {
                     id: row.get_unwrap(0),
@@ -342,6 +346,7 @@ impl Sqlite {
                     mode: row.get_unwrap(3),
                     role_prompt: row.get_unwrap(4),
                     tool_list: row.get_unwrap(5),
+                    ref_recent_conversation: row.get_unwrap(6),
                 })
             },
         )?;
@@ -501,6 +506,26 @@ impl Sqlite {
             })
             .unwrap()
             .collect::<Result<Vec<_>, rusqlite::Error>>();
+        results
+    }
+
+    pub fn select_latest_agent_speeches(
+        &self,
+        note_id: u64,
+        agent_id: u16,
+        max_hisotry_count: u64,
+    ) -> Result<Vec<AgentHistory>, rusqlite::Error> {
+        let mut stmt = self.conn.prepare("SELECT id,created_at_unixtime,content,speech_id,agent_id,note_id FROM agent_speeches WHERE note_id = ?1 AND agent_id = ?2 ORDER BY created_at_unixtime DESC LIMIT ?3").unwrap();
+        let results = stmt.query_map(params![note_id, agent_id, max_hisotry_count], |row| {
+            Ok(AgentHistory {
+                id: row.get_unwrap(0),
+                created_at_unixtime: row.get_unwrap(1),
+                content: row.get_unwrap(2),
+                speech_id: row.get_unwrap(3),
+                agent_id: row.get_unwrap(4),
+                note_id: row.get_unwrap(5),
+            })
+        }).unwrap().collect::<Result<Vec<_>, rusqlite::Error>>();
         results
     }
 
