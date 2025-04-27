@@ -855,11 +855,6 @@ impl Sqlite {
             .execute("DELETE FROM notes WHERE id = ?1", params![note_id])
     }
 
-    pub fn delete_speeches_by(&self, note_id: u64) -> Result<usize, rusqlite::Error> {
-        self.conn
-            .execute("DELETE FROM speeches WHERE note_id = ?1", params![note_id])
-    }
-
     pub fn ensure_tools_table_exists(&self) -> Result<(), rusqlite::Error> {
         // テーブルが存在するか確認
         let exists: bool = self.conn.query_row(

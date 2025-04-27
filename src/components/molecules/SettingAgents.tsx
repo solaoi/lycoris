@@ -61,7 +61,7 @@ const SettingAgents = (props: SettingAgentsProps): JSX.Element => {
                                         <div>
                                             <div className="mb-2 font-bold border-b border-neutral-300 pb-2">役割</div>
                                             <div className="text-sm">
-                                                <p>{t.role_prompt}</p>
+                                                <p className="whitespace-pre-wrap break-words">{t.role_prompt}</p>
                                             </div>
                                         </div>
                                         <div>

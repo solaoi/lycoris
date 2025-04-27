@@ -28,7 +28,6 @@ impl NoteDeleter {
             }
         });
 
-        let _ = sqlite.delete_speeches_by(note_id);
         let _ = sqlite.delete_note(note_id);
 
         let _ = &self.app_handle.emit_all(
