@@ -15,7 +15,7 @@ const AgentWorkspace = (props: AgentWorkspaceProps): JSX.Element => {
                 .filter(c => c.agent_id === agent_id)
                 .map(c => {
                     return (
-                        <MyMarkdown content={c.content || ""} title={`${note_title.trim()}_workspace_${c.id}`} />
+                        <MyMarkdown key={`workspace-${c.id}`} content={c.content || ""} title={`${note_title.trim()}_workspace_${c.id}`} />
                     )
                 })}
         </div>)
