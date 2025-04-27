@@ -30,6 +30,18 @@ import { ChevronDown } from '../atoms/ChevronDown'
 import { toast } from 'react-toastify'
 import { settingSlackSendTraceMessageEnabledState } from '../../store/atoms/settingSlackSendTraceMessageEnabledState'
 import { settingDiscordSendTraceMessageEnabledState } from '../../store/atoms/settingDiscordSendTraceMessageEnabledState'
+import { AgentSelectButton } from '../molecules/AgentSelectButton'
+import { Agent } from '../../type/Agent.type'
+import { AgentSwitcherTabs } from '../molecules/AgentSwitcherTabs'
+import { agentSelectedState } from '../../store/atoms/agentSelectedState'
+import { agentSwitcherState } from '../../store/atoms/agentSwitcherState'
+import { AgentHistory } from '../molecules/AgentHistory'
+import { agentHistoryState } from '../../store/atoms/agentHistoryState'
+import { agentsWithNoteState } from '../../store/atoms/agentsWithNoteState'
+import { agentWorkspaceState } from '../../store/atoms/agentWorkspaceState'
+import { AgentTabs } from '../molecules/AgentTabs'
+import { AgentWorkspace } from '../molecules/AgentWorkspace'
+import { agentTabState } from '../../store/atoms/agentTabState'
 
 const NoteMain = (): JSX.Element => {
     const filterTarget = useRecoilValue(speechFilterState);
@@ -137,6 +149,9 @@ const NoteMain = (): JSX.Element => {
                 if (settingKeyOpenai !== "" && prev.some(h => h.speech_type === "action" && !h.content_2)) {
                     invoke('execute_action_command', { noteId: recordingNote || tracingNote });
                 }
+                if (settingKeyOpenai !== "" && transcriptionAccuracy !== "off" && selectedAgent.length > 0) {
+                    invoke('execute_agent_command', { noteId: recordingNote || tracingNote, agents: selectedAgent });
+                }
                 return prev.map(p => {
                     if (p.id === id) {
                         if (p.content !== content) {
@@ -238,9 +253,56 @@ const NoteMain = (): JSX.Element => {
         }
     }, []);
 
+    const [agents, setAgents] = useState<Agent[]>([]);
+    const selectedAgent = useRecoilValue(agentSelectedState)
+    useEffect(() => {
+        invoke("select_all_agents_command").then((value: unknown) => {
+            const agents = value as Agent[];
+            setAgents(agents);
+        });
+    }, [])
+    const agentSwitcher = useRecoilValue(agentSwitcherState)
+    const [agentHistories, setAgentHistories] = useRecoilState(agentHistoryState(selectedNote!.note_id))
+    const [agentWorkspaces, setAgentWorkspaces] = useRecoilState(agentWorkspaceState(selectedNote!.note_id))
+    const [agentIdsWithNote, setAgentIdsWithNote] = useRecoilState(agentsWithNoteState(selectedNote!.note_id))
+    useEffect(() => {
+        setAgentIdsWithNote([])
+    }, [selectedNote, isRecording, isTracing])
+    useEffect(() => {
+        const unlistenAgentHandled = agents.length > 0 ? listen('agentHandled', (event) => {
+            const agent = event.payload as { id: number, speech_id: number, agent_id: number, content: string, created_at_unixtime: number, note_id: number }
+            setAgentHistories(prev => {
+                return [...prev, agent]
+            })
+        }) : null;
+        const unlistenAgentWorkspaceHandled = agents.length > 0 ? listen('agentWorkspaceHandled', (event) => {
+            const workspace = event.payload as { id: number, agent_id: number, content: string, created_at_unixtime: number, note_id: number }
+
+            setAgentWorkspaces(prev => {
+                if (prev.some(p => p.id === workspace.id)) {
+                    return prev.map(p => {
+                        if (p.id === workspace.id) {
+                            return workspace
+                        }
+                        return p
+                    })
+                } else {
+                    return [...prev, workspace]
+                }
+            })
+        }) : null;
+        return () => {
+            if (agents.length > 0) {
+                unlistenAgentHandled!.then(f => f());
+                unlistenAgentWorkspaceHandled!.then(f => f());
+            }
+        }
+    }, [agents, selectedNote, setAgentHistories])
+    const agentTab = useRecoilValue(agentTabState)
+
     return (<>
         <div className="bg-white">
-            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center group relative overflow-x-hidden h-[64px]" >
+            <div className="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8 bg-white flex items-center relative overflow-x-hidden h-[64px]" >
                 <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-2xl tracking-tight font-bold text-gray-600 flex-1 cursor-pointer mr-2 !pl-0 hover:border-base-300 border-2 border-transparent rounded-lg"
                     onDoubleClick={(e) => { e.preventDefault(); setEditTitle(true); }}>
                     {editTitle ?
@@ -264,7 +326,8 @@ const NoteMain = (): JSX.Element => {
                             }} />
                         : <p className='pl-1 tracking-normal'>{selectedNote!.note_title}</p>}
                 </h1>
-                <div className="flex-none ml-1 mr-2">
+                <div className="flex-none ml-1 mr-2 flex gap-2">
+                    <AgentSelectButton agents={agents} />
                     {isTracing && tracingNote === selectedNote?.note_id ?
                         <TraceStopButton /> :
                         <TraceStartButton />}
@@ -275,7 +338,13 @@ const NoteMain = (): JSX.Element => {
                 <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-red-100 opacity-40 ${(isRecording && recordingNote === selectedNote?.note_id) && "animate-shine"}`} />
                 <div className={`absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-yellow-100 opacity-40 ${(isTracing && tracingNote === selectedNote?.note_id) && "animate-shine"}`} />
             </div>
-            <div className="bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm" >
+            {(agentIdsWithNote.length > 0 || selectedAgent.length > 0) && (<div className="bg-white pb-1">
+                <div className='bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px]' >
+                    <AgentSwitcherTabs agents={agents} selectedAgent={selectedAgent} agentIdsWithNote={agentIdsWithNote} />
+                </div>
+            </div>
+            )}
+            <div className={`bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm ${agentSwitcher !== null ? "hidden" : ""}`} >
                 <FilterTabs />
                 <div className='flex gap-2 items-center'>
                     <div className="flex group mr-4">
@@ -358,7 +427,7 @@ const NoteMain = (): JSX.Element => {
                 </div>
             </div>
         </div>
-        <div className="p-5 overflow-auto z-0" style={{ height: `calc(100vh - 160px)` }} ref={scrollContainerRef}>
+        <div className={`p-5 overflow-auto z-0 ${agentSwitcher !== null ? "hidden" : ""}`} style={{ height: (agentIdsWithNote.length > 0 || selectedAgent.length > 0) ? `calc(100vh - 192px)` : `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} setHistories={setHistories} />
             <div className="ml-[3.75rem] mb-[243px] text-gray-400" ref={bottomRef} >
                 {partialTextDesktop !== null && partialText !== null && <div className='flex flex-col'>
@@ -369,6 +438,17 @@ const NoteMain = (): JSX.Element => {
                 {partialTextDesktop === null && partialText !== null && <div className="flex items-start"><span className="loading loading-ring loading-xs mr-[5px] mt-1 flex-none"></span><p>{partialText}</p></div>}
             </div>
             <NoteFooter titleRef={inputEl} />
+        </div>
+        <div className={`bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm`} >
+            <AgentTabs agents={agents} agentId={agentSwitcher}/>
+        </div>
+        <div className={`p-5 overflow-auto z-0 ${agentSwitcher === null ? "hidden" : ""}`} style={{ height: `calc(100vh - 192px)` }} ref={scrollContainerRef}>
+            <div className={`${agentTab === "workspace" ? "" : "hidden"}`}>
+                <AgentWorkspace agent_id={agentSwitcher ?? 0} workspaces={agentWorkspaces} note_title={selectedNote?.note_title ?? ""}/>
+            </div>
+            <div className={`${agentTab !== "workspace" ? "" : "hidden"}`}>
+                <AgentHistory agent_id={agentSwitcher ?? 0} histories={agentHistories} />
+            </div>
         </div>
         <div className="flex justify-center items-center w-8 h-8 fixed bottom-0 right-0 mb-1 mr-[1.4rem] bg-white/80 drop-shadow-md rounded-full cursor-pointer hover:bg-base-200"
             style={!showGotoBottom ? { display: "none" } : {}}

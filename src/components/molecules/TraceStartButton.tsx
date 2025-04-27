@@ -10,6 +10,7 @@ import { traceState } from '../../store/atoms/traceState';
 import { tracingNoteState } from '../../store/atoms/tracingNoteState';
 import { tracingState } from '../../store/atoms/tracingState';
 import { transcriptionAccuracyState } from '../../store/atoms/transcriptionAccuracyState';
+import { agentSelectedState } from '../../store/atoms/agentSelectedState';
 
 const TraceStartButton = (): JSX.Element => {
     const isRecording = useRecoilValue(recordState);
@@ -21,6 +22,7 @@ const TraceStartButton = (): JSX.Element => {
     const setTracingNote = useSetRecoilState(tracingNoteState)
     const recordingNote = useRecoilValue(recordingNoteState)
     const isTracing = useRecoilValue(tracingState);
+    const agentSelected = useRecoilValue(agentSelectedState);
     const click = () => {
         setTracing(true)
         setTracingNote(selectedNote!.note_id)

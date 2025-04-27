@@ -1,6 +1,8 @@
 import Database from 'tauri-plugin-sql-api'
 import { NoteType } from '../type/Note.type'
 import { SpeechHistoryType } from '../type/SpeechHistory.type'
+import { AgentHistoryType } from '../type/AgentHistory.type'
+import { AgentWorkspaceType } from '../type/AgentWorkspace.type'
 
 export default class DB {
   private db: Database
@@ -47,6 +49,29 @@ export default class DB {
 
   public async selectSpeechesBy(note_id: number): Promise<SpeechHistoryType[]> {
     return await this.db.select('SELECT * FROM speeches WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
+  }
+
+  public async selectAgentSpeechesBy(note_id: number): Promise<AgentHistoryType[]> {
+    return await this.db.select('SELECT * FROM agent_speeches WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
+  }
+
+  public async selectAgentsBy(note_id: number): Promise<{ agent_id: number }[]> {
+    return await this.db.select(
+      `
+      SELECT DISTINCT agent_id
+      FROM (
+        SELECT agent_id FROM agent_speeches  WHERE note_id = $1
+        UNION
+        SELECT agent_id FROM agent_workspaces WHERE note_id = $1
+      ) merged
+      ORDER BY agent_id ASC
+      `,
+      [note_id],
+    );
+  }
+
+  public async selectAgentWorkspacesBy(note_id: number): Promise<AgentWorkspaceType[]> {
+    return await this.db.select('SELECT * FROM agent_workspaces WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
   }
 
   public async loadDownloadedModels(model_type: string): Promise<{model_name: string}[]> {

@@ -196,13 +196,13 @@ const SettingTools = (props: SettingToolsProps): JSX.Element => {
                                                 </div>
                                                 <div className="my-2">
                                                     <MultiSelect
+                                                        labelName="機能"
                                                         key={`${serverName}_features_${index}`}
                                                         options={toolDescriptions.map(desc => ({ value: desc.name, label: desc.name }))}
                                                         onChange={handleChange}
                                                         value={optionSelected}
                                                         isSelectAll={true}
                                                         menuPlacement={"bottom"}
-                                                        placeholder="機能を選択..."
                                                         onBlur={() => {
                                                             const instruction = tools.find(tool => tool.name === serverName)!.instruction
                                                             const disabled = tools.find(tool => tool.name === serverName)!.disabled
