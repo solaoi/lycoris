@@ -486,12 +486,12 @@ impl Sqlite {
     pub fn select_lateset_speeches(
         &self,
         note_id: u64,
-        max_hisotry_count: u64,
+        max_history_count: u64,
     ) -> Result<Vec<Speech>, rusqlite::Error> {
         let mut stmt = self.conn
             .prepare("SELECT id,speech_type,created_at_unixtime,content,wav,model,model_description,note_id FROM speeches WHERE model = \"whisper\" AND is_done_with_hybrid_whisper = 1 AND is_done_with_hybrid_reazonspeech = 1 AND note_id = ?1 ORDER BY created_at_unixtime DESC LIMIT ?2").unwrap();
         let results = stmt
-            .query_map(params![note_id, max_hisotry_count], |row| {
+            .query_map(params![note_id, max_history_count], |row| {
                 Ok(Speech {
                     id: row.get_unwrap(0),
                     speech_type: row.get_unwrap(1),
@@ -513,10 +513,10 @@ impl Sqlite {
         &self,
         note_id: u64,
         agent_id: u16,
-        max_hisotry_count: u64,
+        max_history_count: u64,
     ) -> Result<Vec<AgentHistory>, rusqlite::Error> {
         let mut stmt = self.conn.prepare("SELECT id,created_at_unixtime,content,speech_id,agent_id,note_id FROM agent_speeches WHERE note_id = ?1 AND agent_id = ?2 ORDER BY created_at_unixtime DESC LIMIT ?3").unwrap();
-        let results = stmt.query_map(params![note_id, agent_id, max_hisotry_count], |row| {
+        let results = stmt.query_map(params![note_id, agent_id, max_history_count], |row| {
             Ok(AgentHistory {
                 id: row.get_unwrap(0),
                 created_at_unixtime: row.get_unwrap(1),

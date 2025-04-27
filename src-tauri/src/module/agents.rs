@@ -382,14 +382,14 @@ impl Agent {
                 let mut agent_speeches = Vec::new();
                 let mut speeches = Vec::new();
                 if agent.ref_recent_conversation == 1 {
-                    let max_hisotry_count = 7;
+                    let max_history_count = 7;
                     agent_speeches = self
                         .sqlite
-                        .select_latest_agent_speeches(self.note_id, agent.id, max_hisotry_count)
+                        .select_latest_agent_speeches(self.note_id, agent.id, max_history_count)
                         .unwrap_or(Vec::new());
                     speeches = self
                         .sqlite
-                        .select_lateset_speeches(self.note_id, max_hisotry_count)
+                        .select_lateset_speeches(self.note_id, max_history_count)
                         .unwrap_or(Vec::new());
                 }
                 let mut workspace: Option<super::sqlite::AgentWorkspace> = None;
@@ -410,8 +410,8 @@ impl Agent {
                         content.clone(),
                         token.clone(),
                         &agent,
-                        agent_speeches,
-                        speeches,
+                        agent_speeches.clone(),
+                        speeches.clone(),
                         workspace_content.clone(),
                     )
                     .await
@@ -439,20 +439,6 @@ impl Agent {
 
                 if agent.has_workspace == 1 {
                     let workspace_id: Option<u16> = workspace.map(|w| w.id);
-
-                    let mut agent_speeches = Vec::new();
-                    let mut speeches = Vec::new();
-                    if agent.ref_recent_conversation == 1 {
-                        let max_hisotry_count = 7;
-                        agent_speeches = self
-                            .sqlite
-                            .select_latest_agent_speeches(self.note_id, agent.id, max_hisotry_count)
-                            .unwrap_or(Vec::new());
-                        speeches = self
-                            .sqlite
-                            .select_lateset_speeches(self.note_id, max_hisotry_count)
-                            .unwrap_or(Vec::new());
-                    }
 
                     match Self::request_with_workspace(
                         content,
