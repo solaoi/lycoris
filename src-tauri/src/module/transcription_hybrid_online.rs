@@ -160,7 +160,7 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
 ```";
 
         messages.push(json!({
-            "role": "system",
+            "role": "developer",
             "content": system_prompt
         }));
 
@@ -170,7 +170,7 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
         }));
 
         // for debugging
-        println!("messages: {:?}", messages);
+        // println!("messages: {:?}", messages);
 
         let response_format = json!({
             "type": "json_schema",
@@ -193,7 +193,7 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
         });
 
         let post_body = json!({
-          "model": "gpt-4o",
+          "model": "gpt-4.1",
           "temperature": temperature,
           "messages": messages,
           "response_format": response_format
@@ -264,7 +264,10 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
 
 pub static SINGLETON_INSTANCE: Mutex<Option<TranscriptionHybridOnline>> = Mutex::new(None);
 
-pub fn initialize_transcription_hybrid_online(app_handle: AppHandle, note_id: u64) {
+pub fn initialize_transcription_hybrid_online(
+    app_handle: AppHandle,
+    note_id: u64,
+) {
     let mut singleton = SINGLETON_INSTANCE.lock().unwrap();
     if singleton.is_none() {
         *singleton = Some(TranscriptionHybridOnline::new(app_handle, note_id));

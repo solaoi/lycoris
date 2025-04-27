@@ -137,7 +137,7 @@ impl Action {
 
         // 将来的には、『assistant』roleではなく『developer』roleにする必要がある。現時点ではAPI側が未対応@2025/01/02
         messages.push(json!({
-            "role": if model == "o1" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
+            "role": if model == "o1-low" || model == "o1" || model == "o1-high" || model == "o3-low" || model == "o3" || model == "o3-high" || model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" || model == "gpt-4.1" || model == "gpt-4.1-mini" || model == "gpt-4.1-nano" || model == "o4-mini-low" || model == "o4-mini" || model == "o4-mini-high" {"developer"} else if model == "o1-mini" || model == "o1-preview" {"assistant"} else {"system"},
             "content": prompt
         }));
         messages.push(json!({
@@ -149,16 +149,34 @@ impl Action {
         // println!("messages: {:?}", messages);
 
         // 現時点ではAPI側がtemparatureパラメータに未対応@2025/01/02
-        let post_body = if model == "o1" || model == "o1-mini" || model == "o1-preview" {
+        let post_body = if model == "o1-mini" || model == "o1-preview" {
             json!({
               "model": model,
               "messages": messages
+            })
+        } else if model == "o1-low" || model == "o1" || model == "o1-high" {
+            json!({
+              "model": "o1",
+              "messages": messages,
+              "reasoning_effort": if model == "o1-low" {"low"} else if model == "o1" {"medium"} else {"high"}
+            })
+        } else if model == "o3-low" || model == "o3" || model == "o3-high" {
+            json!({
+              "model": "o3",
+              "messages": messages,
+              "reasoning_effort": if model == "o3-low" {"low"} else if model == "o3" {"medium"} else {"high"}
             })
         } else if model == "o3-mini-low" || model == "o3-mini" || model == "o3-mini-high" {
             json!({
               "model": "o3-mini",
               "messages": messages,
               "reasoning_effort": if model == "o3-mini-low" {"low"} else if model == "o3-mini" {"medium"} else {"high"}
+            })
+        } else if model == "o4-mini-low" || model == "o4-mini" || model == "o4-mini-high" {
+            json!({
+              "model": "o4-mini",
+              "messages": messages,
+              "reasoning_effort": if model == "o4-mini-low" {"low"} else if model == "o4-mini" {"medium"} else {"high"}
             })
         } else if model == "gpt-4o-search-preview-low"
             || model == "gpt-4o-search-preview"
@@ -321,7 +339,7 @@ impl Action {
         }
 
         messages.push(json!({
-            "role": "system",
+            "role": "developer",
             "content": prompt
         }));
         messages.push(json!({
@@ -370,7 +388,7 @@ impl Action {
         });
 
         let post_body = json!({
-          "model": "gpt-4o",
+          "model": "gpt-4.1",
           "temperature": temperature,
           "messages": messages,
           "response_format": response_format
@@ -591,7 +609,7 @@ pub async fn request_gpt_tool(
     survey_tool_enabled: u16,
     search_tool_enabled: u16,
 ) -> Result<ToolExecution, Box<dyn std::error::Error>> {
-    let model = "o3-mini";
+    let model = "o4-mini";
     let reasoning_effort = "low";
     let url = "https://api.openai.com/v1/chat/completions";
 

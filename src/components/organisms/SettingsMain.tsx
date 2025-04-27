@@ -8,13 +8,7 @@ import { ModelDownloadWhisperButton } from "../molecules/ModelDownloadWhisperBut
 import { ModelDownloadWhisperProgress } from "../molecules/ModelDownloadWhisperProgress"
 import { SettingKey } from "../molecules/SettingKey"
 import { SettingLanguages } from "../molecules/SettingLanguages"
-// import { SettingTemplate } from "../molecules/SettingTemplate"
-// import { SettingFCfunctions } from "../molecules/SettingFCfunctions"
-// import { SettingFCfunctionCall } from "../molecules/SettingFCfunctionCall"
-// import { SettingHook } from "../molecules/SettingHook"
-// import { SettingResource } from "../molecules/SettingResource"
-// import { SettingModel } from "../molecules/SettingModel"
-// import { SettingAILanguage } from "../molecules/SettingAILanguage"
+import logo from "../../assets/lycoris-logo.png";
 import { SettingAmiVoiceModel } from "../molecules/SettingAmiVoiceModel"
 import { ModelDownloadFugumtEnJaButton } from "../molecules/ModelDownloadFugumtEnJaButton"
 import { ModelDownloadFugumtEnJaProgress } from "../molecules/ModelDownloadFugumtEnJaProgress"
@@ -45,13 +39,15 @@ import { SlackLogo } from "../atoms/SlackLogo"
 import { DiscordLogo } from "../atoms/DiscordLogo"
 import { SettingDiscordWebHookUrl } from "../molecules/SettingDiscordWebHookUrl"
 import { SettingDiscordSendTraceMessageEnabled } from "../molecules/SettingDiscordSendTraceMessageEnabled"
+import { SettingAgentAddButton } from "../molecules/SettingAgentAddButton"
+import { SettingAgentContent } from "../molecules/SettingAgentContent"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
     const settingProcess = useRecoilValue(settingProcessState);
     const settingOnline = useRecoilValue(settingOnlineState);
     const settingVoice = useRecoilValue(settingVoiceState);
-    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3 | 4>(0);
+    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3 | 4 | 5>(0);
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
 
     return (
@@ -63,12 +59,14 @@ const SettingsMain = (): JSX.Element => {
                 </svg>
                 設定
             </h1>
-            <ul className="menu menu-horizontal menu-xs bg-base-200 rounded gap-2 mt-8 p-[4px] mb-2 text-gray-400 h-[32px]">
+            <ul className="menu menu-horizontal menu-xs bg-base-200 rounded gap-2 mt-8 p-[4px] mb-2 mr-8 text-gray-400 flex justify-center">
                 <li><button onClick={() => { if (settingCategory !== 0) { setSettingCategory(0); } }} className={settingCategory === 0 ? "active" : ""}>基本設定</button></li>
                 <li><button onClick={() => { if (settingCategory !== 1) { setSettingCategory(1); } }} className={settingCategory === 1 ? "active" : ""}>APIキー管理</button></li>
-                <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 2) { setSettingCategory(2); } }} className={settingCategory === 2 ? "active" : ""}>各種アクション</button></li>
+                <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 2) { setSettingCategory(2); } }} className={settingCategory === 2 ? "active" : ""}>ツール管理</button></li>
+                <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 5) { setSettingCategory(5); } }} className={settingCategory === 5 ? "active" : ""}>エージェント管理</button></li>
                 <li><button onClick={() => { if (settingCategory !== 4) { setSettingCategory(4); } }} className={settingCategory === 4 ? "active" : ""}>外部サービス連携</button></li>
                 <li><button onClick={() => { if (settingCategory !== 3) { setSettingCategory(3); } }} className={settingCategory === 3 ? "active" : ""}>スマート読み上げ</button></li>
+                <div className="flex-auto"></div>
             </ul>
             <div className="settings-inner overflow-auto mr-8 pb-4" style={{ height: `calc(100vh - 200px)` }}>
                 {settingCategory === 0 && (
@@ -695,27 +693,6 @@ const SettingsMain = (): JSX.Element => {
                                     <div className="mb-8">
                                         <SettingKey settingName="settingKeyOpenai" />
                                     </div>
-
-                                    {/* <div className="mt-8 mb-4">
-                                        <p className="mb-2">アシスタント設定</p>
-                                        <hr />
-                                    </div>
-                                    <div className="mb-8">
-                                        <SettingAILanguage />
-                                    </div>
-                                    <div className="mb-8">
-                                        <SettingResource />
-                                    </div>
-                                    <div className="mb-8">
-                                        <SettingTemplate />
-                                    </div>
-                                    <div className="mb-8">
-                                        <SettingFCfunctions />
-                                    </div>
-                                    <div className="mb-8">
-                                        <SettingFCfunctionCall />
-                                    </div>
-                                    <SettingHook /> */}
                                 </>}
                                 {settingOnline === "AmiVoice" && <>
                                     <div className="mb-4 text-sm">
@@ -740,7 +717,7 @@ const SettingsMain = (): JSX.Element => {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
                                 </svg>
-                                ツール
+                                ツール管理
                             </h2>
 
                             <div className="px-5 mt-4 flex flex-col gap-4">
@@ -806,6 +783,22 @@ const SettingsMain = (): JSX.Element => {
                                         <SettingDiscordWebHookUrl />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {settingCategory === 5 && (
+                    <div className="mt-2">
+                        <div className="px-5 cursor-default border pt-4 pb-8 bg-white/60 drop-shadow-md rounded-lg">
+                            <h2 className="text-xl flex items-center">
+                                <img src={logo} alt="select agent" className='w-6 mr-2' />
+                                エージェント管理
+                            </h2>
+                            <div className="px-5 mt-2">
+                                <div className="mb-8">
+                                    <p>文字起こしをエージェントに渡すことで、より高度な処理を行えます。</p>
+                                </div>
+                                <SettingAgentContent />
                             </div>
                         </div>
                     </div>

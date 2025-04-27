@@ -7,9 +7,10 @@ type Option = {
 };
 
 const MultiSelect = (props: any) => {
+    const { labelName, ...rest } = props;
     const [selectInput, setSelectInput] = useState<string>("");
     const isAllSelected = useRef<boolean>(false);
-    const selectAllLabel = useRef<string>("全ての機能を選択");
+    const selectAllLabel = useRef<string>(`全ての${labelName}を選択`);
     const allOption = { value: "*", label: selectAllLabel.current };
 
     const filterOptions = (options: Option[], input: string) =>
@@ -19,8 +20,8 @@ const MultiSelect = (props: any) => {
     const comparator = (v1: Option, v2: Option) =>
         v1.value.localeCompare(v2.value);
 
-    let filteredOptions = filterOptions(props.options, selectInput);
-    let filteredSelectedOptions = filterOptions(props.value, selectInput);
+    let filteredOptions = filterOptions(rest.options, selectInput);
+    let filteredSelectedOptions = filterOptions(rest.value, selectInput);
 
     const MultiValueRemove = (props: any) => (
         <div style={{ width: "3px", borderRadius: "0 2px 2px 0", backgroundColor: "lightgray" }}></div>
@@ -92,13 +93,13 @@ const MultiSelect = (props: any) => {
                 JSON.stringify(filteredOptions) ===
                 JSON.stringify(selected.sort(comparator)))
         )
-            return props.onChange(
+            return rest.onChange(
                 [
-                    ...(props.value ?? []),
-                    ...props.options.filter(
+                    ...(rest.value ?? []),
+                    ...rest.options.filter(
                         ({ label }: Option) =>
                             label.toLowerCase().includes(selectInput?.toLowerCase()) &&
-                            (props.value ?? []).filter((opt: Option) => opt.label === label)
+                            (rest.value ?? []).filter((opt: Option) => opt.label === label)
                                 .length === 0
                     ),
                 ].sort(comparator)
@@ -109,10 +110,10 @@ const MultiSelect = (props: any) => {
             JSON.stringify(selected.sort(comparator)) !==
             JSON.stringify(filteredOptions)
         )
-            return props.onChange(selected);
+            return rest.onChange(selected);
         else
-            return props.onChange([
-                ...(props.value ?? []).filter(
+            return rest.onChange([
+                ...(rest.value ?? []).filter(
                     ({ label }: Option) =>
                         !label.toLowerCase().includes(selectInput?.toLowerCase())
                 ),
@@ -155,36 +156,37 @@ const MultiSelect = (props: any) => {
         menu: (def: any) => ({ ...def, zIndex: 9999 }),
     };
 
-    if (props.isSelectAll && props.options.length !== 0) {
+    if (rest.isSelectAll && rest.options.length !== 0) {
         isAllSelected.current =
             JSON.stringify(filteredSelectedOptions) ===
             JSON.stringify(filteredOptions);
 
         if (filteredSelectedOptions?.length > 0) {
             if (filteredSelectedOptions?.length === filteredOptions?.length)
-                selectAllLabel.current = `全ての機能(${filteredOptions.length})が選択されました`;
+                selectAllLabel.current = `全ての${labelName}(${filteredOptions.length})が選択されました`;
             else
                 selectAllLabel.current = `${filteredSelectedOptions?.length} / ${filteredOptions.length} が選択されました`;
-        } else selectAllLabel.current = "全ての機能を選択";
+        } else selectAllLabel.current = `全ての${labelName}を選択`;
 
         allOption.label = selectAllLabel.current;
 
         return (
             <ReactSelect
-                {...props}
+                {...rest}
+                placeholder={`${labelName}を選択...`}
                 inputValue={selectInput}
                 onInputChange={onInputChange}
                 onKeyDown={onKeyDown}
-                options={[allOption, ...props.options]}
+                options={[allOption, ...rest.options]}
                 onChange={handleChange}
                 components={{
                     Option: Option,
                     Input: Input,
                     MultiValueRemove: MultiValueRemove,
-                    ...props.components,
+                    ...rest.components,
                 }}
                 filterOption={customFilterOption}
-                menuPlacement={props.menuPlacement ?? "auto"}
+                menuPlacement={rest.menuPlacement ?? "auto"}
                 styles={customStyles}
                 isMulti
                 closeMenuOnSelect={false}
@@ -198,15 +200,16 @@ const MultiSelect = (props: any) => {
 
     return (
         <ReactSelect
-            {...props}
+            {...rest}
+            placeholder={`${labelName}を選択...`}
             inputValue={selectInput}
             onInputChange={onInputChange}
             filterOption={customFilterOption}
             components={{
                 Input: Input,
-                ...props.components,
+                ...rest.components,
             }}
-            menuPlacement={props.menuPlacement ?? "auto"}
+            menuPlacement={rest.menuPlacement ?? "auto"}
             onKeyDown={onKeyDown}
             tabSelectsValue={false}
             hideSelectedOptions={true}

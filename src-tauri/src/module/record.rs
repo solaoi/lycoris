@@ -1,10 +1,3 @@
-//! Run with:
-//! cargo run --example read_wav <model path> <wav path>
-//! e.g. "cargo run --example read_wav /home/user/stt/model /home/user/stt/test.wav"
-//! (The WAV file must have signed 16-bit samples)
-//!
-//! Read the "Setup" section in the README to know how to link the vosk dynamic
-//! libaries to the examples
 use crate::BUNDLE_IDENTIFIER;
 
 use std::{
@@ -141,6 +134,7 @@ impl Record {
         let (stop_convert_tx, stop_convert_rx) = unbounded();
         let is_no_transcription = transcription_accuracy == "off";
         let app_handle = self.app_handle.clone();
+
         thread::spawn(move || loop {
             match notify_decoding_state_is_finalized_rx.try_recv() {
                 Ok(mut text) => {
@@ -176,6 +170,7 @@ impl Record {
                         .lock()
                         .unwrap()
                         .replace(Writer::build(&audio_path.to_str().expect("error"), spec));
+
                     if !is_no_transcription && !*is_converting.lock().unwrap() {
                         let is_converting_clone = Arc::clone(&is_converting);
                         let app_handle_clone = app_handle.clone();
@@ -187,6 +182,7 @@ impl Record {
                             let mut lock = is_converting_clone.lock().unwrap();
                             *lock = true;
                             drop(lock);
+
                             if transcription_accuracy_clone.starts_with("online-transcript") {
                                 transcription_online::initialize_transcription_online(
                                     app_handle_clone,

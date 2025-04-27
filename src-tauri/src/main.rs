@@ -26,14 +26,40 @@ use urlencoding::decode;
 
 mod module;
 use module::{
-    action::{self, request_gpt_tool}, chat_online::ChatOnline, deleter::NoteDeleter, device::{self, Device}, discord_client::DiscordClient, downloader::{
+    action::{self, request_gpt_tool},
+    agents,
+    chat_online::ChatOnline,
+    deleter::NoteDeleter,
+    device::{self, Device},
+    discord_client::DiscordClient,
+    downloader::{
         model_dir::ModelDirDownloader, sbv2::StyleBertVits2ModelDownloader,
         sbv2_voice::StyleBertVits2VoiceModelDownloader, vosk::VoskModelDownloader,
         whisper::WhisperModelDownloader,
-    }, mcp_host::{
+    },
+    mcp_host::{
         self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
         test_tool_connection, MCPHost, ToolConnectTestRequest,
-    }, model_type_sbv2::ModelTypeStyleBertVits2, model_type_vosk::ModelTypeVosk, model_type_whisper::ModelTypeWhisper, online_llm_client::{ApprovedResult, OnlineLLMClient}, permissions, record::Record, record_desktop::RecordDesktop, screenshot::{self, AppWindow}, slack_client::SlackClient, sqlite::{Sqlite, ToolExecution}, synthesizer::{self, Synthesizer}, transcription::{TraceCompletion, Transcription}, transcription_amivoice::TranscriptionAmivoice, transcription_hybrid::TranscriptionHybrid, transcription_ja::TranscriptionJa, transcription_online::TranscriptionOnline, translation_en::TranslationEn, translation_ja::TranslationJa, translation_ja_high::TranslationJaHigh
+    },
+    model_type_sbv2::ModelTypeStyleBertVits2,
+    model_type_vosk::ModelTypeVosk,
+    model_type_whisper::ModelTypeWhisper,
+    online_llm_client::{ApprovedResult, OnlineLLMClient},
+    permissions,
+    record::Record,
+    record_desktop::RecordDesktop,
+    screenshot::{self, AppWindow},
+    slack_client::SlackClient,
+    sqlite::{Agent, Sqlite, ToolExecution},
+    synthesizer::{self, Synthesizer},
+    transcription::{TraceCompletion, Transcription},
+    transcription_amivoice::TranscriptionAmivoice,
+    transcription_hybrid::TranscriptionHybrid,
+    transcription_ja::TranscriptionJa,
+    transcription_online::TranscriptionOnline,
+    translation_en::TranslationEn,
+    translation_ja::TranslationJa,
+    translation_ja_high::TranslationJaHigh,
 };
 
 struct RecordState(Arc<Mutex<Option<Sender<()>>>>);
@@ -612,6 +638,79 @@ async fn send_discord_message_command(content: String) -> Result<String, String>
     result
 }
 
+#[derive(Default)]
+pub struct AgentsExecutionState {
+    pub is_executing_map: Arc<Mutex<HashMap<String, bool>>>,
+}
+
+#[tauri::command]
+fn execute_agent_command(
+    note_id: u64,
+    agents: Vec<String>,
+    app_handle: AppHandle,
+    state: State<AgentsExecutionState>,
+) -> Result<(), String> {
+    let is_executing_map = state.is_executing_map.clone();
+
+    for agent in agents {
+        let agent_for_thread = agent.clone();
+        let app_handle_clone = app_handle.clone();
+        let is_executing_map_clone = is_executing_map.clone();
+
+        {
+            let mut map = is_executing_map_clone
+                .lock()
+                .map_err(|e| format!("Failed to lock is_executing_map: {}", e))?;
+
+            if let Some(true) = map.get(&agent) {
+                println!("Agent `{}` is already running. Skipping.", agent);
+                continue;
+            }
+
+            map.insert(agent.clone(), true);
+        }
+
+        std::thread::spawn(move || {
+            let mut agent = agents::Agent::new(app_handle_clone, note_id, agent_for_thread.clone());
+            agent.start();
+
+            {
+                let mut map = is_executing_map_clone.lock().unwrap();
+                map.insert(agent_for_thread.clone(), false);
+            }
+        });
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+fn insert_agent_command(
+    name: String,
+    has_workspace: u16,
+    mode: u16,
+    role_prompt: String,
+    tool_list: String,
+    ref_recent_conversation: u16,
+) -> Result<Agent, String> {
+    let sqlite = Sqlite::new();
+    sqlite
+        .insert_agent(name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn select_all_agents_command() -> Result<Vec<Agent>, String> {
+    let sqlite = Sqlite::new();
+    sqlite.select_all_agents().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn delete_agents_command(agent_names: Vec<String>) -> Result<(), String> {
+    let sqlite = Sqlite::new();
+    sqlite.delete_agents(agent_names).map_err(|e| e.to_string())
+}
+
 fn set_ort_env(path_resolver: &PathResolver) {
     let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
 
@@ -719,6 +818,7 @@ fn main() {
         })
         .manage(RecordState(Default::default()))
         .manage(SynthesizeState(Default::default()))
+        .manage(AgentsExecutionState::default())
         .invoke_handler(tauri::generate_handler![
             list_synthesize_models_command,
             synthesize_init_command,
@@ -756,6 +856,10 @@ fn main() {
             update_content_2_on_speech_command,
             send_slack_message_command,
             send_discord_message_command,
+            insert_agent_command,
+            select_all_agents_command,
+            delete_agents_command,
+            execute_agent_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

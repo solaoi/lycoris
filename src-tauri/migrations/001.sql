@@ -15,6 +15,7 @@ CREATE TABLE speeches (
     content_2 TEXT,
     is_done_with_hybrid_reazonspeech INTEGER DEFAULT 0,
     is_done_with_hybrid_whisper INTEGER DEFAULT 0,
+    is_done_with_agent INTEGER DEFAULT 0,
     hybrid_reazonspeech_content TEXT,
     hybrid_whisper_content TEXT,
     wav TEXT,
@@ -23,7 +24,34 @@ CREATE TABLE speeches (
     model_description TEXT,
     -- manual|ja-0.22|small-ja-0.22|en-us-0.22|small-en-us-0.15|cn-0.22|small-cn-0.22|small-ko-0.22|fr-0.22|small-fr-0.22|de-0.21|small-de-0.15|ru-0.42|small-ru-0.22|es-0.42|small-es-0.42|small-pt-0.3|small-tr-0.3|vn-0.4|small-vn-0.4|it-0.22|small-it-0.22|small-nl-0.22|small-ca-0.4|small-uk-v3-small|uk-v3|small-sv-rhasspy-0.15|small-hi-0.22|hi-0.22|small-cs-0.4-rhasspy|small-pl-0.22|small|medium|large
     note_id INTEGER NOT NULL,
-    FOREIGN KEY(note_id) REFERENCES notes(id)
+    FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE
+);
+CREATE TABLE agent_speeches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    speech_id INTEGER NOT NULL,
+    agent_id INTEGER NOT NULL,
+    content TEXT,
+    created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
+    note_id INTEGER NOT NULL,
+    FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE,
+    FOREIGN KEY(agent_id) REFERENCES agents(id) ON DELETE CASCADE
+);
+CREATE TABLE agents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    has_workspace INTEGER DEFAULT 0,
+    mode INTEGER DEFAULT 0,
+    role_prompt TEXT,
+    tool_list TEXT,
+    ref_recent_conversation INTEGER DEFAULT 0
+);
+CREATE TABLE agent_workspaces (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_id INTEGER NOT NULL,
+    content TEXT,
+    created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
+    note_id INTEGER NOT NULL,
+    FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE
 );
 CREATE TABLE settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,4 +1,4 @@
-import logo from "../../assets/lycoris_chat-bubble-start-logo.png";
+import logo from "../../assets/lycoris-logo.png";
 
 const ChatBubbleStartLogo = () => {
     return (
