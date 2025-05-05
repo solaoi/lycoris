@@ -41,7 +41,7 @@ impl TranslationJaHigh {
         let loader = NormalLoaderBuilder::new(
             NormalSpecificConfig {
                 use_flash_attn: false,
-                prompt_batchsize: None,
+                prompt_chunksize: None,
                 topology: None,
                 organization: Default::default(),
                 write_uqff: None,
@@ -55,6 +55,8 @@ impl TranslationJaHigh {
             None,
             None,
             Some(model_path),
+            true,
+            Default::default(),
         )
         .build(Some(NormalLoaderType::Llama))
         .unwrap();
@@ -80,6 +82,7 @@ impl TranslationJaHigh {
                 SchedulerConfig::DefaultScheduler {
                     method: DefaultSchedulerMethod::Fixed(5.try_into().unwrap()),
                 },
+                false,
             )
             .with_no_prefix_cache(true)
             .build(),

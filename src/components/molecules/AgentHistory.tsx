@@ -29,7 +29,7 @@ const AgentHistory = (props: AgentHistoryProps): JSX.Element => {
                         return [...acc, {
                             el: (<div key={"agent_history_" + c.agent_id + "_" + i}>
                                 {cal &&
-                                    <div className={'badge bg-white shadow-md border-transparent mb-4 cursor-default'} style={{ padding: "0.7rem 0.8rem", fontSize: "0.8rem" }}>
+                                    <div className={'badge bg-white shadow-md border-transparent my-4 cursor-default'} style={{ padding: "0.7rem 0.8rem", fontSize: "0.8rem" }}>
                                         <CalendarDays />
                                         <p className='ml-1'>{cal}</p>
                                     </div>}

@@ -2,6 +2,13 @@ import { useRef, useState, useEffect, Fragment } from "react"
 import { AudioPlayer } from "./AudioPlayer"
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { useGetElementProperty } from "../../hooks/useGetElementProperty";
+import happy from "../../assets/emotion/happy.png";
+import sad from "../../assets/emotion/sad.png";
+import angry from "../../assets/emotion/angry.png";
+import { useRecoilValue } from "recoil";
+import { emotionWithNoteState } from "../../store/atoms/emotionWithNoteState";
+import { selectedNoteState } from "../../store/atoms/selectedNoteState";
+
 
 type SpeechProps = {
     model: string
@@ -9,10 +16,11 @@ type SpeechProps = {
     date: string
     content: string
     wav: string
+    emotion?: number
 }
 
 const Speech = (props: SpeechProps): JSX.Element => {
-    const { model, date, content, wav } = props
+    const { model, date, content, wav, emotion = 0 } = props
     const [isHover, setHover] = useState(false)
     const targetRef = useRef(null);
     const { getElementProperty } = useGetElementProperty<HTMLDivElement>(targetRef);
@@ -31,9 +39,17 @@ const Speech = (props: SpeechProps): JSX.Element => {
         });
         return <div>{texts}</div>;
     }
+    const selectedNote = useRecoilValue(selectedNoteState)
+    const hasEmotion = useRecoilValue(emotionWithNoteState(selectedNote!.note_id))
+
     return (
-        <div onMouseLeave={leave} >
-            <div className={"flex mb-1 cursor-pointer hover:bg-gray-400 hover:text-white hover:rounded"}
+        <div className="flex items-center" onMouseLeave={leave} >
+            {hasEmotion === 1 && (emotion > 1 ? <div className="flex items-center mr-2">
+                <div className="size-4 flex-shrink-0">
+                    <img src={emotion === 2 ? happy : emotion === 3 ? angry : emotion === 4 ? sad : ""} alt="emotion" />
+                </div>
+            </div> : <div className="size-4 flex-shrink-0 mr-2"></div>)}
+            <div className={"flex mb-1 cursor-pointer hover:bg-gray-400 hover:text-white hover:rounded flex-grow"}
                 onClick={() => setHover(true)}
                 ref={targetRef} >
                 <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>

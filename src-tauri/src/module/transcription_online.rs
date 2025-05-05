@@ -213,9 +213,9 @@ impl TranscriptionOnline {
             .send()
             .await?;
 
-        println!("Status: {}", response.status());
+        // println!("Status: {}", response.status());
         let json_response: Value = response.json().await?;
-        println!("Response: {:?}", json_response);
+        // println!("Response: {:?}", json_response);
         let response_text = json_response["text"]
             .as_str()
             .unwrap_or("text field not found");

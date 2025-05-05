@@ -41,13 +41,15 @@ import { SettingDiscordWebHookUrl } from "../molecules/SettingDiscordWebHookUrl"
 import { SettingDiscordSendTraceMessageEnabled } from "../molecules/SettingDiscordSendTraceMessageEnabled"
 import { SettingAgentAddButton } from "../molecules/SettingAgentAddButton"
 import { SettingAgentContent } from "../molecules/SettingAgentContent"
+import { ModelDownloadKushinadaButton } from "../molecules/ModelDownloadKushinadaButton"
+import { ModelDownloadKushinadaProgress } from "../molecules/ModelDownloadKushinadaProgress"
 
 const SettingsMain = (): JSX.Element => {
     const settingLanguage = useRecoilValue(settingLanguageState);
     const settingProcess = useRecoilValue(settingProcessState);
     const settingOnline = useRecoilValue(settingOnlineState);
     const settingVoice = useRecoilValue(settingVoiceState);
-    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3 | 4 | 5>(0);
+    const [settingCategory, setSettingCategory] = useState<0 | 1 | 2 | 3 | 4 | 5 | 6>(0);
     const settingKeyOpenai = useRecoilValue(settingKeyState("settingKeyOpenai"));
 
     return (
@@ -66,6 +68,7 @@ const SettingsMain = (): JSX.Element => {
                 <li className={settingKeyOpenai === "" ? "hidden" : ""}><button onClick={() => { if (settingCategory !== 5) { setSettingCategory(5); } }} className={settingCategory === 5 ? "active" : ""}>エージェント管理</button></li>
                 <li><button onClick={() => { if (settingCategory !== 4) { setSettingCategory(4); } }} className={settingCategory === 4 ? "active" : ""}>外部サービス連携</button></li>
                 <li><button onClick={() => { if (settingCategory !== 3) { setSettingCategory(3); } }} className={settingCategory === 3 ? "active" : ""}>スマート読み上げ</button></li>
+                <li><button onClick={() => { if (settingCategory !== 6) { setSettingCategory(6); } }} className={settingCategory === 6 ? "active" : ""}>感情分析</button></li>
                 <div className="flex-auto"></div>
             </ul>
             <div className="settings-inner overflow-auto mr-8 pb-4" style={{ height: `calc(100vh - 200px)` }}>
@@ -670,8 +673,8 @@ const SettingsMain = (): JSX.Element => {
                     <div className="mt-2">
                         <div className="px-5 cursor-default border pt-4 pb-8 bg-white/60 drop-shadow-md rounded-lg">
                             <h2 className="text-xl mt-5 mb-4 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-6 mr-2">
-                                    <path fillRule="evenodd" d="M8 7a5 5 0 1 1 3.61 4.804l-1.903 1.903A1 1 0 0 1 9 14H8v1a1 1 0 0 1-1 1H6v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-2a1 1 0 0 1 .293-.707L8.196 8.39A5.002 5.002 0 0 1 8 7Zm5-3a.75.75 0 0 0 0 1.5A1.5 1.5 0 0 1 14.5 7 .75.75 0 0 0 16 7a3 3 0 0 0-3-3Z" clipRule="evenodd" />
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
                                 </svg>
                                 APIキー管理
                             </h2>
@@ -954,6 +957,37 @@ const SettingsMain = (): JSX.Element => {
                                         <div className="text-white bg-gray-600 select-auto max-w-fit mt-1 px-2 py-1 rounded-sm">/Applications/Lycoris.app/Contents/Resources/resources/style-bert-vits/models</div>
                                     </div>
                                 }
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {settingCategory === 6 && (
+                    <div className="mt-2">
+                        <div className="px-5 cursor-default border pt-4 pb-8 bg-white/60 drop-shadow-md rounded-lg">
+                            <h2 className="text-xl flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                                </svg>
+                                感情分析
+                            </h2>
+                            <div className="px-5 mt-2">
+                                <div className="mb-8">
+                                    <p>文字起こしと並行して、感情分析を行うことができます。</p>
+                                    <p>感情分析パックをダウンロードしてください。</p>
+                                </div>
+                                <div className="h-[86px]" >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div>
+                                            <p>感情分析パック</p>
+                                            <div className="flex my-1">
+                                                <div className="badge bg-slate-400 text-white">imprt/kushinada-hubert-large-jtes-er</div>
+                                                <div className="badge bg-slate-400 text-white ml-1">1.3 GB</div>
+                                            </div>
+                                        </div>
+                                        <ModelDownloadKushinadaButton />
+                                    </div>
+                                    <ModelDownloadKushinadaProgress />
+                                </div>
                             </div>
                         </div>
                     </div>
