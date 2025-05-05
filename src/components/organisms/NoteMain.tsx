@@ -42,6 +42,8 @@ import { agentWorkspaceState } from '../../store/atoms/agentWorkspaceState'
 import { AgentTabs } from '../molecules/AgentTabs'
 import { AgentWorkspace } from '../molecules/AgentWorkspace'
 import { agentTabState } from '../../store/atoms/agentTabState'
+import { emotionWithNoteState } from '../../store/atoms/emotionWithNoteState'
+import { modelKushinadaDownloadedState } from '../../store/atoms/modelKushinadaDownloadedState'
 
 const NoteMain = (): JSX.Element => {
     const filterTarget = useRecoilValue(speechFilterState);
@@ -126,8 +128,19 @@ const NoteMain = (): JSX.Element => {
         }
     }, [selectedNote, recordingNote])
 
+    const [hasEmotion, setHasEmotion] = useRecoilState(emotionWithNoteState(selectedNote!.note_id))
+    const emotionKeysRef = useRef<number[]>([]);
+    const latestEmotionsRef = useRef<{ [speechId: number]: number }>({});
+    useEffect(() => {
+        emotionKeysRef.current = []
+        latestEmotionsRef.current = {}
+    }, [recordingNote, tracingNote]);
+
     useEffect(() => {
         const unlistenFinalText = listen('finalTextRecognized', event => {
+            if (hasEmotion === 1) {
+                invoke('execute_emotion_command', {})
+            }
             const { is_desktop, ...current } = event.payload as SpeechHistoryType & { is_desktop: boolean }
             if (is_desktop) {
                 setPartialTextDesktop(null)
@@ -153,41 +166,67 @@ const NoteMain = (): JSX.Element => {
                     invoke('execute_agent_command', { noteId: recordingNote || tracingNote, agents: selectedAgent });
                 }
                 return prev.map(p => {
+                    let newP = { ...p };
+                    if (hasEmotion === 1 && p.id !== undefined) {
+                        const emotionVal = latestEmotionsRef.current[p.id];
+                        if (emotionVal !== undefined) {
+                            newP.is_done_with_emotion = emotionVal;
+                            delete latestEmotionsRef.current[p.id];
+                        }
+                    }
+
                     if (p.id === id) {
                         if (p.content !== content) {
                             if (slackSendTraceMessageEnabled === 1) {
-                                invoke('send_slack_message_command', { content }).catch(e => {
-                                    console.error(`Slackメッセージの送信に失敗しました: ${e}`)
-                                    toast.error("Slackメッセージの送信に失敗しました", {
-                                        pauseOnFocusLoss: false,
-                                        autoClose: 2500
+                                invoke('send_slack_message_command', { content })
+                                    .catch(e => {
+                                        console.error(`Slackメッセージの送信に失敗しました: ${e}`)
+                                        toast.error("Slackメッセージの送信に失敗しました", {
+                                            pauseOnFocusLoss: false,
+                                            autoClose: 2500
+                                        });
                                     });
-                                });
                             }
                             if (discordSendTraceMessageEnabled === 1) {
-                                invoke('send_discord_message_command', { content }).catch(e => {
-                                    console.error(`Discordメッセージの送信に失敗しました: ${e}`)
-                                    toast.error("Discordメッセージの送信に失敗しました", {
-                                        pauseOnFocusLoss: false,
-                                        autoClose: 2500
+                                invoke('send_discord_message_command', { content })
+                                    .catch(e => {
+                                        console.error(`Discordメッセージの送信に失敗しました: ${e}`)
+                                        toast.error("Discordメッセージの送信に失敗しました", {
+                                            pauseOnFocusLoss: false,
+                                            autoClose: 2500
+                                        });
                                     });
-                                });
                             }
                         }
-                        return {
-                            ...p,
+                        newP = {
+                            ...newP,
                             content,
                             model: "whisper",
-                            model_description: transcriptionAccuracy!
+                            model_description: transcriptionAccuracy!,
                         }
                     }
-                    return p;
+
+                    return newP;
                 })
             })
+        });
+        const unlistenEmotionAnalyzed = listen('emotionAnalyzed', event => {
+            const { id, emotion } = event.payload as { id: number, emotion: number }
+            latestEmotionsRef.current[id] = emotion;
+            if (!emotionKeysRef.current.includes(id)) {
+                emotionKeysRef.current.push(id);
+            }
+            while (emotionKeysRef.current.length > 20) {
+                const oldKey = emotionKeysRef.current.shift();
+                if (oldKey !== undefined) {
+                    delete latestEmotionsRef.current[oldKey];
+                }
+            }
         });
         return () => {
             unlistenFinalText.then(f => f());
             unlistenFinalTextConverted.then(f => f());
+            unlistenEmotionAnalyzed.then(f => f());
         }
     }, [recordingNote, isTracing, tracingNote])
 
@@ -299,6 +338,8 @@ const NoteMain = (): JSX.Element => {
         }
     }, [agents, selectedNote, setAgentHistories])
     const agentTab = useRecoilValue(agentTabState)
+    const downloadedModels = useRecoilValue(modelKushinadaDownloadedState);
+    const is_kushinada_downloaded = downloadedModels.filter(m => m === "kushinada-hubert-large-jtes-er").length > 0;
 
     return (<>
         <div className="bg-white">
@@ -347,6 +388,25 @@ const NoteMain = (): JSX.Element => {
             <div className={`bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm ${agentSwitcher !== null ? "hidden" : ""}`} >
                 <FilterTabs />
                 <div className='flex gap-2 items-center'>
+                    {is_kushinada_downloaded && <div className="group">
+                        <label className="cursor-pointer label">
+                            <span className="label-text inline-flex mr-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="size-5">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.536-4.464a.75.75 0 1 0-1.061-1.061 3.5 3.5 0 0 1-4.95 0 .75.75 0 0 0-1.06 1.06 5 5 0 0 0 7.07 0ZM9 8.5c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S7.448 7 8 7s1 .672 1 1.5Zm3 1.5c.552 0 1-.672 1-1.5S12.552 7 12 7s-1 .672-1 1.5.448 1.5 1 1.5Z" clipRule="evenodd" />
+                                </svg>
+                            </span>
+                            <input type="checkbox" className="toggle toggle-accent" checked={hasEmotion === 1} onChange={(e) => {
+                                if (isRecording) {
+                                    return;
+                                }
+                                setHasEmotion(e.target.checked ? 1 : 0)
+                            }} />
+                        </label>
+                        <div className="w-16 invisible rounded text-[12px]
+                        font-bold text-white py-1 bg-slate-600 right-14
+                        group-hover:visible absolute text-center z-10" style={{ top: (agentIdsWithNote.length > 0 || selectedAgent.length > 0) ? "194px" : "158px" }}>感情分析
+                        </div>
+                    </div>}
                     <div className="flex group mr-4">
                         <button className="text-slate-500 hover:text-slate-800" onClick={async () => {
                             const typeMapper = (speech_type: string) => {
@@ -420,14 +480,14 @@ const NoteMain = (): JSX.Element => {
                             <Download />
                         </button>
                         <div className="w-20 invisible rounded text-[12px]
-                        font-bold text-white py-1 bg-slate-600 top-[154px] right-7
-                        group-hover:visible absolute text-center z-10">ダウンロード
+                        font-bold text-white py-1 bg-slate-600 right-7
+                        group-hover:visible absolute text-center z-10" style={{ top: (agentIdsWithNote.length > 0 || selectedAgent.length > 0) ? "194px" : "158px" }}>ダウンロード
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div className={`p-5 overflow-auto z-0 ${agentSwitcher !== null ? "hidden" : ""}`} style={{ height: (agentIdsWithNote.length > 0 || selectedAgent.length > 0) ? `calc(100vh - 192px)` : `calc(100vh - 160px)` }} ref={scrollContainerRef}>
+        <div className={`px-5 pb-5 overflow-auto z-0 ${agentSwitcher !== null ? "hidden" : ""}`} style={{ height: (agentIdsWithNote.length > 0 || selectedAgent.length > 0) ? `calc(100vh - 192px)` : `calc(100vh - 160px)` }} ref={scrollContainerRef}>
             <SpeechHistory histories={histories} setHistories={setHistories} />
             <div className="ml-[3.75rem] mb-[243px] text-gray-400" ref={bottomRef} >
                 {partialTextDesktop !== null && partialText !== null && <div className='flex flex-col'>
@@ -440,11 +500,11 @@ const NoteMain = (): JSX.Element => {
             <NoteFooter titleRef={inputEl} />
         </div>
         <div className={`bg-white max-w-7xl mx-auto pl-2 py-2 flex items-center justify-between h-[32px] drop-shadow-sm`} >
-            <AgentTabs agents={agents} agentId={agentSwitcher}/>
+            <AgentTabs agents={agents} agentId={agentSwitcher} />
         </div>
-        <div className={`p-5 overflow-auto z-0 ${agentSwitcher === null ? "hidden" : ""}`} style={{ height: `calc(100vh - 192px)` }} ref={scrollContainerRef}>
+        <div className={`px-5 pb-5 overflow-auto z-0 ${agentSwitcher === null ? "hidden" : ""}`} style={{ height: `calc(100vh - 192px)` }} ref={scrollContainerRef}>
             <div className={`${agentTab === "workspace" ? "" : "hidden"}`}>
-                <AgentWorkspace agent_id={agentSwitcher ?? 0} workspaces={agentWorkspaces} note_title={selectedNote?.note_title ?? ""}/>
+                <AgentWorkspace agent_id={agentSwitcher ?? 0} workspaces={agentWorkspaces} note_title={selectedNote?.note_title ?? ""} />
             </div>
             <div className={`${agentTab !== "workspace" ? "" : "hidden"}`}>
                 <AgentHistory agent_id={agentSwitcher ?? 0} histories={agentHistories} />

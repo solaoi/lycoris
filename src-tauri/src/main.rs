@@ -37,6 +37,7 @@ use module::{
         sbv2_voice::StyleBertVits2VoiceModelDownloader, vosk::VoskModelDownloader,
         whisper::WhisperModelDownloader,
     },
+    emotion,
     mcp_host::{
         self, add_mcp_config, delete_mcp_config, get_mcp_tools, initialize_mcp_host,
         test_tool_connection, MCPHost, ToolConnectTestRequest,
@@ -181,6 +182,17 @@ fn download_sbv2_model_command(app_handle: AppHandle, model: String) {
 }
 
 #[tauri::command]
+fn download_kushinada_model_command(app_handle: AppHandle) {
+    std::thread::spawn(move || {
+        let dl = ModelDirDownloader::new(app_handle);
+        dl.download(
+            "kushinada-hubert-large-jtes-er",
+            "downloadKushinadaProgress",
+        )
+    });
+}
+
+#[tauri::command]
 fn list_devices_command() -> Vec<Device> {
     device::list_devices()
 }
@@ -252,10 +264,19 @@ fn start_command(
     transcription_accuracy: String,
     note_id: u64,
     device_type: String, // microphone, desktop, both
+    has_emotion: bool,
 ) {
     let mut lock = state.0.lock().unwrap();
     let (stop_record_tx, stop_record_rx) = unbounded();
     *lock = Some(stop_record_tx);
+
+    let app_handle_clone = app_handle.clone();
+    if has_emotion {
+        std::thread::spawn(move || {
+            emotion::initialize_emotion(app_handle_clone, note_id);
+        });
+    }
+
     std::thread::spawn(move || {
         if device_type == "microphone" {
             let record = Record::new(app_handle);
@@ -309,6 +330,9 @@ fn stop_command(state: State<'_, RecordState>) {
     if let Some(stop_record_tx) = lock.take() {
         stop_record_tx.send(()).unwrap()
     }
+    std::thread::spawn(move || {
+        emotion::drop_emotion();
+    });
 }
 
 #[tauri::command]
@@ -318,10 +342,18 @@ fn start_trace_command(
     speaker_language: String,
     transcription_accuracy: String,
     note_id: u64,
+    has_emotion: bool,
 ) {
     let mut lock = state.0.lock().unwrap();
     let (stop_convert_tx, stop_convert_rx) = unbounded();
     *lock = Some(stop_convert_tx);
+
+    let app_handle_clone = app_handle.clone();
+    if has_emotion {
+        std::thread::spawn(move || {
+            emotion::initialize_emotion(app_handle_clone, note_id);
+        });
+    }
 
     std::thread::spawn(move || {
         if transcription_accuracy.starts_with("online-transcript") {
@@ -376,6 +408,9 @@ fn stop_trace_command(state: State<'_, RecordState>, app_handle: AppHandle) {
                 .unwrap();
         })
     }
+    std::thread::spawn(move || {
+        emotion::drop_emotion();
+    });
 }
 
 #[tauri::command]
@@ -684,6 +719,35 @@ fn execute_agent_command(
     Ok(())
 }
 
+#[derive(Default)]
+pub struct EmotionState {
+    pub is_executing: Arc<Mutex<bool>>,
+}
+
+#[tauri::command]
+fn execute_emotion_command(state: State<EmotionState>) -> Result<(), String> {
+    let is_executing = state.is_executing.clone();
+
+    {
+        let mut executing_flag = is_executing.lock().map_err(|_| "Mutex lock error")?;
+        if *executing_flag {
+            println!("Emotion command is already running. Skipped.");
+            return Ok(());
+        }
+        *executing_flag = true;
+    }
+
+    std::thread::spawn(move || {
+        emotion::start_emotion();
+
+        if let Ok(mut executing_flag) = is_executing.lock() {
+            *executing_flag = false;
+        }
+    });
+
+    Ok(())
+}
+
 #[tauri::command]
 fn insert_agent_command(
     name: String,
@@ -695,7 +759,14 @@ fn insert_agent_command(
 ) -> Result<Agent, String> {
     let sqlite = Sqlite::new();
     sqlite
-        .insert_agent(name, has_workspace, mode, role_prompt, tool_list, ref_recent_conversation)
+        .insert_agent(
+            name,
+            has_workspace,
+            mode,
+            role_prompt,
+            tool_list,
+            ref_recent_conversation,
+        )
         .map_err(|e| e.to_string())
 }
 
@@ -819,6 +890,7 @@ fn main() {
         .manage(RecordState(Default::default()))
         .manage(SynthesizeState(Default::default()))
         .manage(AgentsExecutionState::default())
+        .manage(EmotionState::default())
         .invoke_handler(tauri::generate_handler![
             list_synthesize_models_command,
             synthesize_init_command,
@@ -833,6 +905,7 @@ fn main() {
             download_reazonspeech_model_command,
             download_sbv2_command,
             download_sbv2_model_command,
+            download_kushinada_model_command,
             list_devices_command,
             list_apps_command,
             list_app_windows_command,
@@ -860,6 +933,7 @@ fn main() {
             select_all_agents_command,
             delete_agents_command,
             execute_agent_command,
+            execute_emotion_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

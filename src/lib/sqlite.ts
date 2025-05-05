@@ -51,6 +51,15 @@ export default class DB {
     return await this.db.select('SELECT * FROM speeches WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
   }
 
+  public async selectHasEmotionBy(note_id: number): Promise<number> {
+    const result = await this.db.select('SELECT has_emotion FROM notes WHERE id = $1', [note_id]) as {has_emotion: number}[]
+    return result[0].has_emotion
+  }
+
+  public async updateHasEmotionBy(note_id: number, has_emotion: number) {
+    await this.db.execute('UPDATE notes SET has_emotion = $1 WHERE id = $2', [has_emotion, note_id])
+  }
+
   public async selectAgentSpeechesBy(note_id: number): Promise<AgentHistoryType[]> {
     return await this.db.select('SELECT * FROM agent_speeches WHERE note_id = $1 ORDER BY created_at_unixtime ASC', [note_id])
   }

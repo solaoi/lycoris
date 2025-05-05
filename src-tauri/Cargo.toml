@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.32"
+version = "0.9.33"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -42,14 +42,18 @@ xcap = "0.4.0"
 macos-accessibility-client = "0.0.1"
 core-graphics = "0.24.0"
 objc2 = "0.6.0"
-ct2rs = { version = "0.9.6", features = ["accelerate"] }
-mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.4.0", features = [
+# ct2rs = { version = "0.9.7", features = ["accelerate"] }
+ct2rs = { git = "https://github.com/jkawamoto/ctranslate2-rs", rev = "8a436a87701ae2df677e1dc918adaf2742445ac9", features = ["accelerate"] }
+mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.5.0", features = [
     "metal",
 ] }
 tauri-plugin-clipboard = "1.1.4"
 sbv2_core = { version = "0.1.4", features = ["dynamic"] }
+ort = { version = "2.0.0-rc.6" }
+ndarray = { version = "0.16", default-features = false }
 whisper-rs = { version = "0.13.2", features = ["metal"] }
-sherpa-rs = "0.6.6"
+# sherpa-rs = "0.6.6"
+sherpa-rs = { git = "https://github.com/solaoi/sherpa-rs", branch = "fix/minimum-cmake" }
 mcp-sdk = { git="https://github.com/solaoi/mcp-sdk", rev="c7e06ce40156fbe23911379e48268eb9543f8acc" }
 which = "7.0.2"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }

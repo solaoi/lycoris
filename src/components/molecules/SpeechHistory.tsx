@@ -17,6 +17,7 @@ import { toast } from 'react-toastify'
 import { invoke } from '@tauri-apps/api'
 import { ToolCard } from './ToolCard'
 import { CalendarDays } from '../atoms/CalendarDays'
+import { emotionWithNoteState } from '../../store/atoms/emotionWithNoteState'
 
 type SpeechHistoryProps = {
     histories: SpeechHistoryType[]
@@ -43,6 +44,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
     );
     const selectedNote = useRecoilValue(selectedNoteState)
     const [editMemoId, setEditMemoId] = useState<number | null>(null)
+    const hasEmotion = useRecoilValue(emotionWithNoteState(selectedNote!.note_id))
 
     return (
         <div>
@@ -59,12 +61,13 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                     return [...acc, {
                         el: (<div key={"history_" + i}>
                             {cal &&
-                                <div className={'badge bg-white shadow-md border-transparent mb-4 cursor-default'} style={{ padding: "0.7rem 0.8rem", fontSize: "0.8rem" }}>
+                                <div className={'badge bg-white shadow-md border-transparent my-4 cursor-default'} style={{ padding: "0.7rem 0.8rem", fontSize: "0.8rem" }}>
                                     <CalendarDays />
                                     <p className='ml-1'>{cal}</p>
                                 </div>}
                             {c.speech_type === "memo"
                                 && <div className='flex py-1' key={"memo_" + i}>
+                                    {hasEmotion === 1 && <div className="size-4 flex-shrink-0 mr-2"></div>}
                                     <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>
                                     <div className="w-full memo flex flex-col items-start ml-5 cursor-pointer hover:border-base-300 border-2 border-transparent rounded-lg"
                                         onDoubleClick={(e) => { e.preventDefault(); setEditMemoId(i); }}>
@@ -106,6 +109,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             {
                                 c.speech_type === "action"
                                 && <div className='flex py-2' key={"action_" + i}>
+                                    {hasEmotion === 1 && <div className="size-4 flex-shrink-0 mr-2"></div>}
                                     <div className="w-16 pl-2 flex-none text-gray-500/60 text-sm flex content-start pt-[0.15rem]">{date}</div>
                                     <div className="card w-4/5 ml-5">
                                         <div className="card-body bg-white/60 drop-shadow-md rounded-lg">
@@ -235,7 +239,7 @@ const SpeechHistory = (props: SpeechHistoryProps): JSX.Element => {
                             }
                             {
                                 c.speech_type === "speech"
-                                && <Speech model={c.model} model_description={c.model_description} date={date} content={c.content} wav={c.wav} />
+                                && <Speech model={c.model} model_description={c.model_description} date={date} content={c.content} wav={c.wav} emotion={c.is_done_with_emotion} />
                             }
                         </div>), created_at_unixtime: c.created_at_unixtime
                     }];

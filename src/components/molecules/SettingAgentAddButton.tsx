@@ -73,6 +73,24 @@ const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element =
                             onChange={(e) => setRolePrompt(e.target.value)}
                         />
                         <div className="flex flex-col gap-2 w-full mt-4">
+                        <div className="flex">
+                                <label className="label w-1/2">
+                                    <span className="label-text">ワークスペース</span>
+                                </label>
+                                <select className="select select-bordered w-full max-w-xs"
+                                    value={hasWorkspace}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value);
+                                        if (mode === 1 && value === 0) {
+                                            toast.error("返答しないモードではワークスペースを無効にできません");
+                                            return;
+                                        }
+                                        setHasWorkspace(value)
+                                    }}>
+                                    <option value="0">無効</option>
+                                    <option value="1">有効</option>
+                                </select>
+                            </div>
                             <div className="flex">
                                 <label className="label w-1/2">
                                     <span className="label-text">モード</span>
@@ -89,24 +107,6 @@ const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element =
                                     }}>
                                     <option value="0">発言ごとに返答</option>
                                     <option value="1">返答しない</option>
-                                </select>
-                            </div>
-                            <div className="flex">
-                                <label className="label w-1/2">
-                                    <span className="label-text">ワークスペース</span>
-                                </label>
-                                <select className="select select-bordered w-full max-w-xs"
-                                    value={hasWorkspace}
-                                    onChange={(e) => {
-                                        const value = parseInt(e.target.value);
-                                        if (mode === 1 && value === 0) {
-                                            toast.error("返答しないモードではワークスペースを無効にできません");
-                                            return;
-                                        }
-                                        setHasWorkspace(value)
-                                    }}>
-                                    <option value="0">無効</option>
-                                    <option value="1">有効</option>
                                 </select>
                             </div>
                             <div className="flex">
