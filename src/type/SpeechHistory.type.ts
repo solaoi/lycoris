@@ -9,4 +9,5 @@ export type SpeechHistoryType = {
     model: string;
     model_description: string;
     note_id: number;
+    is_done_with_emotion?: number;
 }

@@ -97,6 +97,13 @@ pub struct WhisperContent {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct EmotionContent {
+    pub id: u16,
+    pub content: String,
+    pub wav: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct AgentHistory {
     pub id: u16,
     pub created_at_unixtime: u64,
@@ -604,10 +611,34 @@ impl Sqlite {
             });
     }
 
+    pub fn select_speech_with_no_emotion(
+        &self,
+        note_id: u64,
+    ) -> Result<EmotionContent, rusqlite::Error> {
+        return self.conn
+            .query_row("SELECT id, content, wav FROM speeches WHERE is_done_with_emotion = 0 AND note_id = ?1 ORDER BY created_at_unixtime ASC LIMIT 1", 
+            params![note_id],
+            |row| {
+                Ok(EmotionContent {
+                    id: row.get_unwrap(0),
+                    content: row.get_unwrap(1),
+                    wav: row.get_unwrap(2),
+                })
+            });
+    }
+
     pub fn update_speech_agent_done(&self, speech_id: u16) -> Result<(), rusqlite::Error> {
         self.conn.execute(
             "UPDATE speeches SET is_done_with_agent = 1 WHERE id = ?1",
             params![speech_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn update_speech_emotion_done(&self, speech_id: u16, emotion_id: u16) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "UPDATE speeches SET is_done_with_emotion = ?1 WHERE id = ?2",
+            params![emotion_id, speech_id],
         )?;
         Ok(())
     }
@@ -785,13 +816,18 @@ impl Sqlite {
         content: String,
     ) -> Result<Updated, rusqlite::Error> {
         if content.is_empty() {
-            match self.conn.execute(
+            let existing_content: String = self.conn.query_row(
+                "SELECT content FROM speeches WHERE id = ?1",
+                [id],
+                |row| row.get(0),
+            )?;
+    
+            self.conn.execute(
                 "UPDATE speeches SET model = 'whisper' WHERE id = ?1",
                 params![id],
-            ) {
-                Ok(_) => Ok(Updated { id, content }),
-                Err(err) => Err(err),
-            }
+            )?;
+    
+            Ok(Updated { id, content: existing_content })
         } else {
             match self.conn.execute(
                 "UPDATE speeches SET model = 'whisper', content = ?1 WHERE id = ?2",

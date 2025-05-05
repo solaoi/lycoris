@@ -8,7 +8,7 @@ import { selectedNoteState } from '../../store/atoms/selectedNoteState';
 import { recordingNoteState } from '../../store/atoms/recordingNoteState';
 import { tracingState } from '../../store/atoms/tracingState';
 import { desktopAudioState } from '../../store/atoms/desktopAudioState';
-import { agentSelectedState } from '../../store/atoms/agentSelectedState';
+import { emotionWithNoteState } from '../../store/atoms/emotionWithNoteState';
 
 const RecordStartButton = (): JSX.Element => {
     const deviceLabel = useRecoilValue(audioDeviceState)
@@ -19,7 +19,8 @@ const RecordStartButton = (): JSX.Element => {
     const selectedNote = useRecoilValue(selectedNoteState)
     const [recordingNote, setRecordingNote] = useRecoilState(recordingNoteState)
     const isTracing = useRecoilValue(tracingState);
-    const agentSelected = useRecoilValue(agentSelectedState);
+    const hasEmotion = useRecoilValue(emotionWithNoteState(selectedNote!.note_id))
+
     const deviceType = (() => {
         if (deviceLabel === null && hasDesktopAudio) {
             return "desktop"
@@ -32,7 +33,7 @@ const RecordStartButton = (): JSX.Element => {
     const click = () => {
         setRecording(true)
         setRecordingNote(selectedNote!.note_id)
-        invoke('start_command', { deviceLabel: deviceLabel ?? "none", speakerLanguage, transcriptionAccuracy, noteId: selectedNote!.note_id, deviceType })
+        invoke('start_command', { deviceLabel: deviceLabel ?? "none", speakerLanguage, transcriptionAccuracy, noteId: selectedNote!.note_id, deviceType, hasEmotion: hasEmotion === 1 })
     }
 
     return (

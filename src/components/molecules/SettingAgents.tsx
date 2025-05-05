@@ -65,15 +65,15 @@ const SettingAgents = (props: SettingAgentsProps): JSX.Element => {
                                             </div>
                                         </div>
                                         <div>
-                                            <div className="mb-2 font-bold border-b border-neutral-300 pb-2">モード</div>
-                                            <div className="text-sm">
-                                                <p>{t.mode === 0 ? "発言ごとに返答" : "返答しない"}</p>
-                                            </div>
-                                        </div>
-                                        <div>
                                             <div className="mb-2 font-bold border-b border-neutral-300 pb-2">ワークスペース</div>
                                             <div className="text-sm">
                                                 <p>{t.has_workspace === 0 ? "無効" : "有効"}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="mb-2 font-bold border-b border-neutral-300 pb-2">モード</div>
+                                            <div className="text-sm">
+                                                <p>{t.mode === 0 ? "発言ごとに返答" : "返答しない"}</p>
                                             </div>
                                         </div>
                                         <div>

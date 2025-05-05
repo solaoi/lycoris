@@ -2,7 +2,8 @@ CREATE TABLE notes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     note_title TEXT,
     is_archived INTEGER DEFAULT 0,
-    created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER))
+    created_at_unixtime INTEGER DEFAULT (CAST(strftime('%s', 'now') AS INTEGER)),
+    has_emotion INTEGER DEFAULT 0
 );
 CREATE TABLE speeches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,6 +17,7 @@ CREATE TABLE speeches (
     is_done_with_hybrid_reazonspeech INTEGER DEFAULT 0,
     is_done_with_hybrid_whisper INTEGER DEFAULT 0,
     is_done_with_agent INTEGER DEFAULT 0,
+    is_done_with_emotion INTEGER DEFAULT 0,
     hybrid_reazonspeech_content TEXT,
     hybrid_whisper_content TEXT,
     wav TEXT,
@@ -225,6 +227,8 @@ INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M1-jp", "style-bert-vits2-voice");
 INSERT INTO models(model_name, model_type)
 VALUES("jvnv-M2-jp", "style-bert-vits2-voice");
+INSERT INTO models(model_name, model_type)
+VALUES("kushinada-hubert-large-jtes-er", "kushinada-hubert-large-jtes-er");
 CREATE INDEX idx_hybrid_status ON speeches(
     is_done_with_hybrid_reazonspeech,
     is_done_with_hybrid_whisper
