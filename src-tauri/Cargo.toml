@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.33"
+version = "0.9.34"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
