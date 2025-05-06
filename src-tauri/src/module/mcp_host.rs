@@ -56,7 +56,7 @@ pub struct MCPHost {
 
 impl MCPHost {
     fn new(app_handle: AppHandle) -> Result<Self, Box<dyn std::error::Error>> {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let tools = sqlite.select_all_tools()?;
         println!(
             "Creating MCPHost with tools: {:?}",
@@ -290,13 +290,13 @@ pub async fn test_tool_connection(
     Ok(true)
 }
 
-pub async fn add_mcp_config(config: Config) -> Result<Vec<Tool>, std::string::String> {
+pub async fn add_mcp_config(config: Config, app_handle: AppHandle) -> Result<Vec<Tool>, std::string::String> {
     let mut tools = Vec::new();
     for (name, tool) in config.mcp_servers {
         let args_json = serde_json::to_string(&tool.args).map_err(|e| e.to_string())?;
 
         let env_json = serde_json::to_string(&tool.env).map_err(|e| e.to_string())?;
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let name = name.replace("_", "-");
         sqlite
             .insert_tool(name.clone(), tool.command, args_json, env_json, tool.disabled, tool.ai_auto_approve.clone(), tool.instruction.clone(), tool.auto_approve.clone())
@@ -312,16 +312,16 @@ pub async fn add_mcp_config(config: Config) -> Result<Vec<Tool>, std::string::St
     Ok(tools)
 }
 
-pub fn delete_mcp_config(tool_names: Vec<String>) -> Result<(), std::string::String> {
+pub fn delete_mcp_config(tool_names: Vec<String>, app_handle: AppHandle) -> Result<(), std::string::String> {
     for tool_name in tool_names {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         sqlite.delete_tool(tool_name).map_err(|e| e.to_string())?;
     }
     Ok(())
 }
 
-pub fn get_mcp_tools() -> Result<Vec<Tool>, std::string::String> {
-    let sqlite = Sqlite::new();
+pub fn get_mcp_tools(app_handle: AppHandle) -> Result<Vec<Tool>, std::string::String> {
+    let sqlite = Sqlite::new(app_handle.clone());
     let tools = sqlite
         .select_all_tools()
         .expect("Failed to select all tools");

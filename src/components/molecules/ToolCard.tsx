@@ -1,4 +1,4 @@
-import { clipboard, invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core"
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { githubLightTheme, JsonEditor } from 'json-edit-react'
@@ -21,6 +21,7 @@ import { settingKeyState } from "../../store/atoms/settingKeyState";
 import { GlobalOrt } from "../atoms/GlobalOrt";
 import { Pencil } from "../atoms/Pencil";
 import { ChatBubbleStartLogo } from "../atoms/ChatBubbleStartLogo";
+import clipboard from "tauri-plugin-clipboard-api";
 
 type ToolCardProps = {
     id: number,
@@ -738,7 +739,8 @@ const ToolCard = ({ id, tool_results, note_id, note_title, clear, updateToolResu
                     </button> :
                     <button className='flex items-center hover:text-gray-500' onClick={() => {
                         if (content) {
-                            clipboard.writeText(content); toast.info("コピーしました", {
+                            clipboard.writeText(content);
+                            toast.info("コピーしました", {
                                 pauseOnFocusLoss: false,
                                 autoClose: 2500
                             })

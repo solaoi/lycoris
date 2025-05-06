@@ -13,7 +13,7 @@ use cpal::{
     SampleFormat,
 };
 use crossbeam_channel::{unbounded, Receiver};
-use tauri::{api::path::data_dir, AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 use super::{
     chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
@@ -62,7 +62,7 @@ impl Record {
         let recognizer_clone = recognizer.clone();
 
         let spec = Writer::wav_spec_from_config(&config);
-        let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
+        let data_dir = self.app_handle.path().data_dir().unwrap_or(PathBuf::from("./"));
         let audio_path = data_dir
             .join(BUNDLE_IDENTIFIER.to_string())
             .join(&format!("{}.wav", &Local::now().timestamp().to_string()));
@@ -127,7 +127,7 @@ impl Record {
         stream.play().expect("Could not play stream");
 
         let app_handle = self.app_handle.clone();
-        app_handle.clone().emit_all("readyToRecognize", "").unwrap();
+        app_handle.clone().emit("readyToRecognize", "").unwrap();
 
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
         let is_converting = Arc::new(Mutex::new(false));
@@ -148,7 +148,7 @@ impl Record {
                         text = text.replace(" ", "");
                     }
 
-                    let speech = Sqlite::new().save_speech(
+                    let speech = Sqlite::new(app_handle.clone()).save_speech(
                         "speech".to_string(),
                         now as u64,
                         text,
@@ -160,7 +160,7 @@ impl Record {
 
                     app_handle
                         .clone()
-                        .emit_all("finalTextRecognized", speech.unwrap())
+                        .emit("finalTextRecognized", speech.unwrap())
                         .unwrap();
 
                     let audio_path = data_dir

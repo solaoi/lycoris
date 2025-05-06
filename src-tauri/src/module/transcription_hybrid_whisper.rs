@@ -6,7 +6,7 @@ use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 use whisper_rs::WhisperContext;
 
 pub struct TranscriptionHybridWhisper {
@@ -22,7 +22,7 @@ impl TranscriptionHybridWhisper {
 
         TranscriptionHybridWhisper {
             app_handle,
-            sqlite: Sqlite::new(),
+            sqlite: Sqlite::new(app_handle_clone.clone()),
             ctx: Transcriber::build(app_handle_clone, "large".to_string()),
             note_id,
         }
@@ -83,7 +83,7 @@ impl TranscriptionHybridWhisper {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -158,7 +158,7 @@ impl TranscriptionHybridWhisper {
                     updated.content = speech.content;
                     self.app_handle
                         .clone()
-                        .emit_all("finalTextConverted", updated)
+                        .emit("finalTextConverted", updated)
                         .unwrap();
                 } else {
                     let _updated = self.sqlite.update_hybrid_whisper_content(speech.id, result);
@@ -183,7 +183,7 @@ impl TranscriptionHybridWhisper {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SettingToolAddButton } from "./SettingToolAddButton"
 import { SettingTools } from "./SettingTools"
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { useRecoilState } from "recoil";
 import { disabledMCPSettingState } from "../../store/atoms/disabledMCPSettingState";
 import { Tool } from "../../type/Tool.type";

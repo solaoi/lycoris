@@ -2,8 +2,8 @@ import Markdown from 'markdown-to-jsx'
 import { useEffect, useRef, useState } from 'react'
 import hljs from 'highlight.js';
 import mermaid from 'mermaid';
-import { writeBinaryFile } from "@tauri-apps/api/fs";
-import { save } from '@tauri-apps/api/dialog';
+import { writeFile } from "@tauri-apps/plugin-fs";
+import { save } from '@tauri-apps/plugin-dialog';
 import html2canvas from 'html2canvas';
 import { ControlledMenu, MenuItem } from '@szhsin/react-menu';
 import clipboard from "tauri-plugin-clipboard-api";
@@ -93,7 +93,7 @@ const MyMarkdown = (props: MyMarkdownProps) => {
             const path = await save({ defaultPath: `${title}.png` });
             if (path) {
                 const uint8Array = new Uint8Array(arrayBuffer);
-                await writeBinaryFile({ path, contents: uint8Array });
+                await writeFile(path, uint8Array);
             }
         } else if (type === "copy") {
             clipboard.writeImageBase64(canvas.toDataURL("image/png").split(';base64,')[1])

@@ -5,7 +5,7 @@ use ct2rs::{tokenizers::auto::Tokenizer, Config, TranslationOptions, Translator}
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 use whisper_rs::WhisperContext;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -23,15 +23,15 @@ impl TranslationEn {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/fugumt-ja-en"))
+            .path()
+            .resolve(format!("resources/fugumt-ja-en"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
 
         TranslationEn {
             app_handle,
-            sqlite: Sqlite::new(),
+            sqlite: Sqlite::new(app_handle_clone.clone()),
             ctx: Transcriber::build(app_handle_clone, "large".to_string()),
             translator: Translator::new(&model_path, &Config::default()).unwrap(),
             note_id,
@@ -45,7 +45,7 @@ impl TranslationEn {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -55,12 +55,12 @@ impl TranslationEn {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -172,7 +172,7 @@ impl TranslationEn {
             if !updated.content.is_empty() {
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             }
 

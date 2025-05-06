@@ -3,6 +3,7 @@ use reqwest::{
     Client,
 };
 use serde_json::json;
+use tauri::AppHandle;
 
 use super::sqlite::Sqlite;
 
@@ -11,8 +12,8 @@ pub struct SlackClient {
 }
 
 impl SlackClient {
-    pub fn new() -> Self {
-        let sqlite = Sqlite::new();
+    pub fn new(app_handle: AppHandle) -> Self {
+        let sqlite = Sqlite::new(app_handle.clone());
         let webhook_url = sqlite.select_slack_webhook_url().unwrap();
 
         Self { webhook_url }

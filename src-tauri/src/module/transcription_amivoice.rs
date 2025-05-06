@@ -9,7 +9,7 @@ use reqwest::{multipart, Client};
 use serde_json::Value;
 use std::io::Cursor;
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
@@ -25,7 +25,7 @@ pub struct TranscriptionAmivoice {
 
 impl TranscriptionAmivoice {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_amivoice_token().unwrap();
         let model = sqlite.select_amivoice_model().unwrap();
         let logging = sqlite.select_amivoice_logging().unwrap();
@@ -46,7 +46,7 @@ impl TranscriptionAmivoice {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -56,12 +56,12 @@ impl TranscriptionAmivoice {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -172,7 +172,7 @@ impl TranscriptionAmivoice {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -191,7 +191,7 @@ impl TranscriptionAmivoice {
 
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated.unwrap())
+                    .emit("finalTextConverted", updated.unwrap())
                     .unwrap();
             } else {
                 println!("amivoice api is temporally failed, so skipping...")

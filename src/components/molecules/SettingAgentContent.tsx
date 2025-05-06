@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SettingAgents } from "./SettingAgents"
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { Agent } from "../../type/Agent.type";
 import { SettingAgentAddButton } from "./SettingAgentAddButton";
 

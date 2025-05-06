@@ -1,5 +1,5 @@
 import { listen } from '@tauri-apps/api/event';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { recordingNoteState } from '../../store/atoms/recordingNoteState';

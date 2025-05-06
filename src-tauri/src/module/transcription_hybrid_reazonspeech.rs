@@ -4,7 +4,7 @@ use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use sherpa_rs::zipformer::ZipFormer;
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 
 pub struct TranscriptionHybridReazonspeech {
     app_handle: AppHandle,
@@ -16,8 +16,8 @@ pub struct TranscriptionHybridReazonspeech {
 impl TranscriptionHybridReazonspeech {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/reazonspeech"))
+            .path()
+            .resolve(format!("resources/reazonspeech"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -31,8 +31,8 @@ impl TranscriptionHybridReazonspeech {
         };
 
         TranscriptionHybridReazonspeech {
-            app_handle,
-            sqlite: Sqlite::new(),
+            app_handle: app_handle.clone(),
+            sqlite: Sqlite::new(app_handle),
             model: ZipFormer::new(config).unwrap(),
             note_id,
         }
@@ -96,7 +96,7 @@ impl TranscriptionHybridReazonspeech {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }

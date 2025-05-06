@@ -1,6 +1,6 @@
 [package]
 name = "lycoris"
-version = "0.9.33"
+version = "0.9.34"
 description = "Lycoris is an offline voice memo"
 authors = ["solaoi"]
 license = "MIT"
@@ -11,12 +11,12 @@ rust-version = "1.85"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.6", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.8.2", features = [ "macos-private-api", "api-all"] }
+tauri = { version = "2", features = [ "protocol-asset", "macos-private-api"] }
 vosk = "0.2.0"
 # cpal 0.15.3 has a bug that causes the app to crash on macOS with coreaudio-rs
 cpal = "0.14.1"
@@ -47,7 +47,7 @@ ct2rs = { git = "https://github.com/jkawamoto/ctranslate2-rs", rev = "8a436a8770
 mistralrs = { git = "https://github.com/EricLBuehler/mistral.rs.git", tag = "v0.5.0", features = [
     "metal",
 ] }
-tauri-plugin-clipboard = "1.1.4"
+tauri-plugin-clipboard = "2.1.11"
 sbv2_core = { version = "0.1.4", features = ["dynamic"] }
 ort = { version = "2.0.0-rc.6" }
 ndarray = { version = "0.16", default-features = false }
@@ -57,15 +57,15 @@ sherpa-rs = { git = "https://github.com/solaoi/sherpa-rs", branch = "fix/minimum
 mcp-sdk = { git="https://github.com/solaoi/mcp-sdk", rev="c7e06ce40156fbe23911379e48268eb9543f8acc" }
 which = "7.0.2"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs" }
-window-shadows = "0.2.2"
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+http-range = "0.1.5"
 
 [dependencies.tauri-plugin-sql]
-git = "https://github.com/tauri-apps/plugins-workspace"
-branch = "v1"
 features = ["sqlite"]
+version = "2"
 [dependencies.tauri-plugin-window-state]
-git = "https://github.com/tauri-apps/plugins-workspace"
-branch = "v1"
+version = "2"
 
 [features]
 # by default Tauri runs in production mode

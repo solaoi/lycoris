@@ -5,7 +5,7 @@ use reqwest::{
     Client,
 };
 use serde_json::{json, Value};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 use super::{
     mcp_host::ToolConfig,
@@ -25,7 +25,7 @@ pub struct Action {
 impl Action {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let runtime = Runtime::new().expect("Failed to create Tokio runtime");
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
         let model = sqlite
             .select_ai_model()
@@ -453,7 +453,7 @@ impl Action {
                                                     Ok(result) => {
                                                         let _ = self
                                                             .app_handle
-                                                            .emit_all("actionExecuted", result);
+                                                            .emit("actionExecuted", result);
                                                     }
                                                     Err(e) => {
                                                         println!(
@@ -487,7 +487,7 @@ impl Action {
                                                     Ok(result) => {
                                                         let _ = self
                                                             .app_handle
-                                                            .emit_all("actionExecuted", result);
+                                                            .emit("actionExecuted", result);
                                                     }
                                                     Err(e) => {
                                                         println!(
@@ -527,7 +527,7 @@ impl Action {
                                                     Ok(result) => {
                                                         let _ = self
                                                             .app_handle
-                                                            .emit_all("actionExecuted", result);
+                                                            .emit("actionExecuted", result);
                                                     }
                                                     Err(e) => {
                                                         println!(

@@ -1,7 +1,7 @@
 import { AtomEffect, atomFamily } from 'recoil'
 import DB from '../../lib/sqlite';
 import { SpeechHistoryType } from '../../type/SpeechHistory.type'
-import { invoke } from '@tauri-apps/api';
+import { invoke } from "@tauri-apps/api/core";
 
 const sqliteEffect: (note_id:number) => AtomEffect<SpeechHistoryType[]> = 
   (note_id) => {

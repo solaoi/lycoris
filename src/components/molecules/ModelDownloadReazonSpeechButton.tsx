@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { modelReazonSpeechDownloadingState } from '../../store/atoms/modelReazonSpeechDownloadingState'
 import { modelReazonSpeechDownloadedState } from '../../store/atoms/modelReazonSpeechDownloadedState'

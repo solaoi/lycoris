@@ -10,7 +10,7 @@ use reqwest::{
 };
 use serde_json::{json, Value};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
@@ -25,7 +25,7 @@ pub struct ChatOnline {
 
 impl ChatOnline {
     pub fn new(app_handle: AppHandle, speaker_language: String, note_id: u64) -> Self {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
         Self {
             app_handle,
@@ -43,7 +43,7 @@ impl ChatOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -53,12 +53,12 @@ impl ChatOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -416,7 +416,7 @@ impl ChatOnline {
 
                     self.app_handle
                         .clone()
-                        .emit_all("finalTextConverted", updated.unwrap())
+                        .emit("finalTextConverted", updated.unwrap())
                         .unwrap();
 
                     let result = self.sqlite.select_ai_language();

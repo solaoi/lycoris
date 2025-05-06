@@ -1,7 +1,7 @@
 {
   "name": "lycoris",
   "private": true,
-  "version": "0.9.33",
+  "version": "0.9.34",
   "type": "module",
   "license": "MIT",
   "engines": {
@@ -17,7 +17,10 @@
   },
   "dependencies": {
     "@szhsin/react-menu": "^4.3.1",
-    "@tauri-apps/api": "^1.6.0",
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-fs": "^2.0.0",
+    "@tauri-apps/plugin-sql": "^2.2.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
     "dayjs": "^1.11.13",
     "highlight.js": "^11.11.1",
     "html2canvas": "^1.4.1",
@@ -31,12 +34,11 @@
     "react-select": "^5.10.1",
     "react-toastify": "^11.0.5",
     "recoil": "^0.7.7",
-    "tauri-plugin-clipboard-api": "1.1.4",
-    "tauri-plugin-sql-api": "github:tauri-apps/tauri-plugin-sql#release",
+    "tauri-plugin-clipboard-api": "2.1.11",
     "zenn-content-css": "^0.1.158"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.6.3",
+    "@tauri-apps/cli": "^2.0.0",
     "@types/markdown-it": "^14.1.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",

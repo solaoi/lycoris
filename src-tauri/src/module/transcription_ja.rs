@@ -4,7 +4,7 @@ use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use sherpa_rs::zipformer::ZipFormer;
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
@@ -19,8 +19,8 @@ pub struct TranscriptionJa {
 impl TranscriptionJa {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/reazonspeech"))
+            .path()
+            .resolve(format!("resources/reazonspeech"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -34,8 +34,8 @@ impl TranscriptionJa {
         };
 
         TranscriptionJa {
-            app_handle,
-            sqlite: Sqlite::new(),
+            app_handle: app_handle.clone(),
+            sqlite: Sqlite::new(app_handle),
             model: ZipFormer::new(config).unwrap(),
             note_id,
         }
@@ -48,7 +48,7 @@ impl TranscriptionJa {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -58,12 +58,12 @@ impl TranscriptionJa {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -90,7 +90,7 @@ impl TranscriptionJa {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -144,7 +144,7 @@ impl TranscriptionJa {
 
             self.app_handle
                 .clone()
-                .emit_all("finalTextConverted", updated)
+                .emit("finalTextConverted", updated)
                 .unwrap();
 
             Ok(())

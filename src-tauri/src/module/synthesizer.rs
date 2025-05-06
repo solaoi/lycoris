@@ -1,12 +1,15 @@
 use std::fs;
 
 use sbv2_core::tts::TTSModelHolder;
-use tauri::AppHandle;
+use tauri::{path::BaseDirectory, AppHandle, Manager};
 
 pub fn list_models(app_handle: AppHandle) -> Vec<String> {
     let models_path = app_handle
-        .path_resolver()
-        .resolve_resource("resources/style-bert-vits/models".to_string())
+        .path()
+        .resolve(
+            format!("resources/style-bert-vits/models"),
+            BaseDirectory::Resource,
+        )
         .unwrap()
         .to_string_lossy()
         .to_string();
@@ -32,20 +35,26 @@ pub struct Synthesizer {
 impl Synthesizer {
     pub fn new(app_handle: AppHandle, model: String) -> Self {
         let bert_model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/style-bert-vits/{}", "deberta.onnx"))
+            .path()
+            .resolve(format!("resources/style-bert-vits/{}", "deberta.onnx"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
         let tokenizer_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/style-bert-vits/{}", "tokenizer.json"))
+            .path()
+            .resolve(
+                format!("resources/style-bert-vits/{}", "tokenizer.json"),
+                BaseDirectory::Resource,
+            )
             .unwrap()
             .to_string_lossy()
             .to_string();
         let models_path = app_handle
-            .path_resolver()
-            .resolve_resource("resources/style-bert-vits/models".to_string())
+            .path()
+            .resolve(
+                format!("resources/style-bert-vits/models"),
+                BaseDirectory::Resource,
+            )
             .unwrap()
             .to_string_lossy()
             .to_string();

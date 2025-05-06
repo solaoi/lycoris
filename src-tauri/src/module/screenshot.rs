@@ -2,7 +2,7 @@ use std::{collections::HashSet, path::PathBuf};
 
 use chrono::Local;
 use serde::{Deserialize, Serialize};
-use tauri::{api::path::data_dir, AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use xcap::Window;
 
 use crate::BUNDLE_IDENTIFIER;
@@ -78,7 +78,7 @@ pub fn screenshot(id: u32, note_id: u64, app_handle: AppHandle) -> bool {
     if let Some(window) = window {
         let image = window.capture_image().unwrap();
 
-        let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
+        let data_dir = app_handle.path().data_dir().unwrap_or(PathBuf::from("./"));
         let now = &Local::now().timestamp();
         let image_path = data_dir.join(BUNDLE_IDENTIFIER.to_string()).join(&format!(
             "{}-{}.png",
@@ -89,7 +89,7 @@ pub fn screenshot(id: u32, note_id: u64, app_handle: AppHandle) -> bool {
 
         image.save(image_path).unwrap();
 
-        let speech = Sqlite::new().save_speech(
+        let speech = Sqlite::new(app_handle.clone()).save_speech(
             "screenshot".to_string(),
             *now as u64,
             image_path_clone.to_str().unwrap().to_string(),
@@ -100,7 +100,7 @@ pub fn screenshot(id: u32, note_id: u64, app_handle: AppHandle) -> bool {
         );
 
         app_handle
-            .emit_all("screenshotTaken", speech.unwrap())
+            .emit("screenshotTaken", speech.unwrap())
             .unwrap();
 
         true
