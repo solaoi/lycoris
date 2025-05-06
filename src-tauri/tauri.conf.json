@@ -45,7 +45,7 @@
   },
   "productName": "Lycoris",
   "mainBinaryName": "Lycoris",
-  "version": "0.9.34",
+  "version": "0.9.35",
   "identifier": "blog.aota.Lycoris",
   "plugins": {
     "sql": {
