@@ -1,4 +1,4 @@
-import Database from 'tauri-plugin-sql-api'
+import Database from '@tauri-apps/plugin-sql'
 import { NoteType } from '../type/Note.type'
 import { SpeechHistoryType } from '../type/SpeechHistory.type'
 import { AgentHistoryType } from '../type/AgentHistory.type'
@@ -53,7 +53,7 @@ export default class DB {
 
   public async selectHasEmotionBy(note_id: number): Promise<number> {
     const result = await this.db.select('SELECT has_emotion FROM notes WHERE id = $1', [note_id]) as {has_emotion: number}[]
-    return result[0].has_emotion
+    return result[0]?.has_emotion || 0
   }
 
   public async updateHasEmotionBy(note_id: number, has_emotion: number) {

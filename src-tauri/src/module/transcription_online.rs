@@ -10,7 +10,7 @@ use reqwest::{
 };
 use serde_json::Value;
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
@@ -31,7 +31,7 @@ impl TranscriptionOnline {
         speaker_language: String,
         note_id: u64,
     ) -> Self {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
         Self {
             app_handle,
@@ -50,7 +50,7 @@ impl TranscriptionOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -60,12 +60,12 @@ impl TranscriptionOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -241,7 +241,7 @@ impl TranscriptionOnline {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -260,7 +260,7 @@ impl TranscriptionOnline {
 
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated.unwrap())
+                    .emit("finalTextConverted", updated.unwrap())
                     .unwrap();
             } else {
                 println!("whisper api is temporally failed, so skipping...")

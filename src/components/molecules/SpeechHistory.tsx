@@ -14,7 +14,7 @@ import { DocumentDuplicate } from '../atoms/DocumentDuplicate'
 import { ArrowPath } from '../atoms/ArrowPath'
 import clipboard from "tauri-plugin-clipboard-api";
 import { toast } from 'react-toastify'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from "@tauri-apps/api/core"
 import { ToolCard } from './ToolCard'
 import { CalendarDays } from '../atoms/CalendarDays'
 import { emotionWithNoteState } from '../../store/atoms/emotionWithNoteState'

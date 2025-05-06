@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { modelFugumtJaEnDownloadingState } from '../../store/atoms/modelFugumtJaEnDownloadingState'
 import { modelFugumtJaEnDownloadedState } from '../../store/atoms/modelFugumtJaEnDownloadedState'

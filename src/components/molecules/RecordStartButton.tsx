@@ -1,6 +1,6 @@
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { audioDeviceState } from '../../store/atoms/audioDeviceState';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { recordState } from '../../store/atoms/recordState';
 import { speakerLanguageState } from '../../store/atoms/speakerLanguageState';
 import { transcriptionAccuracyState } from '../../store/atoms/transcriptionAccuracyState';

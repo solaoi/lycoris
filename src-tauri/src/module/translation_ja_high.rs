@@ -13,7 +13,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 use tokio::sync::mpsc::channel;
 use whisper_rs::WhisperContext;
 
@@ -33,8 +33,8 @@ impl TranslationJaHigh {
     pub fn new(app_handle: AppHandle, speaker_language: String, note_id: u64) -> Self {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/honyaku-13b"))
+            .path()
+            .resolve(format!("resources/honyaku-13b"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -75,7 +75,7 @@ impl TranslationJaHigh {
 
         TranslationJaHigh {
             app_handle,
-            sqlite: Sqlite::new(),
+            sqlite: Sqlite::new(app_handle_clone.clone()),
             ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
             translator: MistralRsBuilder::new(
                 pipeline,
@@ -98,7 +98,7 @@ impl TranslationJaHigh {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -108,12 +108,12 @@ impl TranslationJaHigh {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -142,7 +142,7 @@ impl TranslationJaHigh {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -266,7 +266,7 @@ impl TranslationJaHigh {
             if !updated.content.is_empty() {
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             }
 

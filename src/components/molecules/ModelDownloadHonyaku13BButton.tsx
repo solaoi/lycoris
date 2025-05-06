@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { modelHonyaku13BDownloadingState } from '../../store/atoms/modelHonyaku13BDownloadingState'
 import { modelHonyaku13BDownloadedState } from '../../store/atoms/modelHonyaku13BDownloadedState'

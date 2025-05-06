@@ -1,4 +1,4 @@
-import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import Zoom from 'react-medium-image-zoom'
 import { useRecoilValue } from 'recoil';
 import { emotionWithNoteState } from '../../store/atoms/emotionWithNoteState';

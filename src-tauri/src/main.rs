@@ -4,12 +4,13 @@
 )]
 use serde_json::Value;
 use tauri::{
-    http::{HttpRange, ResponseBuilder},
-    AppHandle, Manager, PathResolver, State, Window,
+    http::response::Builder as ResponseBuilder,
+    path::BaseDirectory,
+    AppHandle, Emitter, Manager, State
 };
+use http_range::HttpRange;
 use tauri_plugin_sql::{Migration, MigrationKind};
 use tokio::runtime::Runtime;
-use window_shadows::set_shadow;
 
 use std::{
     cmp::min,
@@ -223,13 +224,13 @@ fn has_accessibility_permission_command() -> bool {
 }
 
 #[tauri::command]
-fn has_screen_capture_permission_command(window: Window) -> bool {
-    permissions::has_screen_capture_permission(window)
+fn has_screen_capture_permission_command(app_handle: AppHandle) -> bool {
+    permissions::has_screen_capture_permission(app_handle)
 }
 
 #[tauri::command]
-fn has_microphone_permission_command(window: Window) -> bool {
-    permissions::has_microphone_permission(window)
+fn has_microphone_permission_command(app_handle: AppHandle) -> bool {
+    permissions::has_microphone_permission(app_handle)
 }
 
 #[tauri::command]
@@ -404,7 +405,7 @@ fn stop_trace_command(state: State<'_, RecordState>, app_handle: AppHandle) {
     if let Some(stop_convert_tx) = lock.take() {
         stop_convert_tx.send(()).unwrap_or_else(|_| {
             app_handle
-                .emit_all("traceCompletion", TraceCompletion {})
+                .emit("traceCompletion", TraceCompletion {})
                 .unwrap();
         })
     }
@@ -436,8 +437,11 @@ async fn test_mcp_tool_command(
 }
 
 #[tauri::command]
-async fn add_mcp_config_command(config: mcp_host::Config) -> Result<Vec<Value>, String> {
-    let tools = add_mcp_config(config).await?;
+async fn add_mcp_config_command(
+    config: mcp_host::Config,
+    app_handle: AppHandle,
+) -> Result<Vec<Value>, String> {
+    let tools = add_mcp_config(config, app_handle).await?;
     let serialized_tools = tools
         .into_iter()
         .map(|tool| {
@@ -455,13 +459,13 @@ async fn add_mcp_config_command(config: mcp_host::Config) -> Result<Vec<Value>, 
 }
 
 #[tauri::command]
-fn delete_mcp_config_command(tool_names: Vec<String>) -> Result<(), String> {
-    delete_mcp_config(tool_names)
+fn delete_mcp_config_command(tool_names: Vec<String>, app_handle: AppHandle) -> Result<(), String> {
+    delete_mcp_config(tool_names, app_handle)
 }
 
 #[tauri::command]
-fn get_mcp_tools_command() -> Result<Vec<Value>, String> {
-    let tools = get_mcp_tools()?;
+fn get_mcp_tools_command(app_handle: AppHandle) -> Result<Vec<Value>, String> {
+    let tools = get_mcp_tools(app_handle)?;
     let serialized_tools = tools
         .into_iter()
         .map(|tool| {
@@ -479,8 +483,12 @@ fn get_mcp_tools_command() -> Result<Vec<Value>, String> {
 }
 
 #[tauri::command]
-fn update_content_2_on_speech_command(speech_id: u64, content_2: String) -> Result<(), String> {
-    let sqlite = Sqlite::new();
+fn update_content_2_on_speech_command(
+    speech_id: u64,
+    content_2: String,
+    app_handle: AppHandle,
+) -> Result<(), String> {
+    let sqlite = Sqlite::new(app_handle);
     sqlite
         .update_content_2_on_speech(speech_id, content_2)
         .map_err(|e| e.to_string())
@@ -493,8 +501,9 @@ fn update_tool_command(
     ai_auto_approve: u16,
     instruction: String,
     auto_approve: Vec<String>,
+    app_handle: AppHandle,
 ) -> Result<(), String> {
-    let sqlite = Sqlite::new();
+    let sqlite = Sqlite::new(app_handle);
     sqlite
         .update_tool(
             tool_name,
@@ -540,11 +549,12 @@ async fn execute_mcp_tool_feature_command(
     state: State<'_, MCPHostState>,
     tools_state: State<'_, ToolsState>,
     speech_id: u64,
+    app_handle: AppHandle,
 ) -> Result<ToolExecution, String> {
     let runtime = runtime_state.0.clone();
     let state_clone = state.0.clone();
     let tools_clone = tools_state.0.clone();
-    let online_llm_client = OnlineLLMClient::new();
+    let online_llm_client = OnlineLLMClient::new(app_handle.clone());
     tokio::task::spawn_blocking(move || {
         runtime.block_on(async move {
             let host = {
@@ -554,7 +564,7 @@ async fn execute_mcp_tool_feature_command(
                     None => return Err("MCPHost not initialized".to_string()),
                 }
             };
-            let sqlite = Sqlite::new();
+            let sqlite = Sqlite::new(app_handle);
             let tool_execution_wrapper = sqlite.select_tool(speech_id).unwrap();
             let tool_execution = tool_execution_wrapper.tool_execution;
             let mut updated_cmds = Vec::new();
@@ -630,6 +640,7 @@ async fn check_approve_cmds_command(
     note_id: u64,
     speech_id: u16,
     cmds: Vec<Value>,
+    app_handle: AppHandle,
 ) -> Result<ApprovedResult, String> {
     let target = cmds
         .into_iter()
@@ -649,25 +660,31 @@ async fn check_approve_cmds_command(
         })
         .collect::<Vec<(String, String, String, String, String)>>();
 
-    let online_llm_client = OnlineLLMClient::new();
+    let online_llm_client = OnlineLLMClient::new(app_handle.clone());
     let result = online_llm_client
-        .check_approve_cmds(note_id, speech_id, target)
+        .check_approve_cmds(note_id, speech_id, target, app_handle)
         .await?;
 
     Ok(result)
 }
 
 #[tauri::command]
-async fn send_slack_message_command(content: String) -> Result<String, String> {
-    let slack_client: SlackClient = SlackClient::new();
+async fn send_slack_message_command(
+    content: String,
+    app_handle: AppHandle,
+) -> Result<String, String> {
+    let slack_client: SlackClient = SlackClient::new(app_handle.clone());
     let result = slack_client.send_message(content).await;
 
     result
 }
 
 #[tauri::command]
-async fn send_discord_message_command(content: String) -> Result<String, String> {
-    let discord_client: DiscordClient = DiscordClient::new();
+async fn send_discord_message_command(
+    content: String,
+    app_handle: AppHandle,
+) -> Result<String, String> {
+    let discord_client: DiscordClient = DiscordClient::new(app_handle.clone());
     let result = discord_client.send_message(content).await;
 
     result
@@ -756,8 +773,9 @@ fn insert_agent_command(
     role_prompt: String,
     tool_list: String,
     ref_recent_conversation: u16,
+    app_handle: AppHandle,
 ) -> Result<Agent, String> {
-    let sqlite = Sqlite::new();
+    let sqlite = Sqlite::new(app_handle);
     sqlite
         .insert_agent(
             name,
@@ -771,26 +789,15 @@ fn insert_agent_command(
 }
 
 #[tauri::command]
-fn select_all_agents_command() -> Result<Vec<Agent>, String> {
-    let sqlite = Sqlite::new();
+fn select_all_agents_command(app_handle: AppHandle) -> Result<Vec<Agent>, String> {
+    let sqlite = Sqlite::new(app_handle);
     sqlite.select_all_agents().map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn delete_agents_command(agent_names: Vec<String>) -> Result<(), String> {
-    let sqlite = Sqlite::new();
+fn delete_agents_command(agent_names: Vec<String>, app_handle: AppHandle) -> Result<(), String> {
+    let sqlite = Sqlite::new(app_handle);
     sqlite.delete_agents(agent_names).map_err(|e| e.to_string())
-}
-
-fn set_ort_env(path_resolver: &PathResolver) {
-    let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
-
-    let dynamic_library_path = path_resolver
-        .resolve_resource(format!("lib/{}", dynamic_library_name))
-        .expect("fail to resolve dynamic library path");
-
-    println!("dynamic lib: {}", dynamic_library_path.display());
-    std::env::set_var("ORT_DYLIB_PATH", dynamic_library_path);
 }
 
 fn main() {
@@ -798,11 +805,11 @@ fn main() {
 
     tauri::Builder::default()
         .register_uri_scheme_protocol("stream", move |_app, request| {
-            let raw_path = request.uri().replace("stream://localhost", "");
+            let raw_path = request.uri().to_string().replace("stream://localhost", "");
             let decoded_path = decode(raw_path.as_str()).unwrap().to_string();
 
             let audio_file = PathBuf::from(&decoded_path);
-            let mut content = std::fs::File::open(&audio_file)?;
+            let mut content = std::fs::File::open(&audio_file).unwrap();
             let mut buf = Vec::new();
 
             let mut response = ResponseBuilder::new();
@@ -830,14 +837,16 @@ fn main() {
                             format!("bytes {}-{}/{}", range.start, last_byte, file_size),
                         );
 
-                    content.seek(SeekFrom::Start(range.start))?;
-                    content.take(real_length).read_to_end(&mut buf)?;
+                    content.seek(SeekFrom::Start(range.start)).unwrap();
+                    content.take(real_length).read_to_end(&mut buf).unwrap();
                 } else {
-                    content.read_to_end(&mut buf)?;
+                    content.read_to_end(&mut buf).unwrap();
                 }
             }
-            response.mimetype("audio/wav").status(status_code).body(buf)
+            response.header("Content-Type", "audio/wav").status(status_code).body(buf).unwrap()
         })
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .plugin(
@@ -854,14 +863,23 @@ fn main() {
                 .build(),
         )
         .setup(|app| {
-            set_ort_env(&app.path_resolver());
+            let dynamic_library_name = "libonnxruntime.1.19.2.dylib";
+            let dynamic_library_path = app
+                .path()
+                .resolve(
+                    format!("lib/{}", dynamic_library_name),
+                    BaseDirectory::Resource,
+                )
+                .expect("fail to resolve dynamic library path");
+            println!("dynamic lib: {}", dynamic_library_path.display());
+            std::env::set_var("ORT_DYLIB_PATH", dynamic_library_path);
 
             let runtime = Arc::new(Runtime::new().expect("Failed to create Tokio runtime"));
             app.manage(RuntimeState(runtime.clone()));
             app.manage(MCPHostState(Arc::new(Mutex::new(None))));
             let app_handle = app.handle();
             runtime.block_on(async {
-                let sqlite = Sqlite::new();
+                let sqlite = Sqlite::new(app_handle.clone());
                 if let Err(e) = sqlite.ensure_tools_table_exists() {
                     eprintln!("Failed to ensure tools table exists: {:?}", e);
                     return;
@@ -880,10 +898,6 @@ fn main() {
                     Err(e) => eprintln!("Failed to initialize MCPHost: {:?}", e),
                 }
             });
-
-            let window = app.get_window("main").unwrap();
-            #[cfg(any(windows, target_os = "macos"))]
-            set_shadow(&window, true).unwrap();
 
             Ok(())
         })

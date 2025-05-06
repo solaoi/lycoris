@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 
 use futures_util::StreamExt;
 use std::cmp::min;
@@ -27,8 +27,8 @@ impl StyleBertVits2ModelDownloader {
         let model_type = "style-bert-vits2";
         let path: &str = &self
             .app_handle
-            .path_resolver()
-            .resolve_resource("resources/style-bert-vits/style-bert-vits.zip")
+            .path()
+            .resolve(format!("resources/style-bert-vits/style-bert-vits.zip"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -39,7 +39,7 @@ impl StyleBertVits2ModelDownloader {
             .ok_or(format!("Failed to get content length from '{}'", url))
             .unwrap();
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             "downloadStyleBertVits2Progress",
             Progress {
                 model_type: model_type.to_string(),
@@ -75,7 +75,7 @@ impl StyleBertVits2ModelDownloader {
 
             let current_rate = ((new as f64 * 100.0) / total_size as f64).round();
             if rate != current_rate {
-                let _ = &self.app_handle.emit_all(
+                let _ = &self.app_handle.emit(
                     "downloadStyleBertVits2Progress",
                     Progress {
                         model_type: model_type.to_string(),
@@ -89,8 +89,8 @@ impl StyleBertVits2ModelDownloader {
 
         let dir: &str = &self
             .app_handle
-            .path_resolver()
-            .resolve_resource("resources/style-bert-vits")
+            .path()
+            .resolve(format!("resources/style-bert-vits"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -105,9 +105,9 @@ impl StyleBertVits2ModelDownloader {
             .output()
             .expect("failed");
 
-        let _ = Sqlite::new().update_model_is_downloaded(model_type.to_string(), 1);
+        let _ = Sqlite::new(self.app_handle.clone()).update_model_is_downloaded(model_type.to_string(), 1);
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             "downloadStyleBertVits2Progress",
             Progress {
                 model_type: model_type.to_string(),

@@ -8,7 +8,8 @@ use hound::SampleFormat;
 use ndarray::Array;
 use ort::{GraphOptimizationLevel, Session, SessionBuilder, Value};
 use samplerate_rs::{convert, ConverterType};
-use tauri::{AppHandle, Manager};
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Emitter, Manager};
 
 #[derive(Debug, Clone, serde::Serialize)]
 struct EmotionAnalyzedPayload {
@@ -26,20 +27,23 @@ pub struct Emotion {
 impl Emotion {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources"))
+            .path()
+            .resolve(format!("resources"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
 
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let session: Session = SessionBuilder::new()
             .unwrap()
             .with_optimization_level(GraphOptimizationLevel::Level3)
             .unwrap()
             .with_intra_threads(1)
             .unwrap()
-            .commit_from_file(format!("{}/kushinada-hubert-large-jtes-er.onnx", model_path))
+            .commit_from_file(format!(
+                "{}/kushinada-hubert-large-jtes-er.onnx",
+                model_path
+            ))
             .unwrap();
 
         Emotion {
@@ -140,7 +144,7 @@ impl Emotion {
                 .update_speech_emotion_done(speech.id, emotion_id);
             if emotion_id > 1 {
                 self.app_handle
-                    .emit_all(
+                    .emit(
                         "emotionAnalyzed",
                         EmotionAnalyzedPayload {
                             id: speech.id,

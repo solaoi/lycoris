@@ -1,6 +1,7 @@
 use core_graphics::access::ScreenCaptureAccess;
 use objc2::{class, msg_send, runtime::AnyObject};
-use tauri::{api::dialog::confirm, Window};
+use tauri::AppHandle;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
 use super::sqlite::Sqlite;
 
@@ -9,7 +10,7 @@ pub fn has_accessibility_permission() -> bool {
     return trusted;
 }
 
-pub fn has_microphone_permission(window: Window) -> bool {
+pub fn has_microphone_permission(app_handle: AppHandle) -> bool {
     unsafe {
         let av_audio_session: *mut AnyObject =
             msg_send![class!(AVAudioApplication), sharedInstance];
@@ -27,14 +28,22 @@ pub fn has_microphone_permission(window: Window) -> bool {
                     .expect("failed to open system preferences");
                 }
             };
-            confirm(Some(&window),"システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"からマイクにアクセスしようとしています。",func);
+            app_handle
+            .dialog()
+            .message("システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。")
+            .title("\"Lycoris.app\"からマイクにアクセスしようとしています。")
+            .buttons(MessageDialogButtons::OkCancelCustom("OK".to_string(), "キャンセル".to_string()))
+            .show(move |result| match result {
+                true => func(true),
+                false => func(false)
+            });
         }
         return trusted;
     }
 }
 
-pub fn has_screen_capture_permission(window: Window) -> bool {
-    let sqlite = Sqlite::new();
+pub fn has_screen_capture_permission(app_handle: AppHandle) -> bool {
+    let sqlite = Sqlite::new(app_handle.clone());
     let has_accessed_screen_capture_permission = sqlite
         .select_has_accessed_screen_capture_permission()
         .unwrap();
@@ -52,7 +61,15 @@ pub fn has_screen_capture_permission(window: Window) -> bool {
                     .expect("failed to open system preferences");
                 }
             };
-            confirm(Some(&window),"システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。", "\"Lycoris.app\"から画面収録にアクセスしようとしています。",func);
+            app_handle
+            .dialog()
+            .message("システム設定の\"プライバシーとセキュリティ\"設定で、このアプリケーションへのアクセスを許可してください。")
+            .title("\"Lycoris.app\"から画面収録にアクセスしようとしています。")
+            .buttons(MessageDialogButtons::OkCancelCustom("OK".to_string(), "キャンセル".to_string()))
+            .show(move |result| match result {
+                true => func(true),
+                false => func(false)
+            });
         }
         return trusted;
     } else {

@@ -1,8 +1,9 @@
-import { appWindow } from "@tauri-apps/api/window"
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow"
 
 import closeIcon from "../../assets/macos/Close.png"
 import minimizeIcon from "../../assets/macos/Minimize.png"
 import zoomIcon from "../../assets/macos/Zoom.png"
+const appWindow = getCurrentWebviewWindow()
 
 const MacosControls = (): JSX.Element => {
     return (

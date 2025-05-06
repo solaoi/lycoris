@@ -5,7 +5,7 @@ use ct2rs::{tokenizers::auto::Tokenizer, Config, TranslationOptions, Translator}
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 use whisper_rs::WhisperContext;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -24,15 +24,15 @@ impl TranslationJa {
     pub fn new(app_handle: AppHandle, speaker_language: String, note_id: u64) -> Self {
         let app_handle_clone = app_handle.clone();
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/fugumt-en-ja"))
+            .path()
+            .resolve(format!("resources/fugumt-en-ja"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
 
         TranslationJa {
             app_handle,
-            sqlite: Sqlite::new(),
+            sqlite: Sqlite::new(app_handle_clone.clone()),
             ctx: Transcriber::build(app_handle_clone, "large-translate-to-en".to_string()),
             translator: Translator::new(&model_path, &Config::default()).unwrap(),
             speaker_language,
@@ -47,7 +47,7 @@ impl TranslationJa {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -57,12 +57,12 @@ impl TranslationJa {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -91,7 +91,7 @@ impl TranslationJa {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -194,7 +194,7 @@ impl TranslationJa {
             if !updated.content.is_empty() {
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             }
 

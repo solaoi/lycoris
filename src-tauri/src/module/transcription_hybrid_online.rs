@@ -10,7 +10,7 @@ use reqwest::{
 };
 use serde_json::{json, to_string, Value};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct TraceCompletion {}
@@ -26,7 +26,7 @@ pub struct TranscriptionHybridOnline {
 impl TranscriptionHybridOnline {
     pub fn new(app_handle: AppHandle, note_id: u64) -> Self {
         let runtime = Runtime::new().expect("Failed to create Tokio runtime");
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
         Self {
             runtime,
@@ -44,7 +44,7 @@ impl TranscriptionHybridOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -54,12 +54,12 @@ impl TranscriptionHybridOnline {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -250,7 +250,7 @@ else {"   - 必要に応じてWhisperの出力を参考に、内容を補完し�
 
                     self.app_handle
                         .clone()
-                        .emit_all("finalTextConverted", updated.unwrap())
+                        .emit("finalTextConverted", updated.unwrap())
                         .unwrap();
                 } else {
                     println!("whisper api is temporally failed, so skipping...")

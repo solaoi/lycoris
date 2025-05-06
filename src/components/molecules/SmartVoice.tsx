@@ -3,7 +3,7 @@ import { useRecoilState } from 'recoil';
 import { lengthScaleState } from "../../store/atoms/smartVoices/lengthScaleState";
 import { sdpRatioState } from "../../store/atoms/smartVoices/sdpRatioState";
 import { smartVoiceState } from "../../store/atoms/smartVoices/smartVoiceState";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 
 const SmartVoice = (): JSX.Element => {
     const [models, setModels] = useState([] as string[])

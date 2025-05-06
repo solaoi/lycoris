@@ -1,4 +1,5 @@
-use tauri::{AppHandle, Manager};
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Emitter, Manager};
 
 use futures_util::StreamExt;
 use std::cmp::min;
@@ -26,8 +27,8 @@ impl ModelDirDownloader {
     pub async fn download(&self, model_type: &str, progress_identifier: &str) {
         let path: &str = &self
             .app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/{}.zip", model_type))
+            .path()
+            .resolve(format!("resources/{}.zip", model_type), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -38,7 +39,7 @@ impl ModelDirDownloader {
             .ok_or(format!("Failed to get content length from '{}'", url))
             .unwrap();
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             progress_identifier,
             Progress {
                 model_type: model_type.to_string(),
@@ -74,7 +75,7 @@ impl ModelDirDownloader {
 
             let current_rate = ((new as f64 * 100.0) / total_size as f64).round();
             if rate != current_rate {
-                let _ = &self.app_handle.emit_all(
+                let _ = &self.app_handle.emit(
                     progress_identifier,
                     Progress {
                         model_type: model_type.to_string(),
@@ -88,8 +89,8 @@ impl ModelDirDownloader {
 
         let dir: &str = &self
             .app_handle
-            .path_resolver()
-            .resolve_resource("resources")
+            .path()
+            .resolve(format!("resources"), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -104,9 +105,9 @@ impl ModelDirDownloader {
             .output()
             .expect("failed");
 
-        let _ = Sqlite::new().update_model_is_downloaded(model_type.to_string(), 1);
+        let _ = Sqlite::new(self.app_handle.clone()).update_model_is_downloaded(model_type.to_string(), 1);
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             progress_identifier,
             Progress {
                 model_type: model_type.to_string(),

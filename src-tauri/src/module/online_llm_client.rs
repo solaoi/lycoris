@@ -3,6 +3,7 @@ use reqwest::{
     Client,
 };
 use serde_json::{json, Value};
+use tauri::AppHandle;
 
 use super::sqlite::Sqlite;
 
@@ -18,8 +19,8 @@ pub struct ApprovedResult {
 }
 
 impl OnlineLLMClient {
-    pub fn new() -> Self {
-        let sqlite = Sqlite::new();
+    pub fn new(app_handle: AppHandle) -> Self {
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
         let model = "gpt-4.1-mini".to_string();
 
@@ -80,6 +81,7 @@ impl OnlineLLMClient {
         note_id: u64,
         speech_id: u16,
         cmds: Vec<(String, String, String, String, String)>,
+        app_handle: AppHandle,
     ) -> Result<ApprovedResult, String> {
         let url = "https://api.openai.com/v1/chat/completions";
         let temperature = 0;
@@ -92,7 +94,7 @@ impl OnlineLLMClient {
             HeaderValue::from_str(&format!("Bearer {}", self.token)).map_err(|e| e.to_string())?,
         );
         headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let contents = sqlite.select_contents_by(note_id, speech_id).unwrap();
         let arr: Vec<_> = contents.iter().rev().take(5).collect();
 

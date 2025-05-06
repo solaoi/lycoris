@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api"
+import { invoke } from "@tauri-apps/api/core"
 import { ChangeEvent, useEffect, useRef, useState } from "react"
 import { useRecoilState } from "recoil"
 import { AppWindowType } from "../../type/AppWindow.type"

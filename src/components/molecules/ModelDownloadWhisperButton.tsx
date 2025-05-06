@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { modelWhisperDownloadingState } from '../../store/atoms/modelWhisperDownloadingState'
 import { modelWhisperDownloadedState } from '../../store/atoms/modelWhisperDownloadedState'

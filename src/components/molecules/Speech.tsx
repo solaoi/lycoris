@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, Fragment } from "react"
 import { AudioPlayer } from "./AudioPlayer"
-import { convertFileSrc } from '@tauri-apps/api/tauri';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { useGetElementProperty } from "../../hooks/useGetElementProperty";
 import happy from "../../assets/emotion/happy.png";
 import sad from "../../assets/emotion/sad.png";
