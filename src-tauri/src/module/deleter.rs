@@ -1,7 +1,7 @@
 use std::fs::remove_file;
 
 use crate::module::sqlite::Sqlite;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct DeleteCompletion {
@@ -18,7 +18,7 @@ impl NoteDeleter {
     }
 
     pub fn delete(&self, note_id: u64) {
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(self.app_handle.clone());
         let speeches = sqlite.select_all_speeches_by(note_id).unwrap();
         let _ = speeches.iter().for_each(|speech| {
             if !speech.wav.is_empty() {
@@ -30,7 +30,7 @@ impl NoteDeleter {
 
         let _ = sqlite.delete_note(note_id);
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             "deleteCompletion",
             DeleteCompletion {
                 note_id,

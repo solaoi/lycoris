@@ -5,7 +5,7 @@ use reqwest::{
     Client,
 };
 use serde_json::{json, Value};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 use tokio::runtime::Runtime;
 
 pub struct Agent {
@@ -20,7 +20,7 @@ pub struct Agent {
 impl Agent {
     pub fn new(app_handle: AppHandle, note_id: u64, agent: String) -> Self {
         let runtime = Runtime::new().expect("Failed to create Tokio runtime");
-        let sqlite = Sqlite::new();
+        let sqlite = Sqlite::new(app_handle.clone());
         let token = sqlite.select_whisper_token().unwrap();
 
         Agent {
@@ -70,7 +70,7 @@ impl Agent {
 
         if !workspace_content.is_empty() {
             system_prompt += &format!(
-            "
+                "
 あなたは自身の記憶として、下記ワークスペースの内容を参照しています。
 なお更新等は別のアシスタントが行いますので、あなたは会話に注力してください。
 
@@ -97,7 +97,11 @@ impl Agent {
 {}",
                     speeches
                         .iter()
-                        .map(|speech| format!("- [unixtime: {}]: {}", speech.created_at_unixtime, speech.content.clone()))
+                        .map(|speech| format!(
+                            "- [unixtime: {}]: {}",
+                            speech.created_at_unixtime,
+                            speech.content.clone()
+                        ))
                         .collect::<Vec<String>>()
                         .join("\n")
                 );
@@ -115,7 +119,11 @@ impl Agent {
                     agent.name,
                     agent_speeches
                         .iter()
-                        .map(|speech| format!("- [unixtime: {}]: {}", speech.created_at_unixtime, speech.content.clone()))
+                        .map(|speech| format!(
+                            "- [unixtime: {}]: {}",
+                            speech.created_at_unixtime,
+                            speech.content.clone()
+                        ))
                         .collect::<Vec<String>>()
                         .join("\n")
                 );
@@ -268,7 +276,11 @@ impl Agent {
 {}",
                     speeches
                         .iter()
-                        .map(|speech| format!("- [unixtime: {}]: {}", speech.created_at_unixtime, speech.content.clone()))
+                        .map(|speech| format!(
+                            "- [unixtime: {}]: {}",
+                            speech.created_at_unixtime,
+                            speech.content.clone()
+                        ))
                         .collect::<Vec<String>>()
                         .join("\n")
                 );
@@ -286,7 +298,11 @@ impl Agent {
                     agent.name,
                     agent_speeches
                         .iter()
-                        .map(|speech| format!("- [unixtime: {}]: {}", speech.created_at_unixtime, speech.content.clone()))
+                        .map(|speech| format!(
+                            "- [unixtime: {}]: {}",
+                            speech.created_at_unixtime,
+                            speech.content.clone()
+                        ))
                         .collect::<Vec<String>>()
                         .join("\n")
                 );
@@ -427,7 +443,7 @@ impl Agent {
                             if let Ok(agent_speech) = inserted {
                                 self.app_handle
                                     .clone()
-                                    .emit_all("agentHandled", agent_speech)
+                                    .emit("agentHandled", agent_speech)
                                     .unwrap();
                             }
                         }
@@ -462,7 +478,7 @@ impl Agent {
                                 if let Ok(agent_workspace) = upserted {
                                     self.app_handle
                                         .clone()
-                                        .emit_all("agentWorkspaceHandled", agent_workspace)
+                                        .emit("agentWorkspaceHandled", agent_workspace)
                                         .unwrap();
                                 }
                             }

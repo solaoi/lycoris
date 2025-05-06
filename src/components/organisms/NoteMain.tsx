@@ -19,11 +19,11 @@ import { tracingState } from '../../store/atoms/tracingState'
 import { tracingNoteState } from '../../store/atoms/tracingNoteState'
 import { RecordPreparingButton } from '../molecules/RecordPreparingButton'
 import { FilterTabs } from '../molecules/FilterTabs'
-import { save } from "@tauri-apps/api/dialog";
-import { writeTextFile } from "@tauri-apps/api/fs";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import dayjs from '../../lib/dayjs'
 import { speechFilterState } from '../../store/atoms/speechFilterState'
-import { invoke } from '@tauri-apps/api'
+import { invoke } from "@tauri-apps/api/core"
 import { settingKeyState } from '../../store/atoms/settingKeyState'
 import { Download } from '../atoms/Download'
 import { ChevronDown } from '../atoms/ChevronDown'

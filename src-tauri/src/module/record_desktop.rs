@@ -16,7 +16,7 @@ use std::{
 use chrono::Local;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use hound::{WavSpec, WavWriter};
-use tauri::{api::path::data_dir, AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 use core_media_rs::cm_sample_buffer::CMSampleBuffer;
 use screencapturekit::{
@@ -30,7 +30,9 @@ use screencapturekit::{
 use vosk::Recognizer;
 
 use super::{
-    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice, transcription_hybrid, transcription_ja, transcription_online, translation_en, translation_ja, translation_ja_high, writer::Writer
+    chat_online, recognizer::MyRecognizer, sqlite::Sqlite, transcription, transcription_amivoice,
+    transcription_hybrid, transcription_ja, transcription_online, translation_en, translation_ja,
+    translation_ja_high, writer::Writer,
 };
 
 pub struct RecordDesktop {
@@ -116,7 +118,11 @@ impl RecordDesktop {
             bits_per_sample,
             sample_format: hound::SampleFormat::Float,
         };
-        let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
+        let data_dir = self
+            .app_handle
+            .path()
+            .data_dir()
+            .unwrap_or(PathBuf::from("./"));
         let audio_path = data_dir.join(BUNDLE_IDENTIFIER.to_string()).join(&format!(
             "{}_desktop.wav",
             &Local::now().timestamp().to_string()
@@ -144,7 +150,7 @@ impl RecordDesktop {
         stream.start_capture().ok();
 
         let app_handle = self.app_handle.clone();
-        app_handle.clone().emit_all("readyToRecognize", "").unwrap();
+        app_handle.clone().emit("readyToRecognize", "").unwrap();
 
         let (stop_writer_tx, stop_writer_rx) = sync_channel(1);
         let is_converting = Arc::new(Mutex::new(false));
@@ -165,7 +171,7 @@ impl RecordDesktop {
                         text = text.replace(" ", "");
                     }
 
-                    let mut speech = Sqlite::new()
+                    let mut speech = Sqlite::new(app_handle.clone())
                         .save_speech(
                             "speech".to_string(),
                             now as u64,
@@ -180,7 +186,7 @@ impl RecordDesktop {
 
                     app_handle
                         .clone()
-                        .emit_all("finalTextRecognized", speech)
+                        .emit("finalTextRecognized", speech)
                         .unwrap();
 
                     let audio_path = data_dir

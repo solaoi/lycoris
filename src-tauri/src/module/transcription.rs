@@ -4,7 +4,7 @@ use crossbeam_channel::Receiver;
 use hound::SampleFormat;
 use samplerate_rs::{convert, ConverterType};
 use std::sync::Mutex;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 use whisper_rs::WhisperContext;
 
 #[derive(Debug, Clone, serde::Serialize)]
@@ -29,7 +29,7 @@ impl Transcription {
         let app_handle_clone = app_handle.clone();
         Transcription {
             app_handle,
-            sqlite: Sqlite::new(),
+            sqlite: Sqlite::new(app_handle_clone.clone()),
             ctx: Transcriber::build(app_handle_clone, transcription_accuracy.clone()),
             speaker_language,
             transcription_accuracy,
@@ -44,7 +44,7 @@ impl Transcription {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                     break;
                 }
@@ -54,12 +54,12 @@ impl Transcription {
                 if vosk_speech.is_err() {
                     self.app_handle
                         .clone()
-                        .emit_all("traceCompletion", TraceCompletion {})
+                        .emit("traceCompletion", TraceCompletion {})
                         .unwrap();
                 } else {
                     self.app_handle
                         .clone()
-                        .emit_all("traceUnCompletion", TraceCompletion {})
+                        .emit("traceUnCompletion", TraceCompletion {})
                         .unwrap();
                 }
                 break;
@@ -82,7 +82,7 @@ impl Transcription {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
                 return Ok(());
             }
@@ -161,7 +161,7 @@ impl Transcription {
                 }
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             } else {
                 println!("whisper is temporally failed, so skipping...");
@@ -172,7 +172,7 @@ impl Transcription {
                 updated.content = speech.content;
                 self.app_handle
                     .clone()
-                    .emit_all("finalTextConverted", updated)
+                    .emit("finalTextConverted", updated)
                     .unwrap();
             }
 

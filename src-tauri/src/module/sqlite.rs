@@ -1,8 +1,8 @@
 use crate::BUNDLE_IDENTIFIER;
 use rusqlite::{params, Connection};
 use serde_json::Value;
+use tauri::{AppHandle, Manager};
 use std::{collections::HashMap, path::PathBuf};
-use tauri::api::path::data_dir;
 
 use super::mcp_host::ToolConfig;
 
@@ -123,8 +123,8 @@ pub struct AgentWorkspace {
 }
 
 impl Sqlite {
-    pub fn new() -> Self {
-        let data_dir = data_dir().unwrap_or(PathBuf::from("./"));
+    pub fn new(app_handle: AppHandle) -> Self {
+        let data_dir = app_handle.path().data_dir().unwrap_or(PathBuf::from("./"));
         let db_path = data_dir.join(BUNDLE_IDENTIFIER).join("speeches.db");
         let conn = Connection::open(&db_path).unwrap();
         println!("{}", conn.is_autocommit());

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilValue } from 'recoil'
 import { appWindowState } from '../../store/atoms/appWindowState'
 import { toast } from 'react-toastify';

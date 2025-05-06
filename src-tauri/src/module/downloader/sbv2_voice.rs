@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 
 use futures_util::StreamExt;
 use std::cmp::min;
@@ -25,11 +25,10 @@ impl StyleBertVits2VoiceModelDownloader {
 
     #[tokio::main]
     pub async fn download(&self, model_type: ModelTypeStyleBertVits2) {
-        let model_path: &str = &format!("resources/style-bert-vits/models/{}.sbv2", model_type.as_str());
         let path: &str = &self
             .app_handle
-            .path_resolver()
-            .resolve_resource(model_path)
+            .path()
+            .resolve(format!("resources/style-bert-vits/models/{}.sbv2", model_type.as_str()), BaseDirectory::Resource)
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -43,7 +42,7 @@ impl StyleBertVits2VoiceModelDownloader {
             .ok_or(format!("Failed to get content length from '{}'", url))
             .unwrap();
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             "downloadStyleBertVits2VoiceProgress",
             Progress {
                 model_type: model_type.as_str().to_string(),
@@ -79,7 +78,7 @@ impl StyleBertVits2VoiceModelDownloader {
 
             let current_rate = ((new as f64 * 100.0) / total_size as f64).round();
             if rate != current_rate {
-                let _ = &self.app_handle.emit_all(
+                let _ = &self.app_handle.emit(
                     "downloadStyleBertVits2VoiceProgress",
                     Progress {
                         model_type: model_type.as_str().to_string(),
@@ -91,9 +90,9 @@ impl StyleBertVits2VoiceModelDownloader {
             }
         }
 
-        let _ = Sqlite::new().update_model_is_downloaded(model_type.as_str().to_string(), 1);
+        let _ = Sqlite::new(self.app_handle.clone()).update_model_is_downloaded(model_type.as_str().to_string(), 1);
 
-        let _ = &self.app_handle.emit_all(
+        let _ = &self.app_handle.emit(
             "downloadStyleBertVits2VoiceProgress",
             Progress {
                 model_type: model_type.as_str().to_string(),

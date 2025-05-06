@@ -1,6 +1,6 @@
 use std::{cmp, thread::available_parallelism};
 
-use tauri::AppHandle;
+use tauri::{path::BaseDirectory, AppHandle, Manager};
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
 pub struct Transcriber {}
@@ -24,8 +24,11 @@ impl Transcriber {
             model_type = "large"
         }
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/whisper/ggml-{}.bin", model_type))
+            .path()
+            .resolve(
+                format!("resources/whisper/ggml-{}.bin", model_type),
+                BaseDirectory::Resource,
+            )
             .unwrap()
             .to_string_lossy()
             .to_string();

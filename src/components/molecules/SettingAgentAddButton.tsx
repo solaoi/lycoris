@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { useRef, useState } from "react";
 import { Agent } from "../../type/Agent.type";
 import { toast } from "react-toastify";
@@ -73,7 +73,7 @@ const SettingAgentAddButton = (props: SettingAgentAddButtonProps): JSX.Element =
                             onChange={(e) => setRolePrompt(e.target.value)}
                         />
                         <div className="flex flex-col gap-2 w-full mt-4">
-                        <div className="flex">
+                            <div className="flex">
                                 <label className="label w-1/2">
                                     <span className="label-text">ワークスペース</span>
                                 </label>

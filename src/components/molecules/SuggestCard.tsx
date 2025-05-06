@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useRef, useState } from "react";
 import { useRecoilValue } from "recoil";
 import { lengthScaleState } from "../../store/atoms/smartVoices/lengthScaleState";

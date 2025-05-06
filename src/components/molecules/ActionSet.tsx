@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRecoilState, useRecoilValue } from "recoil"
 import { actionState } from "../../store/atoms/actionState"
-import { invoke } from "@tauri-apps/api"
+import { invoke } from "@tauri-apps/api/core"
 import { Tool } from "../../type/Tool.type"
 import { settingSurveyToolEnabledState } from "../../store/atoms/settingSurveyToolEnabledState"
 import { settingSearchToolEnabledState } from "../../store/atoms/settingSearchToolEnabledState"

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { recordingNoteState } from '../../store/atoms/recordingNoteState'
 import { recordState } from '../../store/atoms/recordState'

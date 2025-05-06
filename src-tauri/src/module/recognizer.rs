@@ -2,7 +2,7 @@ use std::sync::mpsc::SyncSender;
 
 use cpal::ChannelCount;
 use dasp::{sample::ToSample, Sample};
-use tauri::{AppHandle, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
 use unicode_segmentation::UnicodeSegmentation;
 use vosk::{DecodingState, Model, Recognizer};
 
@@ -17,8 +17,11 @@ pub struct MyRecognizer {}
 impl MyRecognizer {
     pub fn build(app_handle: AppHandle, speaker_language: String, sample_rate: f32) -> Recognizer {
         let model_path = app_handle
-            .path_resolver()
-            .resolve_resource(format!("resources/vosk-model-{}", speaker_language))
+            .path()
+            .resolve(
+                format!("resources/vosk-model-{}", speaker_language),
+                BaseDirectory::Resource,
+            )
             .unwrap()
             .to_string_lossy()
             .to_string();
@@ -52,7 +55,7 @@ impl MyRecognizer {
                     last_partial.insert_str(0, &result.partial);
                     if !result.partial.is_empty() {
                         app_handle
-                            .emit_all(
+                            .emit(
                                 "partialTextRecognized",
                                 PartialText {
                                     content: result.partial.to_string(),

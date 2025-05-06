@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import { useRecoilState, useRecoilValue } from 'recoil'
 import { modelStyleBertVits2DownloadingState } from '../../store/atoms/modelStyleBertVits2DownloadingState'
 import { modelStyleBertVits2DownloadedState } from '../../store/atoms/modelStyleBertVits2DownloadedState'

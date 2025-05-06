@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronRight } from "../atoms/ChevronRight";
 import { ChevronDown } from "../atoms/ChevronDown";
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { Tool } from "../../type/Tool.type";
 import { MultiSelect, Option } from "./MultiSelect";
 
